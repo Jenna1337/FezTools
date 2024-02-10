@@ -17,7 +17,7 @@ body {
 	transition-timing-function: linear;*/
 }
 </style>
-<style "TableStyles">
+<style id="TableStyles">
 :root {
 	--tablebg: transparent;
 	--tabledatabg: transparent;
@@ -187,7 +187,7 @@ thead, tfoot {
 		outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) * 1.5);
 	}
 }
-.nodebox.selected .mapnode{
+.nodebox.selected .mapnode, .mapnode:focus{
 	outline: 3.5px solid white;
 	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
 	/*animation: 1s ease-in-out 0s alternate infinite waves;*/
@@ -283,6 +283,7 @@ thead, tfoot {
 	flex-direction: column;
 	flex-wrap: wrap;
 	line-height: 1;
+	/* TODO ensure icons meet WCAG standards for color contrast; */
 }
 .nodeicon {
 	display: block;
@@ -296,11 +297,41 @@ thead, tfoot {
 <style id="fpscounterstyles">
 #fpscountercontainer
 {
-	z-index: 10000000000;
+	z-index: 1000000000;
 	position: absolute;
 	top: 1lh;
 	left: 20em;
 	background-color: #111C;
+}
+</style>
+<style id="viewsourcelinkstyles">
+#viewsource {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	color: cyan;
+	background-color: black;
+	background-color: #000E;
+	padding: 2px;
+	border: 1px solid white;
+	border-radius: 4px;
+	margin: 2px;
+	line-height: 1;
+	z-index: 1000000000;
+}
+/* unvisited */   /* visited */
+#viewsource:link, #viewsource:visited {
+	/* Just use the styles defined above */
+}
+/* pointer over */
+#viewsource:hover {
+	color: yellow;
+	font-weight: bold;
+}
+/* pointer down */
+#viewsource:active {
+	color: red;
+	font-weight: normal !important;
 }
 </style>
 <script id="WorldMap">
@@ -469,14 +500,14 @@ function WorldMap(maptree, LinkThickness, fullcube)
 		var cube = {"Size": Size, "Position": Position, "Color":color};
 		
 		var boxcontainer = document.createElement("div");
-		var boxX = document.createElement("div");boxX.style.rotate = "x 90deg";
-		var boxY = document.createElement("div");boxY.style.rotate = "y 90deg";
-		var boxZ = document.createElement("div");                             ;
+		var boxX = document.createElement("div");boxX.style.rotate = "x 90deg"; boxX.role = "presentation";
+		var boxY = document.createElement("div");boxY.style.rotate = "y 90deg"; boxY.role = "presentation";
+		var boxZ = document.createElement("div");                             ; boxZ.role = "presentation";
 		boxX.style.width = boxX.style.height = boxY.style.width = boxY.style.height = boxZ.style.width = boxZ.style.height = cubesize+"px";
 		if(fullcube){
-			var boxX2 = document.createElement("div");boxX2.style.rotate = "x 90deg";
-			var boxY2 = document.createElement("div");boxY2.style.rotate = "y 90deg";
-			var boxZ2 = document.createElement("div");                             ;
+			var boxX2 = document.createElement("div");boxX2.style.rotate = "x 90deg"; boxX2.role = "presentation";
+			var boxY2 = document.createElement("div");boxY2.style.rotate = "y 90deg"; boxY2.role = "presentation";
+			var boxZ2 = document.createElement("div");                              ; boxZ2.role = "presentation";
 			boxX2.style.width= boxX2.style.height= boxY2.style.width= boxY2.style.height= boxZ2.style.width= boxZ2.style.height= cubesize+"px";
 			
 			boxY.style.translate=linesize/2+"px";
@@ -726,6 +757,8 @@ function MakeCollapsible(jsonData){
 			td.classList.toggle("hidden", hideByDefault);
 			//td.style.display = "none";
 			
+			th.role = "button";
+			th.tabIndex = 0;
 			th.addEventListener("click",(event)=>{
 			//	event.target.nextElementSibling.style.display = event.target.nextElementSibling.style.display === "none" ? "" : "none";
 				event.target.nextElementSibling.classList.toggle("hidden");
@@ -1061,6 +1094,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				le.dataset.posindex = tfstrs.indexOf(tfstr);
 				le.dataset.linkindex = linkindex;
 				le.style.transform = tfstr;
+				le.role = "presentation";
 				maplinks.appendChild(le);
 		});
 		mapnodepanbox.appendChild(maplinks);
@@ -1072,6 +1106,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			mapnodes = maplinks;
 		}else{
 			mapnodes = document.createElement("div");
+			maplinks.role = "presentation";
 		}
 		mapnodes.id = "mapnodes";
 		worlddata.forEach(levelinfo=>{
@@ -1103,7 +1138,8 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			//mapnode.style.outlineWidth = 1/levelinfo.Size*nodeDistanceMultiplier*0.3+nodeSizeUnits
 			nodebox.style.setProperty("--outlinesize", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.05+nodeSizeUnits);
 			nodebox.style.setProperty("--outlinesize-hover", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.25+nodeSizeUnits);
-			mapnode.tabIndex = 0;
+			nodebox.tabIndex = 0;
+			nodebox.role = "button";
 			nodebox.addEventListener("focusin", function(event){focusOnNode(this);}, true);
 			nodebox.appendChild(mapnode);
 			
@@ -1593,5 +1629,32 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-widthmulti="1" data-heightmulti="2" data-maxlasttimediffloglen="300" />
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
 </svg>
+<a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezWorldMapViewer/blob/main/FezWorldMapViewer.html">
+<!--img src="https://github.githubassets.com/favicons/favicon-dark.png" style="height: 1lh; vertical-align: bottom;padding-inline-end: 0.5ex;"/-->View Source
+<span> on GitHub</span><!--span>🔗&#xFE0F;</span--><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
+0 48 48">
+<path d="M36 24c-1.2 0-2 0.8-2 2v12c0 1.2-0.8 2-2 2h-22c-1.2
+0-2-0.8-2-2v-22c0-1.2 0.8-2 2-2h12c1.2 0 2-0.8 2-2s-0.8-2-2-2h-12c-3.4
+0-6 2.6-6 6v22c0 3.4 2.6 6 6 6h22c3.4 0 6-2.6
+6-6v-12c0-1.2-0.8-2-2-2z"></path>
+<path d="M43.8 5.2c-0.2-0.4-0.6-0.8-1-1-0.2-0.2-0.6-0.2-0.8-0.2h-12c-1.2
+0-2 0.8-2 2s0.8 2 2 2h7.2l-18.6 18.6c-0.8 0.8-0.8 2 0 2.8 0.4 0.4 0.8
+0.6 1.4 0.6s1-0.2 1.4-0.6l18.6-18.6v7.2c0 1.2 0.8 2 2 2s2-0.8
+2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
+</svg></span>
+</a>
 </body>
+<script>
+function GetGithubSourceHref(){
+	let h=window.location.hostname.split(".");
+	let p=window.location.pathname.split("/").filter(a=>a.length>0);
+	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+p[1];
+}
+if(window.location.hostname){
+	let href = GetGithubSourceHref();
+	if(href){
+		document.getElementById("viewsource").href = href;
+	}
+}Array.from(document.styleSheets).map(ss=>[ss.ownerNode.id,Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="").map(r=>[r.style?.zIndex])])
+</script>
 </html>
