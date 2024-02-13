@@ -1196,7 +1196,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		//add shortcut links
 		if(showShortcutLinks)
 		{
-			//generates the transforms
+			//generates the transform for diagonal lines from one point in 3D space to another point, having the same thickness as LinkThickness
 			function createTransformString(node1Pos, node2Pos) {
 				const midpoint = {
 					X: (node1Pos.X + node2Pos.X) / 2 * nodeDistanceMultiplier,
