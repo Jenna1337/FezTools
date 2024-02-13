@@ -293,6 +293,9 @@ thead, tfoot {
 .maplink.selected * {
 	background-color: white;
 }
+.mapshortcutlink * {
+	background-color: red;
+}
 </style>
 <style id="fpscounterstyles">
 #fpscountercontainer
@@ -942,6 +945,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	var sensitivityX = 0.5;
 	var sensitivityY = 0.5;
 	var zoomSensitivity = 1.2;
+	var fullcube = true;
+	var LinkThickness = 0.05375;
+	var showShortcutLinks = false;//worlddata.some(a=>a.Entrances?.some(b=>b.IsShortcut));
 	
 	var settings;
 	
@@ -1096,11 +1102,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				le.style.transform = tfstr;
 				le.role = "presentation";
 				maplinks.appendChild(le);
-		});
-		mapnodepanbox.appendChild(maplinks);
+			});
+			mapnodepanbox.appendChild(maplinks);
 		}
-		
-		//TODO add shortcut links with a toggle visibility option in Settings; just gotta figure out how to do diagonal lines in HTML from one point in 3D space to another point, having the same thickness as LinkThickness
 		
 		if(sharedLinkNodeContainer){
 			mapnodes = maplinks;
@@ -1188,6 +1192,68 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		});
 		mapnodepanbox.appendChild(mapnodes);
 		mapcontainer.appendChild(mapnodepanbox);
+		
+		//add shortcut links
+		if(showShortcutLinks)
+		{
+			//generates the transforms
+			function createTransformString(node1Pos, node2Pos) {
+				const midpoint = {
+					X: (node1Pos.X + node2Pos.X) / 2 * nodeDistanceMultiplier,
+					Y: (node1Pos.Y + node2Pos.Y) / 2 * nodeDistanceMultiplier,
+					Z: (node1Pos.Z + node2Pos.Z) / 2 * nodeDistanceMultiplier
+				};
+				const translateX = midpoint.X;
+				const translateY = midpoint.Y;
+				const translateZ = midpoint.Z;
+				const distance = Math.sqrt((midpoint.X*2) ** 2 + (midpoint.Y*2) ** 2 + (midpoint.Z*2) ** 2);
+				
+				var rotationX = Math.atan(translateY / translateX); if(Number.isNaN(rotationX)) rotationX = 0;
+				var rotationY = Math.acos(translateZ / distance); if(Number.isNaN(rotationY)) rotationY = 0;
+				const rotationZ = 0;
+				
+				
+				const scaleX = LinkThickness;
+				const scaleY = LinkThickness;
+				const scaleZ = distance;
+				
+				const cosX = Math.cos(rotationX);
+				const cosY = Math.cos(rotationY);
+				const cosZ = Math.cos(rotationZ);
+				const sinX = Math.sin(rotationX);
+				const sinY = Math.sin(rotationY);
+				const sinZ = Math.sin(rotationZ);
+				
+				//TODO figure out how to do diagonal lines in HTML from one point in 3D space to another point, having the same thickness as LinkThickness
+				// I don't like trigonometry
+				return "translate3d("+translateX+"px, "+(-translateY)+"px, "+translateZ+"px)";
+			}
+			let shortcutConnections = worlddata.flatMap(a=>a.Entrances?.filter(b=>b.IsShortcut)).filter(a=>a!=null).map(a=>[a.LevelName,a.TargetLevelName]);
+			//remove duplicate connections 
+			shortcutConnections = shortcutConnections.reduce((a,c)=>{
+				if(!(a.some(b=>c[1]==b[0] && c[0]==b[1]) || a.some(b=>c[0]==b[0] && c[1]==b[1]))){
+					a.push(c);
+				}return a;
+			},[])
+			//get node positions
+			shortcutConnections = shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b)));
+			console.log(shortcutConnections);
+			let shortcutTransforms = shortcutConnections.forEach(a=>{
+				var m = createTransformString(a[0].Position,a[1].Position);
+				var le = worldmap.LinksMesh[0].BaseElement.cloneNode(true);
+				le.className = "maplink mapshortcutlink";
+				le.style.transform = m;
+				le.role = "presentation";
+				le.dataset.node1 = a[0].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
+				le.dataset.node2 = a[1].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
+				maplinks.appendChild(le);
+			});
+			//shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))
+			//shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position))
+			//JSON.stringify(shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))) === JSON.stringify(shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position)))
+			
+		}
+		
 		focusOnNode(CurrentNode);
 	}
 	Rebuild3DMap();
@@ -1249,8 +1315,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		})
 	}
 	
-	var fullcube = true;
-	var LinkThickness = 0.05375;
 	function RebuildWorldMap(){
 		let a=GetAllWorldData(maptree,LinkThickness,fullcube);
 		worldmap = a.worldmap;
@@ -1324,15 +1388,23 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			if(fpstracker){
 				fpstracker.style.display = value ? "" : "none";
 			}
+		},
+		get showShortcutLinks(){
+			return showShortcutLinks;
+		},
+		set showShortcutLinks(value){
+			showShortcutLinks = value;
+			RebuildWorldMap();
 		}
+		
 	};
 	
 	mapsettings = document.createElement("div");
 	mapsettings.id = "mapsettings";
 	mapsettings.textContent = "Settings";
 	mapsettings.appendChild(document.createElement("hr"));
+	//generate map settings box
 	{
-		//generate map settings box
 		var s=Object.entries(settings).map(a=>({"key":a[0],"type":(typeof a[1]),"initValue":a[1]}))
 		s.forEach(settingdata=>{
 			let l = document.createElement("label");
