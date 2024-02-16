@@ -852,30 +852,36 @@ function MakeTableWithCaption(caption, jsonData, includeTotals, includeHeaders){
 }
 </script>
 <script id="MapViewer3D">
-const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
-	function yawPitchToRotVec(yaw, pitch){
-		
-		var radians_yaw = yaw * (Math.PI / 180)
-		var radians_pitch = pitch * (Math.PI / 180)
-	//Calculate the cosine and sine values of half the yaw and pitch angles:
-		var cos_yaw = Math.cos(radians_yaw / 2)
-		var sin_yaw = Math.sin(radians_yaw / 2)
-		var cos_pitch = Math.cos(radians_pitch / 2)
-		var sin_pitch = Math.sin(radians_pitch / 2)
-	//Compute the x, y, and z components of the axis vector:
-		var x_axis = cos_yaw * sin_pitch
-		var z_axis = sin_yaw * sin_pitch
-		var y_axis = sin_yaw * cos_pitch
-	//Compute the angle of rotation:
-		var angle = 2 * Math.acos(cos_yaw * cos_pitch) * (180 / Math.PI)
-	//Normalize the axis vector:
-		//Calculate the magnitude of the axis vector: 
-		var magnitude = Math.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2)
-		//Normalize the axis vector dividing each component by the magnitude:
-		var normalized_x_axis = x_axis / magnitude, normalized_y_axis = y_axis / magnitude, normalized_z_axis = z_axis / magnitude
-	//The resulting Axis-Angle representation in CSS rotate3d format is:
-		return "rotate3d("+normalized_x_axis+", "+normalized_y_axis+", "+normalized_z_axis+", "+angle+"deg) ";
+function yawPitchToRotVec(yaw, pitch, rads=false){
+	var radians_yaw;
+	var radians_pitch;
+	if(rads){
+		radians_yaw = yaw
+		radians_pitch = pitch
+	}else{
+		radians_yaw = yaw * (Math.PI / 180)
+		radians_pitch = pitch * (Math.PI / 180)
 	}
+//Calculate the cosine and sine values of half the yaw and pitch angles:
+	var cos_yaw = Math.cos(radians_yaw / 2)
+	var sin_yaw = Math.sin(radians_yaw / 2)
+	var cos_pitch = Math.cos(radians_pitch / 2)
+	var sin_pitch = Math.sin(radians_pitch / 2)
+//Compute the x, y, and z components of the axis vector:
+	var x_axis = cos_yaw * sin_pitch
+	var z_axis = sin_yaw * sin_pitch
+	var y_axis = sin_yaw * cos_pitch
+//Compute the angle of rotation:
+	var angle = 2 * Math.acos(cos_yaw * cos_pitch) * (180 / Math.PI)
+//Normalize the axis vector:
+	//Calculate the magnitude of the axis vector: 
+	var magnitude = Math.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2)
+	//Normalize the axis vector dividing each component by the magnitude:
+	var normalized_x_axis = x_axis / magnitude, normalized_y_axis = y_axis / magnitude, normalized_z_axis = z_axis / magnitude
+//The resulting Axis-Angle representation in CSS rotate3d format is:
+	return "rotate3d("+normalized_x_axis+", "+normalized_y_axis+", "+normalized_z_axis+", "+angle+"deg) ";
+}
+const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	
 	const nodeSizeUnits = "px";
 	const nodeDistanceMultiplier = 50;//determines the initial scale for everything
@@ -1163,7 +1169,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					return _fval;
 				}
 				var fval;
-				if(Array.isArray(a.Field)){
+				if(Array.isArray(a.Field)){ 
 					fval = a.Field.map(f=>levelinfo[f]).map(getFval).reduce((a,b)=>a+b,0);
 				}
 				else{
@@ -1203,19 +1209,19 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					Y: (node1Pos.Y + node2Pos.Y) / 2 * nodeDistanceMultiplier,
 					Z: (node1Pos.Z + node2Pos.Z) / 2 * nodeDistanceMultiplier
 				};
+				const distance = Math.sqrt((midpoint.X*2) ** 2 + (midpoint.Y*2) ** 2 + (midpoint.Z*2) ** 2);
+				
+				var rotationX = Math.atan(midpoint.Z / midpoint.X); if(Number.isNaN(rotationX)) rotationX = 0;
+				var rotationY = Math.acos(midpoint.Y / distance); if(Number.isNaN(rotationY)) rotationY = 0;
+				const rotationZ = 0;
+				
 				const translateX = midpoint.X;
 				const translateY = midpoint.Y;
 				const translateZ = midpoint.Z;
-				const distance = Math.sqrt((midpoint.X*2) ** 2 + (midpoint.Y*2) ** 2 + (midpoint.Z*2) ** 2);
-				
-				var rotationX = Math.atan(translateY / translateX); if(Number.isNaN(rotationX)) rotationX = 0;
-				var rotationY = Math.acos(translateZ / distance); if(Number.isNaN(rotationY)) rotationY = 0;
-				const rotationZ = 0;
-				
 				
 				const scaleX = LinkThickness;
 				const scaleY = LinkThickness;
-				const scaleZ = distance;
+				const scaleZ = distance / nodeDistanceMultiplier;
 				
 				const cosX = Math.cos(rotationX);
 				const cosY = Math.cos(rotationY);
@@ -1226,7 +1232,11 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				
 				//TODO figure out how to do diagonal lines in HTML from one point in 3D space to another point, having the same thickness as LinkThickness
 				// I don't like trigonometry
-				return "translate3d("+translateX+"px, "+(-translateY)+"px, "+translateZ+"px)";
+				return ""
+						+" translate3d("+translateX+"px, "+(-translateY)+"px, "+translateZ+"px) "
+						+ yawPitchToRotVec(rotationX, -rotationY, true)
+						+ " scale3d("+scaleX+", "+scaleY+", "+scaleZ+") "
+						;
 			}
 			let shortcutConnections = worlddata.flatMap(a=>a.Entrances?.filter(b=>b.IsShortcut)).filter(a=>a!=null).map(a=>[a.LevelName,a.TargetLevelName]);
 			//remove duplicate connections 
@@ -1243,6 +1253,8 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				var le = worldmap.LinksMesh[0].BaseElement.cloneNode(true);
 				le.className = "maplink mapshortcutlink";
 				le.style.transform = m;
+				le.style.height = "0";
+				le.style.width = "0";
 				le.role = "presentation";
 				le.dataset.node1 = a[0].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
 				le.dataset.node2 = a[1].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
@@ -1313,6 +1325,8 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				focusOnNode(CurrentNode);
 			}
 		})
+		
+		//TODO add keyboard controls
 	}
 	
 	function RebuildWorldMap(){
