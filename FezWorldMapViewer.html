@@ -308,11 +308,11 @@ thead, tfoot {
 }
 </style>
 <style id="viewsourcelinkstyles">
-#viewsource {
+#viewsourcebox {
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	color: cyan;
+	color: white;
 	background-color: black;
 	background-color: #000E;
 	padding: 2px;
@@ -321,6 +321,13 @@ thead, tfoot {
 	margin: 2px;
 	line-height: 1;
 	z-index: 1000000000;
+	text-align: right;
+}
+#viewsource {
+	color: cyan;
+	padding: 2px;
+	margin: 2px;
+	line-height: 1;
 }
 /* unvisited */   /* visited */
 #viewsource:link, #viewsource:visited {
@@ -1716,6 +1723,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-widthmulti="1" data-heightmulti="2" data-maxlasttimediffloglen="300" />
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
 </svg>
+<div id="viewsourcebox">
+Last Modified: <span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezWorldMapViewer/blob/main/FezWorldMapViewer.html">
 <!--img src="https://github.githubassets.com/favicons/favicon-dark.png" style="height: 1lh; vertical-align: bottom;padding-inline-end: 0.5ex;"/-->View Source
 <span> on GitHub</span><!--span>🔗&#xFE0F;</span--><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
@@ -1730,8 +1739,20 @@ document.addEventListener("DOMContentLoaded", ()=>{
 2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
 </svg></span>
 </a>
+</div>
 </body>
 <script>
+document.addEventListener("DOMContentLoaded",function(){
+	try{
+		var lm = document.getElementById("lastmodifiedspan");
+		lm.textContent = (new Date(document.lastModified)).toISOString();
+		lm.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+});
+
 function GetGithubSourceHref(){
 	let h=window.location.hostname.split(".");
 	let p=window.location.pathname.split("/").filter(a=>a.length>0);
