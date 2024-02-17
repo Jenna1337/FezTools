@@ -1436,6 +1436,35 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	mapsettings.appendChild(document.createElement("hr"));
 	//generate map settings box
 	{
+		function iterateAllInputs(elem, callback){
+			Array.from(elem.querySelectorAll("input")).forEach(callback);
+		}
+		function getInputState(i){
+			let val = null;
+			if(i.type=="checkbox"){
+				val = i.checked;
+			}
+			else if(i.type=="number" || i.type=="range"){
+				val = Number(i.value);
+			}
+			else if(i.type=="button"){
+				val = null;
+			}
+			else{
+				throw "Unsupported setting type:"+i.type;
+				val = i.value;
+			}
+			return val;
+		}
+		function saveAllSettings(settingsbox){
+			iterateAllInputs(settingsbox, settinginput => {
+				let val = getInputState(settinginput);
+				if(val!=null){
+					localStorage.setItem(settinginput.id, val);
+				}
+			});
+		}
+		
 		var s=Object.entries(settings).map(a=>({"key":a[0],"type":(typeof a[1]),"initValue":a[1]}))
 		s.forEach(settingdata=>{
 			let l = document.createElement("label");
@@ -1474,21 +1503,33 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			}
 			if(!noval){
 				i.addEventListener("change", ()=>{
-					let newval = null;
-					if(settingdata.type==typeof(true)){
-						newval = i.checked;
-					}
-					else if(settingdata.type==typeof(69)){
-						newval = Number(i.value);
-					}
-					else{
-						throw "Unsupported setting type:"+settingdata.type;
-						newval = i.value;
-					}
+					let newval = getInputState(i);
 					if(newval!=null){
 						settings[settingdata.key] = newval;
 					}
+					saveAllSettings(mapsettings);
 				});
+			}
+			
+			let savedval = localStorage.getItem(i.id);
+			if(savedval!=null){
+				console.log(i.id, savedval);
+				let newval = null;
+				if(i.type=="checkbox"){
+					i.checked = newval=savedval!="false";
+				}
+				else if(i.type=="number" || i.type=="range"){
+					i.value = newval=Number(savedval);
+				}
+				else if(i.type=="button"){
+				}
+				else{
+					throw "Unsupported setting type:"+i.type;
+					i.value = newval=savedval;
+				}
+				if(newval!=null){
+					settings[settingdata.key] = newval;
+				}
 			}
 			
 			mapsettings.appendChild(l);
