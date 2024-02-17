@@ -1216,34 +1216,40 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					Y: (node1Pos.Y + node2Pos.Y) / 2 * nodeDistanceMultiplier,
 					Z: (node1Pos.Z + node2Pos.Z) / 2 * nodeDistanceMultiplier
 				};
-				const distance = Math.sqrt((midpoint.X*2) ** 2 + (midpoint.Y*2) ** 2 + (midpoint.Z*2) ** 2);
+				const vector = {
+					X: (node2Pos.X - node1Pos.X),
+					Y: (node2Pos.Y - node1Pos.Y),
+					Z: (node2Pos.Z - node1Pos.Z)
+				};
+				const distance = Math.sqrt(
+						(nodeDistanceMultiplier*vector.X) ** 2 + 
+						(nodeDistanceMultiplier*vector.Y) ** 2 + 
+						(nodeDistanceMultiplier*vector.Z) ** 2);
 				
-				var rotationX = Math.atan(midpoint.Z / midpoint.X); if(Number.isNaN(rotationX)) rotationX = 0;
-				var rotationY = Math.acos(midpoint.Y / distance); if(Number.isNaN(rotationY)) rotationY = 0;
+				const distanceflat = Math.sqrt(
+						(nodeDistanceMultiplier*vector.X) ** 2 + 
+						(nodeDistanceMultiplier*vector.Z) ** 2);
+				
+				var rotationX = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(rotationX)) rotationX = 0;
+				var rotationY = Math.PI/2 - Math.atan2(vector.Z, vector.Y); if(Number.isNaN(rotationY)) rotationY = 0;
 				const rotationZ = 0;
+				console.log(rotationX * 360/Math.PI, rotationY * 360/Math.PI);
 				
-				const translateX = midpoint.X;
-				const translateY = midpoint.Y;
+				const translateX = midpoint.X + nodeDistanceMultiplier / 2;
+				const translateY = -midpoint.Y + nodeDistanceMultiplier / 2;
 				const translateZ = midpoint.Z;
 				
 				const scaleX = LinkThickness;
 				const scaleY = LinkThickness;
 				const scaleZ = distance / nodeDistanceMultiplier;
 				
-				const cosX = Math.cos(rotationX);
-				const cosY = Math.cos(rotationY);
-				const cosZ = Math.cos(rotationZ);
-				const sinX = Math.sin(rotationX);
-				const sinY = Math.sin(rotationY);
-				const sinZ = Math.sin(rotationZ);
-				
 				//TODO figure out how to do diagonal lines in HTML from one point in 3D space to another point, having the same thickness as LinkThickness
 				// I don't like trigonometry
-				return ""
-						+" translate3d("+translateX+"px, "+(-translateY)+"px, "+translateZ+"px) "
-						+ yawPitchToRotVec(rotationX, -rotationY, true)
+				return [""
+						+ yawPitchToRotVec(rotationX, rotationY, true)
 						+ " scale3d("+scaleX+", "+scaleY+", "+scaleZ+") "
-						;
+						,translateX+"px "+translateY+"px "+translateZ+"px"
+						];
 			}
 			let shortcutConnections = worlddata.flatMap(a=>a.Entrances?.filter(b=>b.IsShortcut)).filter(a=>a!=null).map(a=>[a.LevelName,a.TargetLevelName]);
 			//remove duplicate connections 
@@ -1259,14 +1265,18 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				var m = createTransformString(a[0].Position,a[1].Position);
 				var le = worldmap.LinksMesh[0].BaseElement.cloneNode(true);
 				le.className = "maplink mapshortcutlink";
-				le.style.transform = m;
-				le.style.height = "0";
-				le.style.width = "0";
+				le.style.transform = m[0];
+				le.style.translate = m[1];
+				//le.style.height = "0";
+				//le.style.width = "0";
+				le.style.transformOrigin = "top left";
+				console.log(le)
 				le.role = "presentation";
 				le.dataset.node1 = a[0].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
 				le.dataset.node2 = a[1].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
 				maplinks.appendChild(le);
 			});
+			console.log(document.querySelectorAll(".mapshortcutlink"));
 			//shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))
 			//shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position))
 			//JSON.stringify(shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))) === JSON.stringify(shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position)))
