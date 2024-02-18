@@ -859,36 +859,48 @@ function MakeTableWithCaption(caption, jsonData, includeTotals, includeHeaders){
 }
 </script>
 <script id="MapViewer3D">
-function yawPitchToRotVec(yaw, pitch, rads=false){
-	var radians_yaw;
-	var radians_pitch;
-	if(rads){
-		radians_yaw = yaw
-		radians_pitch = pitch
-	}else{
-		radians_yaw = yaw * (Math.PI / 180)
-		radians_pitch = pitch * (Math.PI / 180)
-	}
-//Calculate the cosine and sine values of half the yaw and pitch angles:
-	var cos_yaw = Math.cos(radians_yaw / 2)
-	var sin_yaw = Math.sin(radians_yaw / 2)
-	var cos_pitch = Math.cos(radians_pitch / 2)
-	var sin_pitch = Math.sin(radians_pitch / 2)
-//Compute the x, y, and z components of the axis vector:
-	var x_axis = cos_yaw * sin_pitch
-	var z_axis = sin_yaw * sin_pitch
-	var y_axis = sin_yaw * cos_pitch
-//Compute the angle of rotation:
-	var angle = 2 * Math.acos(cos_yaw * cos_pitch) * (180 / Math.PI)
-//Normalize the axis vector:
-	//Calculate the magnitude of the axis vector: 
-	var magnitude = Math.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2)
-	//Normalize the axis vector dividing each component by the magnitude:
-	var normalized_x_axis = x_axis / magnitude, normalized_y_axis = y_axis / magnitude, normalized_z_axis = z_axis / magnitude
-//The resulting Axis-Angle representation in CSS rotate3d format is:
-	return "rotate3d("+normalized_x_axis+", "+normalized_y_axis+", "+normalized_z_axis+", "+angle+"deg) ";
-}
 const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
+	
+	function yawPitchToRotVec(yaw, pitch, rads=false, anglefix=false){
+		var radians_yaw;
+		var radians_pitch;
+		if(rads){
+			radians_yaw = yaw
+			radians_pitch = pitch
+		}else{
+			radians_yaw = yaw * (Math.PI / 180)
+			radians_pitch = pitch * (Math.PI / 180)
+		}
+		if(anglefix){//idk if fixing the angles to be between 0 and a full circle actually does anything beneficial
+			const FULL_CIRCLE_RADS = Math.PI*2;
+			while(radians_yaw < 0){
+				radians_yaw += FULL_CIRCLE_RADS;
+			}
+			while(radians_pitch < 0){
+				radians_pitch += FULL_CIRCLE_RADS;
+			}
+			radians_yaw %= FULL_CIRCLE_RADS;
+			radians_pitch %= FULL_CIRCLE_RADS;
+		}
+	//Calculate the cosine and sine values of half the yaw and pitch angles:
+		var cos_yaw = Math.cos(radians_yaw / 2)
+		var sin_yaw = Math.sin(radians_yaw / 2)
+		var cos_pitch = Math.cos(radians_pitch / 2)
+		var sin_pitch = Math.sin(radians_pitch / 2)
+	//Compute the x, y, and z components of the axis vector:
+		var x_axis = cos_yaw * sin_pitch
+		var z_axis = sin_yaw * sin_pitch
+		var y_axis = sin_yaw * cos_pitch
+	//Compute the angle of rotation:
+		var angle = 2 * Math.acos(cos_yaw * cos_pitch) * (180 / Math.PI)
+		// Normalize the axis vector
+		var magnitude = Math.sqrt(x_axis ** 2 + y_axis ** 2 + z_axis ** 2);
+		var normalized_x_axis = x_axis / magnitude;
+		var normalized_y_axis = y_axis / magnitude;
+		var normalized_z_axis = z_axis / magnitude;
+		
+		return "rotate3d(" + normalized_x_axis + ", " + normalized_y_axis + ", " + normalized_z_axis + ", " + angle + "deg)";
+	}
 	
 	const nodeSizeUnits = "px";
 	const nodeDistanceMultiplier = 50;//determines the initial scale for everything
@@ -1211,29 +1223,39 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		{
 			//generates the transform for diagonal lines from one point in 3D space to another point, having the same thickness as LinkThickness
 			function createTransformString(node1Pos, node2Pos) {
+				if(node1Pos.Y < node2Pos.Y){
+					let tmp = node1Pos;
+					node1Pos = node2Pos;
+					node2Pos = tmp;
+				}
 				const midpoint = {
 					X: (node1Pos.X + node2Pos.X) / 2 * nodeDistanceMultiplier,
 					Y: (node1Pos.Y + node2Pos.Y) / 2 * nodeDistanceMultiplier,
 					Z: (node1Pos.Z + node2Pos.Z) / 2 * nodeDistanceMultiplier
 				};
 				const vector = {
-					X: (node2Pos.X - node1Pos.X),
-					Y: (node2Pos.Y - node1Pos.Y),
-					Z: (node2Pos.Z - node1Pos.Z)
+					X: nodeDistanceMultiplier*(node2Pos.X - node1Pos.X),
+					Y: nodeDistanceMultiplier*(node2Pos.Y - node1Pos.Y),
+					Z: nodeDistanceMultiplier*(node2Pos.Z - node1Pos.Z)
 				};
 				const distance = Math.sqrt(
-						(nodeDistanceMultiplier*vector.X) ** 2 + 
-						(nodeDistanceMultiplier*vector.Y) ** 2 + 
-						(nodeDistanceMultiplier*vector.Z) ** 2);
+						(vector.X) ** 2 + 
+						(vector.Y) ** 2 + 
+						(vector.Z) ** 2);
 				
 				const distanceflat = Math.sqrt(
-						(nodeDistanceMultiplier*vector.X) ** 2 + 
-						(nodeDistanceMultiplier*vector.Z) ** 2);
+						(vector.X) ** 2 + 
+						(vector.Z) ** 2);
 				
-				var rotationX = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(rotationX)) rotationX = 0;
-				var rotationY = Math.PI/2 - Math.atan2(vector.Z, vector.Y); if(Number.isNaN(rotationY)) rotationY = 0;
+				
+				var azimuth = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(azimuth)) azimuth = 0;
+				var elevate = Math.atan(vector.Y/ distanceflat);
+				
+				var rotationX = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(azimuth)) azimuth = 0;
+				var rotationY = Math.atan(-vector.Y/ distanceflat);
 				const rotationZ = 0;
-				console.log(rotationX * 360/Math.PI, rotationY * 360/Math.PI);
+				
+				console.log(azimuth * 180/Math.PI, elevate * 180/Math.PI);
 				
 				const translateX = midpoint.X + nodeDistanceMultiplier / 2;
 				const translateY = -midpoint.Y + nodeDistanceMultiplier / 2;
@@ -1243,21 +1265,23 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				const scaleY = LinkThickness;
 				const scaleZ = distance / nodeDistanceMultiplier;
 				
-				//TODO figure out how to do diagonal lines in HTML from one point in 3D space to another point, having the same thickness as LinkThickness
 				// I don't like trigonometry
 				return [""
-						+ yawPitchToRotVec(rotationX, rotationY, true)
+						//+ yawPitchToRotVec(azimuth, elevate, true)//Note: this doesn't work here for whatever reason
+						+ " rotateY("+azimuth+"rad) rotateX("+elevate+"rad) "
 						+ " scale3d("+scaleX+", "+scaleY+", "+scaleZ+") "
-						,translateX+"px "+translateY+"px "+translateZ+"px"
-						];
+						,translateX+"px "+translateY+"px "+translateZ+"px",
+						azimuth * 180/Math.PI, elevate * 180/Math.PI];
 			}
 			let shortcutConnections = worlddata.flatMap(a=>a.Entrances?.filter(b=>b.IsShortcut)).filter(a=>a!=null).map(a=>[a.LevelName,a.TargetLevelName]);
 			//remove duplicate connections 
+			if(false){
 			shortcutConnections = shortcutConnections.reduce((a,c)=>{
 				if(!(a.some(b=>c[1]==b[0] && c[0]==b[1]) || a.some(b=>c[0]==b[0] && c[1]==b[1]))){
 					a.push(c);
 				}return a;
 			},[])
+			}
 			//get node positions
 			shortcutConnections = shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b)));
 			console.log(shortcutConnections);
@@ -1270,13 +1294,15 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				//le.style.height = "0";
 				//le.style.width = "0";
 				le.style.transformOrigin = "top left";
-				console.log(le)
 				le.role = "presentation";
 				le.dataset.node1 = a[0].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
 				le.dataset.node2 = a[1].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
+				le.dataset.azimuth = m[2];//TODO remove once the shortcut links get rendered properly
+				le.dataset.elevate = m[3];//TODO remove once the shortcut links get rendered properly
 				maplinks.appendChild(le);
 			});
 			console.log(document.querySelectorAll(".mapshortcutlink"));
+			console.log(document.querySelectorAll(".mapshortcutlink:not([data-elevate=\"0\"])"));
 			//shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))
 			//shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position))
 			//JSON.stringify(shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))) === JSON.stringify(shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position)))
