@@ -11,11 +11,6 @@ body {
 	padding: 0;
 	margin: 0;
 }
-*{
-	/*transition-property: transform, translate, scale;
-	transition-duration: 0.2s;
-	transition-timing-function: linear;*/
-}
 </style>
 <style id="TableStyles">
 :root {
@@ -149,6 +144,13 @@ thead, tfoot {
 	pointer-events: none;
 	background: none;
 }
+#mapnodepanbox *{
+	/* TODO fix transitions? */
+	/*transition-property: translate, scale;
+	transition-duration: 0.2s;
+	transition-timing-function: linear;*/
+}
+
 #mapnodes, #maplinks {
 	translate: 50vw 50vh;
 	height: 100vh;
@@ -260,7 +262,8 @@ thead, tfoot {
 	top: 0;
 	left: 0;
 	transform-style: preserve-3d;
-	
+}
+.nomousebuttons .maplink{
 	pointer-events: all;
 	cursor: crosshair;
 }
@@ -1035,8 +1038,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		//while(pitch<0){ pitch+= 360; }
 		
 		let rotatestr = yawPitchToRotVec(yaw,pitch);
+		
 		mapnodes.style.transform = scalestr + rotatestr + translatestr;
-		maplinks.style.transform = scalestr + rotatestr + translatestr;
+		
+		maplinks.style = mapnodes.style.cssText;
 		
 		mapnodepanbox.style.translate = "0px 0px";
 		mapnodepanbox.dataset.tx = 0;
@@ -1163,6 +1168,21 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			nodebox.classList.add("nodebox");
 			var mapnode = document.createElement("img");
 			mapnode.classList.add("mapnode");
+			
+			//Note: error event does not bubble, so we can't just use a single event listener
+			mapnode.addEventListener("error", function(err){
+				var targ = err.target;
+				var targparent = targ.parentElement;
+				var noimg = document.createElement("span");
+				Array.from(targ.attributes).forEach(a=>{
+					noimg.setAttribute(a.name, targ.getAttribute(a.name));
+				});
+				noimg.textContent = targ.alt;
+				targ.style.display = "none";
+				targ.remove();
+				targparent.prepend(noimg);
+			});
+			
 			mapnode.src = levelinfo.Texture;
 			mapnode.setAttribute('draggable', false)
 			//mapnode.textContent = levelinfo.Name;//JSON.stringify(levelinfo);
@@ -1338,6 +1358,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				mousepos.Y = event.pageY;
 				
 				var b = event.buttons;
+				mapcontainer.classList.toggle("nomousebuttons", !b);
 				if((b&1)>0){//mouse1
 					mouse1down = true;
 					let x = mapnodepanbox.dataset.tx = Number(mapnodepanbox.dataset.tx ?? 0) + dx;
