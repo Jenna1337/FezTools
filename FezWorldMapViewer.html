@@ -260,12 +260,17 @@ thead, tfoot {
 	top: 0;
 	left: 0;
 	transform-style: preserve-3d;
+	
+	pointer-events: all;
+	cursor: crosshair;
 }
 .maplink *{
 	background-color: white;
 	background-color: gray;
 	background-color: grey;
 	background-color: #7777;
+	/*Note: links are semitransparent so you can see other links crossing and layered
+			beneath the above links, and the opacity property doesn't do this*/
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -294,6 +299,12 @@ thead, tfoot {
 	background-color: white;
 }
 .mapshortcutlink * {
+	background-color: red;
+	background-color: darkred;
+	background-color: #9007;
+	/*background-color: #d007;*/
+}
+.mapshortcutlink.selected * {
 	background-color: red;
 }
 </style>
@@ -999,16 +1010,22 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				});
 			}
 			l.classList.add("selected");
-		});;
+		});
+		
+		document.querySelectorAll(".maplink.mapshortcutlink").forEach(a=>{
+			if(node.dataset.Name == a.dataset.node1 || node.dataset.Name == a.dataset.node2){
+				a.classList.add("selected");
+			}
+		});
 		
 		//update rotations for billboard effect
 		//mapnodescontainer.style.translate = node.style.translate.split(" ").map(a=>a.startsWith("-")?a.substring(1):"-"+a).join(" ")
-		var loc = node.style.translate.split(/ |,/g).map(a=>a.startsWith("-")?a.substring(1):"-"+a);
+		let loc = node.style.translate.split(/ |,/g).map(a=>a.startsWith("-")?a.substring(1):"-"+a);
 		while(loc.length<3){
 			loc.push("0px");
 		}
 		loc = loc.map((a,i)=>i<2?(Number(a.replace(nodeSizeUnits,""))-nodeDistanceMultiplier/2)+nodeSizeUnits:a);
-		loc2 = loc.map((a,i)=>i<2?(Number(a.replace(nodeSizeUnits,"")))+nodeSizeUnits:a);
+		let loc2 = loc.map((a,i)=>i<2?(Number(a.replace(nodeSizeUnits,"")))+nodeSizeUnits:a);
 		let scalestr = "scale("+zoom+") ";
 		let translatestr = "translate3d("+loc.join(",")+") ";
 		
@@ -1041,7 +1058,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				a.style.translate = temppos;
 			}
 		})
-		var nodedata = Object.fromEntries(Object.keys(ldat)
+		let nodedata = Object.fromEntries(Object.keys(ldat)
 				.filter(a=>!["Position","Texture","Size","NodeType","Connections","Entrances","BaseElement"].includes(a))
 				.map(a=>{
 					var rawdataentry = ldat[a];
@@ -1251,12 +1268,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				var azimuth = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(azimuth)) azimuth = 0;
 				var elevate = Math.atan(vector.Y/ distanceflat);
 				
-				var rotationX = Math.PI/2 - Math.atan2(vector.Z, vector.X); if(Number.isNaN(azimuth)) azimuth = 0;
-				var rotationY = Math.atan(-vector.Y/ distanceflat);
-				const rotationZ = 0;
-				
-				console.log(azimuth * 180/Math.PI, elevate * 180/Math.PI);
-				
 				const translateX = midpoint.X + nodeDistanceMultiplier / 2;
 				const translateY = -midpoint.Y + nodeDistanceMultiplier / 2;
 				const translateZ = midpoint.Z;
@@ -1275,16 +1286,13 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			}
 			let shortcutConnections = worlddata.flatMap(a=>a.Entrances?.filter(b=>b.IsShortcut)).filter(a=>a!=null).map(a=>[a.LevelName,a.TargetLevelName]);
 			//remove duplicate connections 
-			if(false){
 			shortcutConnections = shortcutConnections.reduce((a,c)=>{
 				if(!(a.some(b=>c[1]==b[0] && c[0]==b[1]) || a.some(b=>c[0]==b[0] && c[1]==b[1]))){
 					a.push(c);
 				}return a;
 			},[])
-			}
 			//get node positions
 			shortcutConnections = shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b)));
-			console.log(shortcutConnections);
 			let shortcutTransforms = shortcutConnections.forEach(a=>{
 				var m = createTransformString(a[0].Position,a[1].Position);
 				var le = worldmap.LinksMesh[0].BaseElement.cloneNode(true);
@@ -1295,14 +1303,12 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				//le.style.width = "0";
 				le.style.transformOrigin = "top left";
 				le.role = "presentation";
-				le.dataset.node1 = a[0].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
-				le.dataset.node2 = a[1].CustomData.LevelName;//TODO remove once the shortcut links get rendered properly
-				le.dataset.azimuth = m[2];//TODO remove once the shortcut links get rendered properly
-				le.dataset.elevate = m[3];//TODO remove once the shortcut links get rendered properly
+				le.dataset.node1 = a[0].CustomData.LevelName;
+				le.dataset.node2 = a[1].CustomData.LevelName;
+				le.title = '"'+le.dataset.node1 +"\" to \""+le.dataset.node2 + '"';
 				maplinks.appendChild(le);
 			});
 			console.log(document.querySelectorAll(".mapshortcutlink"));
-			console.log(document.querySelectorAll(".mapshortcutlink:not([data-elevate=\"0\"])"));
 			//shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))
 			//shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position))
 			//JSON.stringify(shortcutConnections.map(a=>a.map(b=>worldmap.NodesMesh.find(c=>c.CustomData.LevelName==b).Position))) === JSON.stringify(shortcutConnections.map(a=>a.map(b=>JSON.parse(mapnodes.querySelector("[data--name=\""+b+"\"]").dataset.allLevelInfoData).Position)))
