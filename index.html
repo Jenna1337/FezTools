@@ -11,6 +11,17 @@ body {
 	padding: 0;
 	margin: 0;
 }
+noscript {
+	position: absolute;
+	z-index: 9999999;
+	color: white;
+	background-color: black;
+	height: 100vh;
+	width: 100vw;
+	font-size: min(100vh, calc(100vw / 30));
+	line-height: 100vh;
+	text-align: center;
+}
 </style>
 <style id="TableStyles">
 :root {
@@ -1790,6 +1801,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	var lastfpstime = 0;
 	var lasttimedifflog = [];
 	var fpscounter = document.getElementById("fpscounter");
+	document.getElementById("fpscountercontainer").style.display = "";
 	
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
@@ -1822,12 +1834,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <div id="mapcontainer"></div>
 <div id="tablemain"></div>
 <div id="realtable"></div>
-<svg id="fpscountercontainer" role="status" height="150" width="300">
+<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
 	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-widthmulti="1" data-heightmulti="2" data-maxlasttimediffloglen="300" />
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
 </svg>
-<div id="viewsourcebox">
+<div id="viewsourcebox" style="max-width: 40ch">
+This web app created by <span id="createdbyspan">Jenna Sloan</span>
 Last Modified: <span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezWorldMapViewer/blob/main/FezWorldMapViewer.html">
 <!--img src="https://github.githubassets.com/favicons/favicon-dark.png" style="height: 1lh; vertical-align: bottom;padding-inline-end: 0.5ex;"/-->View Source
@@ -1844,6 +1857,9 @@ Last Modified: <span id="lastmodifiedspan"></span>
 </svg></span>
 </a>
 </div>
+<noscript>
+This page requires JavaScript
+</noscript>
 </body>
 <script>
 document.addEventListener("DOMContentLoaded",function(){
@@ -1851,6 +1867,17 @@ document.addEventListener("DOMContentLoaded",function(){
 		var lm = document.getElementById("lastmodifiedspan");
 		lm.textContent = (new Date(document.lastModified)).toISOString();
 		lm.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+	try{
+		var cb = document.getElementById("createdbyspan");
+		cb.textContent = Array.from(document.getElementsByTagName("meta"))
+				.filter(function(a){var n=a.getAttribute("name"); return n && n.toLowerCase()==="author";})
+				.map(a=>a.getAttribute("content"))
+				.join(", ");
+		cb.after(document.createElement("br"));
 	}
 	catch(error){
 		console.error(error);
