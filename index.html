@@ -1887,7 +1887,7 @@ document.addEventListener("DOMContentLoaded",function(){
 function GetGithubSourceHref(){
 	let h=window.location.hostname.split(".");
 	let p=window.location.pathname.split("/").filter(a=>a.length>0);
-	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+p[1];
+	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+(p[1] ?? "index.html");
 }
 if(window.location.hostname){
 	let href = GetGithubSourceHref();
