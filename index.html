@@ -251,7 +251,7 @@ thead, tfoot {
 	border: 1px solid white;
 }
 #mapdebuginfo {
-	z-index: 100000;
+	z-index: 10000;
 	background-color: black;
 	background-color: #111C;
 	color: white;
@@ -261,7 +261,7 @@ thead, tfoot {
 	z-index: 1 !important;
 }
 #mapsettings {
-	z-index: 10000;
+	z-index: 100000;
 	top: 0;
 	right: 0;
 	text-align: center;
@@ -269,6 +269,15 @@ thead, tfoot {
 	background-color: #000E;
 	padding: 1ex;
 	border: 1px solid white;
+	max-height: calc(100vh - 3lh - 2ex - 2px);
+	overflow: scroll;
+	overflow: auto;
+}
+#mapsettings.collapsed {
+	height: 3ex;
+	height: 1lh;
+	overflow: hidden;
+	overflow: clip;
 }
 .maplink {
 	position: absolute;
@@ -1500,8 +1509,30 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		},
 		set ShortcutLinkHue(value){
 			mapcontainer.style.setProperty("--shortcutlinkhue", value*100 + "deg");
+		},
+		"CollapseSettings": function(evt){
+			let targ = evt.target;
+			let collapsed = targ.dataset.ischecked != "1";
+			targ.dataset.ischecked = collapsed ? "1" : "0";
+			//TODO change the text of the button depending on if it is collapsed 
+			if(collapsed){
+				let parentStyle = window.getComputedStyle(targ.parentElement);
+				let edgespacing = "0.5ex";
+				if(parentStyle && parentStyle.padding && parentStyle.padding.length>0) {
+					edgespacing = "calc("+parentStyle.padding+" / 2)";
+				}
+				targ.style.position = "absolute";
+				targ.style.top = edgespacing;
+				targ.style.left = edgespacing;
+				targ.style.bottom = edgespacing;
+				targ.style.padding = "1px";
+				targ.style.margin = "0px";
+			}
+			else{
+				targ.style = "";
+			}
+			mapsettings.classList.toggle("collapsed", collapsed);
 		}
-		
 	};
 	
 	mapsettings = document.createElement("div");
@@ -1586,25 +1617,27 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			}
 			
 			let savedval = localStorage.getItem(i.id);
-			if(savedval!=null){
-				console.log(i.id, savedval);
-				let newval = null;
-				if(i.type=="checkbox"){
-					i.checked = newval=savedval!="false";
-				}
-				else if(i.type=="number" || i.type=="range"){
-					i.value = newval=Number(savedval);
-				}
-				else if(i.type=="button"){
-				}
-				else{
-					throw "Unsupported setting type:"+i.type;
-					i.value = newval=savedval;
-				}
-				if(newval!=null){
-					settings[settingdata.key] = newval;
-				}
+			if(savedval==null){
+				savedval = settingdata.initValue;
 			}
+			console.log(i.id, savedval);
+			let newval = null;
+			if(i.type=="checkbox"){
+				i.checked = newval=savedval!="false";
+			}
+			else if(i.type=="number" || i.type=="range"){
+				i.value = newval=Number(savedval);
+			}
+			else if(i.type=="button"){
+			}
+			else{
+				throw "Unsupported setting type:"+i.type;
+				i.value = newval=savedval;
+			}
+			if(newval!=null){
+				settings[settingdata.key] = newval;
+			}
+			
 			
 			mapsettings.appendChild(l);
 			mapsettings.appendChild(i);
@@ -1811,7 +1844,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	var lastfpstime = 0;
 	var lasttimedifflog = [];
 	var fpscounter = document.getElementById("fpscounter");
-	document.getElementById("fpscountercontainer").style.display = "";
 	
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
@@ -1831,6 +1863,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
 		                 + (1000/timediff).toFixed(5) + " fps";
 		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>(a[0]*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
 		document.getElementById("fpschartavg").setAttribute("d", "M 0,"+chartavg+"h"+fpschartwidth);
+		
+		{
+			let fpscont = document.getElementById("fpscountercontainer");
+			let dbgelem = document.getElementById("mapdebuginfo");
+			if(dbgelem){
+				fpscont.style.top = window.getComputedStyle(dbgelem).height;
+			}
+		}
 		
 		window.requestAnimationFrame(nextFrame);
 	}
