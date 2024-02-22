@@ -143,6 +143,8 @@ thead, tfoot {
 		border-color: white;
 		padding-inline: 0.25em;
 	}
+	
+	--shortcutlinkhue: 0deg;
 }
 #mapcontainer>*{
 	position: absolute;
@@ -312,14 +314,16 @@ thead, tfoot {
 .maplink.selected * {
 	background-color: white;
 }
-.mapshortcutlink * {
+.maplink.mapshortcutlink * {
 	background-color: red;
 	background-color: darkred;
 	background-color: #9007;
 	/*background-color: #d007;*/
+	background-color: hsla(var(--shortcutlinkhue), 100%, 30%, 45%);
 }
-.mapshortcutlink.selected * {
+.maplink.mapshortcutlink.selected * {
 	background-color: red;
+	background-color: hsla(var(--shortcutlinkhue), 100%, 50%, 100%);
 }
 </style>
 <style id="fpscounterstyles">
@@ -1490,6 +1494,12 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		set showShortcutLinks(value){
 			showShortcutLinks = value;
 			RebuildWorldMap();
+		},
+		get ShortcutLinkHue(){
+			return Number(mapcontainer.style.getPropertyValue("--shortcutlinkhue"));
+		},
+		set ShortcutLinkHue(value){
+			mapcontainer.style.setProperty("--shortcutlinkhue", value*100 + "deg");
 		}
 		
 	};
