@@ -1380,7 +1380,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				var dy = event.pageY - mousepos.Y;
 				mousepos.X = event.pageX;
 				mousepos.Y = event.pageY;
-				
+				event.preventDefault();//disables touch scrolling
 				var b = event.buttons;
 				mapcontainer.classList.toggle("nomousebuttons", !b);
 				if((b&1)>0){//mouse1
