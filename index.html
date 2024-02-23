@@ -1081,6 +1081,8 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		hidenodeinfoboxbutton.onclick = function(){
 			nodeinfobox.classList.add("hidden");
 		};
+		hidenodeinfoboxbutton.ariaLabel = "Close Node Info";
+		nodeinfobox.ariaLabel = "Node Info";
 	}
 	
 	function focusOnNode(node){
