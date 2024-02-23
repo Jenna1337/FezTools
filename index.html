@@ -209,6 +209,9 @@ thead, tfoot {
 .nodebox.selected .mapnode, .mapnode:focus{
 	outline: 3.5px solid white;
 	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
+	outline-width: calc(calc(var(--outlinesize-hover) * 0.6 + var(--outlinesize) * 0.4) * 1.5);
+	outline-style: double;
+	outline-style: solid;
 }
 .animations {
 	& .nodebox.selected .mapnode, .mapnode:focus{
@@ -231,6 +234,7 @@ thead, tfoot {
 	height: 50px;
 	width: 50px;
 	overflow: visible;
+	font-size: 15px;
 }
 #nodeinfobox {
 	white-space: pre;
@@ -1314,7 +1318,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			let ypos = -levelinfo.Position.Y*nodeDistanceMultiplier+nodeSizeUnits;
 			let zpos = levelinfo.Position.Z*nodeDistanceMultiplier +nodeSizeUnits;
 			nodebox.style.translate = xpos + " " + ypos + " " + zpos;
-			nodebox.style.fontSize = nodeDistanceMultiplier*0.3+nodeSizeUnits;//nodeDistanceMultiplier*0.04+nodeSizeUnits;
+			//nodebox.style.fontSize = nodeDistanceMultiplier*0.3+nodeSizeUnits;//nodeDistanceMultiplier*0.04+nodeSizeUnits;
 			//mapnode.style.outlineWidth = 1/levelinfo.Size*nodeDistanceMultiplier*0.3+nodeSizeUnits
 			nodebox.style.setProperty("--outlinesize", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.05+nodeSizeUnits);
 			nodebox.style.setProperty("--outlinesize-hover", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.25+nodeSizeUnits);
