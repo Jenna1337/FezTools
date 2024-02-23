@@ -239,13 +239,39 @@ thead, tfoot {
 	/*top: 1lh;*/
 	left: 0;
 }
+#nodeinfobox #hidenodeinfoboxbutton {
+	font-size: larger;
+	font-weight: bold;
+	padding: 1ex;
+	display: inline-block;
+	color: white;
+	text-decoration: none;
+	/* border: 1px solid red;*/
+	width: 1lh;
+	text-align: center;
+	background-color: #300;
+	background-color: #F003;
+	opacity: 0.9;
+}
+#nodeinfobox #hidenodeinfoboxbutton:hover {
+	background-color: red;
+	background-color: #F00D;
+}
+#nodeinfobox #hidenodeinfoboxbutton:active {
+	background-color: #F33;
+	background-color: #F33D;
+}
+.hidden {
+	display: none !important;
+	visibility: hidden !important;
+}
 #maplegend {
 	z-index: 100;
 	background-color: black;
 	background-color: #000E;
 	color: white;
 	bottom: 0;
-	left: 20em;
+	left: 0;
 	border: 1px solid white;
 	padding: 2px;
 }
@@ -257,7 +283,27 @@ thead, tfoot {
 	background-color: black;
 	background-color: #111C;
 	color: white;
-	left: 20em;
+	left: 0;
+	right: 40ch;
+	right: calc(36ch + 2ex + 10px);
+	right: calc(36ch + 2ex + 6px + 2ch);
+}
+@media (min-width: 1000px) {
+	#mapdebuginfo, #maplegend {
+		left: 20em;
+	}
+}
+
+#mapdebuginfo:has(~#mapsettings.collapsed){
+	right: 4ex;
+	right: 2lh;
+	right: calc(1lh + 2ex + 2px);
+}
+#mapdebuginfo:has(~#nodeinfobox.hidden){
+	left: 0;
+}
+#nodeinfobox.hidden~#maplegend{
+	left: 0;
 }
 #maplinks {
 	z-index: 1 !important;
@@ -275,9 +321,20 @@ thead, tfoot {
 	overflow: scroll;
 	overflow: auto;
 }
+#mapsettings input {
+	max-width: 19ch;
+	padding-block: 1px;
+	padding-inline: 2px;
+	font-family: inherit;
+	/*border-width: 2px;
+	border-radius: 2px;*/
+	margin: 0;
+}
 #mapsettings.collapsed {
 	height: 3ex;
 	height: 1lh;
+	width: 3ex;
+	width: 1lh;
 	overflow: hidden;
 	overflow: clip;
 }
@@ -1016,8 +1073,21 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	
 	var settings;
 	
+	var hidenodeinfoboxbutton = document.createElement("a");
+	{
+		hidenodeinfoboxbutton.textContent = "X";//Note: not using Unicode Cross Mark character "\u274C\uFE0E" since some fonts might not support it.
+		hidenodeinfoboxbutton.href = "#";
+		hidenodeinfoboxbutton.id = "hidenodeinfoboxbutton";
+		hidenodeinfoboxbutton.onclick = function(){
+			nodeinfobox.classList.add("hidden");
+		};
+	}
+	
 	function focusOnNode(node){
 		CurrentNode.classList.remove("selected");
+		if(node !== LastFocusedNode){
+			nodeinfobox.classList.remove("hidden");
+		}
 		LastFocusedNode = (FocusNode = (CurrentNode = node));
 		CurrentNode.classList.add("selected");
 		
@@ -1109,6 +1179,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					return [a,parsedval];
 				}));
 		nodeinfobox.innerHTML = "";
+		nodeinfobox.appendChild(hidenodeinfoboxbutton);
 		nodeinfobox.appendChild(MakeCollapsible(nodedata));
 		//nodeinfobox.textContent = JSON.stringify(nodedata,null," ");
 		mapdebuginfo.textContent = JSON.stringify(getDebugInfo(),null," ");
@@ -1232,7 +1303,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			nodebox.style.setProperty("--outlinesize-hover", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.25+nodeSizeUnits);
 			nodebox.tabIndex = 0;
 			nodebox.role = "button";
-			nodebox.addEventListener("focusin", function(event){focusOnNode(this);}, true);
+			nodebox.addEventListener("focusin", function(event){
+				focusOnNode(this);
+				nodeinfobox.classList.remove("hidden");
+			}, true);
 			nodebox.appendChild(mapnode);
 			
 			//add icons
@@ -1376,6 +1450,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	{
 		let mousepos = {"X":0,"Y":0};
 		let mouse1down = false;
+		mapcontainer.addEventListener("pointerdown",function(event){
+			mousepos.X = event.pageX;
+			mousepos.Y = event.pageY;
+		});
 		mapcontainer.addEventListener("pointermove",function(event){
 			if(event.target!==nodeinfobox){
 				var dx = event.pageX - mousepos.X;
@@ -1522,19 +1600,37 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			//TODO change the text of the button depending on if it is collapsed 
 			if(collapsed){
 				let parentStyle = window.getComputedStyle(targ.parentElement);
-				let edgespacing = "0.5ex";
-				if(parentStyle && parentStyle.padding && parentStyle.padding.length>0) {
-					edgespacing = "calc("+parentStyle.padding+" / 2)";
-				}
+				let edgespacing = "0";
 				targ.style.position = "absolute";
 				targ.style.top = edgespacing;
 				targ.style.left = edgespacing;
 				targ.style.bottom = edgespacing;
+				targ.style.right = edgespacing;
+				
+				targ.style.height = "100%";
+				targ.style.width = "100%";
+				
 				targ.style.padding = "1px";
 				targ.style.margin = "0px";
+				
+				targ.style.fontSize = "3ex";
+				if(CSS.supports("font-size: 1.5lh"))
+					targ.style.fontSize = "1.5lh";
+				if(CSS.supports("font-size: calc(1lh + 1ex)"))
+					targ.style.fontSize = "calc(1lh + 1ex)";
+				
+				targ.style.lineHeight = "1";
+				if(CSS.supports("line-height: 1lh"))
+					targ.style.lineHeight = "1lh";
+				
+				if(targ.value.length > 5){
+					targ.dataset.value = targ.value;
+				}
+				targ.value = "⚙\uFE0E";
 			}
 			else{
 				targ.style = "";
+				targ.value = targ.dataset.value;
 			}
 			mapsettings.classList.toggle("collapsed", collapsed);
 		}
@@ -1878,6 +1974,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 			let dbgelem = document.getElementById("mapdebuginfo");
 			if(dbgelem){
 				fpscont.style.top = window.getComputedStyle(dbgelem).height;
+				fpscont.style.left = window.getComputedStyle(dbgelem).left;
 			}
 		}
 		if(fpscounteractive){
