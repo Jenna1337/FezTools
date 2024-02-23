@@ -209,8 +209,12 @@ thead, tfoot {
 .nodebox.selected .mapnode, .mapnode:focus{
 	outline: 3.5px solid white;
 	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
-	/*animation: 1s ease-in-out 0s alternate infinite waves;*/
-	animation: 1s ease-in 0s infinite waves;
+}
+.animations {
+	& .nodebox.selected .mapnode, .mapnode:focus{
+		/*animation: 1s ease-in-out 0s alternate infinite waves;*/
+		animation: 1s ease-in 0s infinite waves;
+	}
 }
 .mapnode:hover {
 	outline: 5px solid gold;
@@ -1457,6 +1461,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	maplegend.id = "maplegend";
 	maplegend.appendChild(MakeTableWithCaption("Legend", mapicons.map(a=>{a=Object.assign({},a);delete a.Field;return a;}), false, false));
 	
+	mapcontainer.classList.add("animations");
 	mapcontainer.appendChild(maplegend);
 	
 	//TODO add convenient zoom slider
@@ -1582,6 +1587,13 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		set RenderFullLinks(value){
 			fullcube = value;
 			RebuildWorldMap();
+		},
+		get EnableCSSAnimations(){
+			return mapcontainer.classList.contains("animations");
+		},
+		set EnableCSSAnimations(value){
+		debugger
+			mapcontainer.classList.toggle("animations", value);
 		},
 		get ShowDebugInfo(){
 			return mapdebuginfo.style.display!=="none";
@@ -1741,7 +1753,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			console.log(i.id, savedval);
 			let newval = null;
 			if(i.type=="checkbox"){
-				i.checked = newval=savedval!="false";
+				i.checked = newval=(savedval!=="false" && savedval!==false);
 			}
 			else if(i.type=="number" || i.type=="range"){
 				i.value = newval=Number(savedval);
