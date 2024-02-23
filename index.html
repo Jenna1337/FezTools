@@ -164,6 +164,8 @@ thead, tfoot {
 	/*transition-property: translate, scale;
 	transition-duration: 0.2s;
 	transition-timing-function: linear;*/
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 #mapnodes, #maplinks {
@@ -239,7 +241,7 @@ thead, tfoot {
 	/*top: 1lh;*/
 	left: 0;
 }
-#nodeinfobox #hidenodeinfoboxbutton {
+#nodeinfobox .hidenodeinfoboxbuttoncontainer {
 	font-size: larger;
 	font-weight: bold;
 	padding: 1ex;
@@ -249,9 +251,13 @@ thead, tfoot {
 	/* border: 1px solid red;*/
 	width: 1lh;
 	text-align: center;
+}
+#nodeinfobox #hidenodeinfoboxbutton {
 	background-color: #A00;
 	background-color: #F00A;
 	opacity: 0.9;
+	position: fixed;
+	z-index: inherit;
 }
 #nodeinfobox #hidenodeinfoboxbutton:hover {
 	background-color: red;
@@ -1074,15 +1080,19 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	var settings;
 	
 	var hidenodeinfoboxbutton = document.createElement("a");
+	var hidenodeinfoboxbuttonspacer = document.createElement("span");
 	{
-		hidenodeinfoboxbutton.textContent = "X";//Note: not using Unicode Cross Mark character "\u274C\uFE0E" since some fonts might not support it.
+		hidenodeinfoboxbuttonspacer.textContent = hidenodeinfoboxbutton.textContent = "X";//Note: not using Unicode Cross Mark character "\u274C\uFE0E" since some fonts might not support it.
 		hidenodeinfoboxbutton.href = "#";
+		hidenodeinfoboxbuttonspacer.className = hidenodeinfoboxbutton.className = "hidenodeinfoboxbuttoncontainer";
 		hidenodeinfoboxbutton.id = "hidenodeinfoboxbutton";
 		hidenodeinfoboxbutton.onclick = function(){
 			nodeinfobox.classList.add("hidden");
 		};
 		hidenodeinfoboxbutton.ariaLabel = "Close Node Info";
 		nodeinfobox.ariaLabel = "Node Info";
+		hidenodeinfoboxbuttonspacer.role = "none";
+		hidenodeinfoboxbuttonspacer.style.visibility = "hidden";
 	}
 	
 	function focusOnNode(node){
@@ -1182,6 +1192,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				}));
 		nodeinfobox.innerHTML = "";
 		nodeinfobox.appendChild(hidenodeinfoboxbutton);
+		nodeinfobox.appendChild(hidenodeinfoboxbuttonspacer);
 		nodeinfobox.appendChild(MakeCollapsible(nodedata));
 		//nodeinfobox.textContent = JSON.stringify(nodedata,null," ");
 		mapdebuginfo.textContent = JSON.stringify(getDebugInfo(),null," ");
@@ -1448,6 +1459,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	
 	mapcontainer.appendChild(maplegend);
 	
+	//TODO add convenient zoom slider
+	//TODO add convenient button to swap rotate and pan buttons
+	
 	//events
 	{
 		let mousepos = {"X":0,"Y":0};
@@ -1599,7 +1613,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			let targ = evt.target;
 			let collapsed = targ.dataset.ischecked != "1";
 			targ.dataset.ischecked = collapsed ? "1" : "0";
-			//TODO change the text of the button depending on if it is collapsed 
 			if(collapsed){
 				let parentStyle = window.getComputedStyle(targ.parentElement);
 				let edgespacing = "0";
