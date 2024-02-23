@@ -1497,6 +1497,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			let fpstracker = document.getElementById("fpscountercontainer");
 			if(fpstracker){
 				fpstracker.style.display = value ? "" : "none";
+				if(fpscountersetactive){
+					fpscountersetactive(value);
+				}
 			}
 		},
 		get showShortcutLinks(){
@@ -1842,10 +1845,14 @@ document.addEventListener("DOMContentLoaded",()=>{
 })
 </script>
 <script id="fpscounterscript">
+var fpscountersetactive = null;
+var fpscountergetactive = null;
 document.addEventListener("DOMContentLoaded", ()=>{
 	var lastfpstime = 0;
 	var lasttimedifflog = [];
 	var fpscounter = document.getElementById("fpscounter");
+	
+	var fpscounteractive = true;
 	
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
@@ -1873,8 +1880,18 @@ document.addEventListener("DOMContentLoaded", ()=>{
 				fpscont.style.top = window.getComputedStyle(dbgelem).height;
 			}
 		}
-		
-		window.requestAnimationFrame(nextFrame);
+		if(fpscounteractive){
+			window.requestAnimationFrame(nextFrame);
+		}
+	}
+	fpscountersetactive = function(active){
+		if(!fpscounteractive && active){
+			window.requestAnimationFrame(nextFrame);
+		}
+		fpscounteractive = active;
+	}
+	fpscountergetactive = function(){
+		return fpscounteractive;
 	}
 	
 	window.requestAnimationFrame(nextFrame);
