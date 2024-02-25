@@ -1377,7 +1377,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		mapcontainer.appendChild(mapnodepanbox);
 		
 		//add shortcut links
-		if(showShortcutLinks)
 		{
 			//generates the transform for diagonal lines from one point in 3D space to another point, having the same thickness as LinkThickness
 			function createTransformString(node1Pos, node2Pos) {
@@ -1447,6 +1446,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				le.dataset.node1 = a[0].CustomData.LevelName;
 				le.dataset.node2 = a[1].CustomData.LevelName;
 				le.title = '"'+le.dataset.node1 +"\" to \""+le.dataset.node2 + '"';
+				if(!showShortcutLinks){
+					le.style.display = "none";
+				}
 				maplinks.appendChild(le);
 			});
 			console.log(document.querySelectorAll(".mapshortcutlink"));
@@ -1616,7 +1618,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		},
 		set showShortcutLinks(value){
 			showShortcutLinks = value;
-			RebuildWorldMap();
+			Array.from(document.querySelectorAll(".mapshortcutlink")).forEach(a=>a.style.display = showShortcutLinks ? "" : "none");
 		},
 		get ShortcutLinkHue(){
 			return Number(mapcontainer.style.getPropertyValue("--shortcutlinkhue"));
