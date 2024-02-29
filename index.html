@@ -1802,6 +1802,14 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		event.stopPropagation();
 	});
 	
+	//hide/collapse stuff if on mobile or if the screen is small
+	if(navigator.userAgent.match(/Mobile/i) || !window.matchMedia("(min-width: 1000px)").matches){
+		nodeinfobox.classList.add("hidden");
+		
+		//collapse settings
+		Array.from(mapsettings.children).find(a=>a.id.toLowerCase().includes("collapse")).click();
+		
+	}
 	return settings;
 };
 </script>
