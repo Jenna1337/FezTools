@@ -411,7 +411,7 @@ thead, tfoot {
 <style id="fpscounterstyles">
 #fpscountercontainer
 {
-	z-index: 1000000000;
+	z-index: 10000;
 	position: absolute;
 	top: 1lh;
 	left: 20em;
@@ -1081,7 +1081,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	var sensitivityX = 0.5;
 	var sensitivityY = 0.5;
 	var zoomSensitivity = 1.2;
-	var fullcube = true;
+	var fullcube = !navigator.userAgent.match(/Mobile/i);
 	var LinkThickness = 0.05375;
 	var showShortcutLinks = false;//worlddata.some(a=>a.Entrances?.some(b=>b.IsShortcut));
 	
@@ -1467,7 +1467,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	maplegend.id = "maplegend";
 	maplegend.appendChild(MakeTableWithCaption("Legend", mapicons.map(a=>{a=Object.assign({},a);delete a.Field;return a;}), false, false));
 	
-	mapcontainer.classList.add("animations");
+	if(!navigator.userAgent.match(/Mobile/i)){
+		mapcontainer.classList.add("animations");
+	}
 	mapcontainer.appendChild(maplegend);
 	
 	//TODO add convenient zoom slider
@@ -1982,7 +1984,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	var lasttimedifflog = [];
 	var fpscounter = document.getElementById("fpscounter");
 	
-	var fpscounteractive = true;
+	//true if using `file` protocol, or reduced motion off and not mobile and more than 8 logical processors
+	var fpscounteractive = !(window.matchMedia("(prefers-reduced-motion)")?.matches??true)//reduced motion off
+			&& (!navigator.userAgent.match(/Mobile/i) && navigator.hardwareConcurrency>=8)//and not mobile and more than 8 logical processors
+			|| window.location.protocol.match(/^file/i);//if using `file` protocol
 	
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
@@ -2094,6 +2099,8 @@ if(window.location.hostname){
 	if(href){
 		document.getElementById("viewsource").href = href;
 	}
-}Array.from(document.styleSheets).map(ss=>[ss.ownerNode.id,Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="").map(r=>[r.style?.zIndex])])
+}
+//Array.from(document.styleSheets).map(ss=>[ss.ownerNode.id,Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="").map(r=>[r.style?.zIndex])])
+//Array.from(document.styleSheets).flatMap(ss=>Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="" && !Number.isNaN(Number(r.style?.zIndex))).map(r=>[r.selectorText,Number(r.style?.zIndex)])).sort((a,b)=>{var k=Number(a[1])-Number(b[1]);return Number.isNaN(k)?1:k;})
 </script>
 </html>
