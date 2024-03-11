@@ -418,6 +418,98 @@ thead, tfoot {
 	background-color: #111C;
 }
 </style>
+<style id="panrotationtoggletyles">
+#panrotationtogglebox {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	color: white;
+	background-color: black;
+	background-color: #000E;
+	border: 1px solid white;
+	border-radius: 4px;
+	line-height: 1;
+	z-index: 100;
+	text-align: right;
+	height: 48px;
+	width: 48px;
+	top: -60px;
+	margin: 0;
+	padding: 2px;
+	overflow: hidden;
+	overflow: clip;
+}
+#panrotationtogglebox * {
+	padding: 0;
+	margin: 0;
+	height: inherit;
+	width: inherit;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	transition-property: transform, transform-origin, z-index, opacity, font-weight;
+	transition-duration: 0.1s;
+	transition-timing-function: linear;
+	color: #DDD;
+}
+#panrotationtogglebutton {
+	color: cyan;
+	line-height: 1;
+	margin: 1px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+}
+/* #panrotationtogglebutton>* {
+	background-color: color-mix(in srgb, currentColor 35%, transparent);
+}*/
+#panrotationtogglebutton svg * {
+	color: inherit;
+}
+/* unvisited */   /* visited */
+#panrotationtogglebutton:link, #panrotationtogglebutton:visited {
+	/* Just use the styles defined above */
+}
+/* pointer over */
+#panrotationtogglebutton:hover {
+	color: yellow;
+	font-weight: bold;
+}
+#panrotationtogglebutton:hover:not([data-option]) #panrotationtogglebutton-pan,
+#panrotationtogglebutton:hover[data-option="pan-rotate"] #panrotationtogglebutton-pan,
+#panrotationtogglebutton:hover[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	transform: scale(0.85) translate(-1.2px, -1.2px);
+	color: white;
+}
+/* pointer down */
+#panrotationtogglebutton:active {
+	color: red;
+	font-weight: normal !important;
+}
+#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-pan,
+#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-pan,
+#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	transform: scale(0.8);
+	transform-origin: top left;
+	z-index: 20;
+	opacity: 1;
+}
+#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-rotate,
+#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-rotate,
+#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-pan {
+	transform: scale(0.5);
+	transform-origin: bottom right;
+	z-index: 1;
+	opacity: 0.6;
+}
+#panrotationtogglebutton-tinyswapicon {
+	color: white !important;
+	z-index: 99999;
+	transform-origin: top right;
+	transform: scale(0.35) translate(-5px,5px);
+}
+</style>
 <style id="viewsourcelinkstyles">
 #viewsourcebox {
 	position: absolute;
@@ -1478,7 +1570,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	//events
 	{
 		let mousepos = {"X":0,"Y":0};
-		let mouse1down = false;
 		mapcontainer.addEventListener("pointerdown",function(event){
 			mousepos.X = event.pageX;
 			mousepos.Y = event.pageY;
@@ -1492,13 +1583,12 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				event.preventDefault();//disables touch scrolling
 				var b = event.buttons;
 				mapcontainer.classList.toggle("nomousebuttons", !b);
-				if((b&1)>0){//mouse1
-					mouse1down = true;
+				if((b&(swapPanRotate ? 2 : 1))>0){//mouse1
 					let x = mapnodepanbox.dataset.tx = Number(mapnodepanbox.dataset.tx ?? 0) + dx;
 					let y = mapnodepanbox.dataset.ty = Number(mapnodepanbox.dataset.ty ?? 0) + dy;
 					mapnodepanbox.style.translate = x+"px "+y+"px";
 				}
-				if((b&2)>0){//mouse2
+				if((b&(swapPanRotate ? 1 : 2))>0){//mouse2
 					yaw += dx * (invertX ? -1 : 1) * sensitivityX;
 					pitch += dy * (invertY ? -1 : 1) * sensitivityY;
 					//yaw %= 360;
@@ -1541,7 +1631,19 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	}
 	
 	var showIcons = true;
+	var swapPanRotate = false;
 	var settings={
+		get swapPanRotate(){
+			return swapPanRotate;
+		},
+		set swapPanRotate(value){
+			swapPanRotate = value;
+			let s = document.getElementById("panrotationtogglebutton");
+			if(s){
+				s.dataset.option = value ? "rotate-pan" : "pan-rotate";
+				s.title = "Swap "+(value ? "Rotate/Pan" : "Pan/Rotate")
+			}
+		},
 		get showIcons(){
 			return showIcons;
 		},
@@ -2053,6 +2155,32 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
 </svg>
 <div id="viewsourcebox" style="max-width: 40ch">
+<div id="panrotationtogglebox">
+<a id="panrotationtogglebutton" title="Swap Pan/Rotate" href="#">
+<svg id="panrotationtogglebutton-pan" height="48" width="48" viewbox="0 0 48 48" role="presentation">
+	<text text-anchor="middle" dominant-baseline="middle" y="24" x="24" fill="currentColor">Pan</text>
+	<!-- TODO insert 2d panning svg icon -->
+</svg>
+<svg id="panrotationtogglebutton-rotate" height="48" width="48" viewbox="0 0 48 48" role="presentation">
+	<text text-anchor="middle" dominant-baseline="middle" y="24" x="24" fill="currentColor">Rotate</text>
+	<!-- TODO insert 3d rotating svg icon -->
+</svg>
+<svg id="panrotationtogglebutton-tinyswapicon" height="48" width="48" viewbox="0 0 48 48" role="presentation">
+	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor">
+	<!-- TODO make the swap icon nicer -->
+</svg>
+</a>
+<script style="display: none;">
+document.addEventListener("DOMContentLoaded",function(){
+	document.getElementById("panrotationtogglebutton").addEventListener("click", function(){
+		mapViewer.swapPanRotate = !mapViewer.swapPanRotate;
+		var s = document.getElementById("map_setting_swapPanRotate");
+		s.checked = mapViewer.swapPanRotate;
+		s.dispatchEvent(new Event("change"))
+	});
+});
+</script>
+</div>
 This web app created by <span id="createdbyspan">Jenna Sloan</span>
 Last Modified: <span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezWorldMapViewer/blob/main/FezWorldMapViewer.html">
