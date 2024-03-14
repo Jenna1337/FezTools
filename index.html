@@ -466,6 +466,8 @@ thead, tfoot {
 }*/
 #panrotationtogglebutton svg * {
 	color: inherit;
+	mix-blend-mode: difference;
+	font-size: 12px;
 }
 /* unvisited */   /* visited */
 #panrotationtogglebutton:link, #panrotationtogglebutton:visited {
@@ -1565,7 +1567,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	mapcontainer.appendChild(maplegend);
 	
 	//TODO add convenient zoom slider
-	//TODO add convenient button to swap rotate and pan buttons
 	
 	//events
 	{
@@ -2158,15 +2159,29 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <div id="panrotationtogglebox">
 <a id="panrotationtogglebutton" title="Swap Pan/Rotate" href="#">
 <svg id="panrotationtogglebutton-pan" height="48" width="48" viewbox="0 0 48 48" role="presentation">
-	<text text-anchor="middle" dominant-baseline="middle" y="24" x="24" fill="currentColor">Pan</text>
-	<!-- TODO insert 2d panning svg icon -->
+	<path d="M24 0 l10 10h-5v9h9v-5l10,10 -10,10v-5h-9v9h5l-10,10 -10,-10h5v-9h-9v5l-10,-10 10,-10v5h9v-9h-5z" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
+	<text text-anchor="middle" dominant-baseline="central" y="24" x="24" fill="currentColor">Pan</text>
 </svg>
-<svg id="panrotationtogglebutton-rotate" height="48" width="48" viewbox="0 0 48 48" role="presentation">
-	<text text-anchor="middle" dominant-baseline="middle" y="24" x="24" fill="currentColor">Rotate</text>
-	<!-- TODO insert 3d rotating svg icon -->
+<svg id="panrotationtogglebutton-rotate" height="48" width="48" viewBox="0 0 48 48" role="presentation">
+	<defs>
+		<clipPath id="rotatebtnclipcircle">
+			<circle cx="24" cy="24" r="24" />
+		</clipPath>
+		<filter id="barrel" width="96" height="96">
+			<feImage id="filter-image" xlink:href="data:image/png;base64,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"
+					result="barrel" x="28" y="28" width="48" height="48"></feImage>
+			<feDisplacementMap in2="barrel" in="SourceGraphic" xChannelSelector="R" yChannelSelector="G" scale="100"></feDisplacementMap>
+			<feOffset dy="-28" dx="-28"></feOffset>
+		</filter>
+	</defs>
+	<g transform-origin="24 24" transform="scale(1.35)" clip-path="url(#rotatebtnclipcircle)">
+	<path filter="url(#barrel)" d="M24 0 l10 10h-5v9h9v-5l10,10 -10,10v-5h-9v9h5l-10,10 -10,-10h5v-9h-9v5l-10,-10 10,-10v5h9v-9h-5z" stroke="none" fill="currentColor"></path>
+	</g>
+	<text text-anchor="middle" dominant-baseline="central" y="24" x="24" fill="currentColor">Rotate</text>
+	<!-- TODO make the 3d rotating svg icon nicer -->
 </svg>
 <svg id="panrotationtogglebutton-tinyswapicon" height="48" width="48" viewbox="0 0 48 48" role="presentation">
-	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor">
+	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor" />
 	<!-- TODO make the swap icon nicer -->
 </svg>
 </a>
