@@ -1713,9 +1713,14 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			let fpstracker = document.getElementById("fpscountercontainer");
 			if(fpstracker){
 				fpstracker.style.display = value ? "" : "none";
-				if(fpscountersetactive){
-					fpscountersetactive(value);
+				function waitForFpsToShow(){
+					if(fpscountersetactive){
+						fpscountersetactive(value);
+					}else{
+						window.requestAnimationFrame(waitForFpsToShow);
+					}
 				}
+				window.requestAnimationFrame(waitForFpsToShow);
 			}
 		},
 		get showShortcutLinks(){
