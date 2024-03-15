@@ -1561,7 +1561,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	maplegend.id = "maplegend";
 	maplegend.appendChild(MakeTableWithCaption("Legend", mapicons.map(a=>{a=Object.assign({},a);delete a.Field;return a;}), false, false));
 	
-	if(!navigator.userAgent.match(/Mobile/i)){
+	if(!navigator.userAgent.match(/Mobile/i)//not mobile
+			&& (window.matchMedia("(update:fast)")?.matches??true)//and has fast updates
+			){
 		mapcontainer.classList.add("animations");
 	}
 	mapcontainer.appendChild(maplegend);
