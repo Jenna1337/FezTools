@@ -2099,6 +2099,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	var lastfpstime = 0;
 	var lasttimedifflog = [];
 	var fpscounter = document.getElementById("fpscounter");
+	var mindiff = 99999;
+	var maxfps = 60;
+	const fpscont = document.getElementById("fpscountercontainer");
+	const fpschartelem = document.getElementById("fpschart");
 	
 	//true if using `file` protocol, or reduced motion off and not mobile and more than 8 logical processors
 	var fpscounteractive = !(window.matchMedia("(prefers-reduced-motion)")?.matches??true)//reduced motion off
@@ -2108,24 +2112,28 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
 		lastfpstime = time;
+		if(timediff < mindiff){
+			mindiff = timediff;
+			maxfps = 1000/mindiff;//Math.min(...lasttimedifflog);
+		}
 		lasttimedifflog.push(timediff);
-		var fpschartelem = document.getElementById("fpschart");
 		var maxframes = Number(fpschartelem.dataset["maxlasttimediffloglen"]);
 		while(lasttimedifflog.length > maxframes){
 			lasttimedifflog.shift()
 		}
-		var fpschartwidthmulti = Number(fpschartelem.dataset["widthmulti"]);
-		var fpschartheightmulti = Number(fpschartelem.dataset["heightmulti"]);
-		var fpschartwidth = lasttimedifflog.length * fpschartwidthmulti;
+		const fpschartwidth = Number(fpscont.getAttribute("width"));
+		const fpschartheight = Number(fpscont.getAttribute("height"));
+		var fpschartwidthmulti = fpschartwidth/maxframes;
+		var fpschartheightmulti = Math.floor(fpschartheight/maxfps);
 		var fpsavg = (1000/(lasttimedifflog.reduce((a,b)=>a+b)/lasttimedifflog.length)).toFixed(5);
 		var chartavg = fpsavg*fpschartheightmulti;
+		var xoffset = maxframes-lasttimedifflog.length;
 		fpscounter.textContent = fpsavg + " fps avg (last "+lasttimedifflog.length+" frames)\n"
 		                 + (1000/timediff).toFixed(5) + " fps";
-		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>(a[0]*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
+		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>((Number(a[0])+xoffset)*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
 		document.getElementById("fpschartavg").setAttribute("d", "M 0,"+chartavg+"h"+fpschartwidth);
 		
 		{
-			let fpscont = document.getElementById("fpscountercontainer");
 			let dbgelem = document.getElementById("mapdebuginfo");
 			if(dbgelem){
 				fpscont.style.top = window.getComputedStyle(dbgelem).height;
@@ -2157,7 +2165,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <div id="realtable"></div>
 <svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
 	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
-	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-widthmulti="1" data-heightmulti="2" data-maxlasttimediffloglen="300" />
+	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
 </svg>
 <div id="viewsourcebox" style="max-width: 40ch">
