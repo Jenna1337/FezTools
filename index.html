@@ -1399,16 +1399,18 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				mapnode.src = cachedImage;
 			}else{
 				mapnode.src = levelinfo.Texture;
-				mapnode.addEventListener("load", function(evt){
-					var imageElement = evt.target;
-					var canvas = document.createElement('canvas');
-					var ctx = canvas.getContext('2d');
-					canvas.width = imageElement.naturalWidth;
-					canvas.height = imageElement.naturalHeight;
-					ctx.drawImage(imageElement, 0, 0);
-					let dataurl = canvas.toDataURL();
-					localStorage?.setItem(levelinfo.Texture, dataurl);
-				});
+				if(window.isSecureContext && location.protocol!=="file:"){
+					mapnode.addEventListener("load", function(evt){
+						var imageElement = evt.target;
+						var canvas = document.createElement('canvas');
+						var ctx = canvas.getContext('2d');
+						canvas.width = imageElement.naturalWidth;
+						canvas.height = imageElement.naturalHeight;
+						ctx.drawImage(imageElement, 0, 0);
+						let dataurl = canvas.toDataURL();
+						localStorage.setItem(levelinfo.Texture, dataurl);
+					});
+				}
 			}
 			mapnode.setAttribute('draggable', false)
 			//mapnode.textContent = levelinfo.Name;//JSON.stringify(levelinfo);
@@ -1568,8 +1570,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		
 		focusOnNode(CurrentNode);
 	}
-	Rebuild3DMap();
-	
 	
 	maplegend = document.createElement("div");
 	maplegend.id = "maplegend";
@@ -1649,6 +1649,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	
 	var showIcons = true;
 	var swapPanRotate = false;
+	var initialized = false;
 	var settings={
 		get swapPanRotate(){
 			return swapPanRotate;
@@ -1706,14 +1707,18 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		},
 		set LinkThickness(value){
 			LinkThickness = value;
-			RebuildWorldMap();
+			if(initialized){
+				RebuildWorldMap();
+			}
 		},
 		get RenderFullLinks(){
 			return fullcube;
 		},
 		set RenderFullLinks(value){
 			fullcube = value;
-			RebuildWorldMap();
+			if(initialized){
+				RebuildWorldMap();
+			}
 		},
 		get EnableCSSAnimations(){
 			return mapcontainer.classList.contains("animations");
@@ -1934,6 +1939,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		Array.from(mapsettings.children).find(a=>a.id.toLowerCase().includes("collapse")).click();
 		
 	}
+	
+	initialized = true;
+	RebuildWorldMap();
+	
 	return settings;
 };
 </script>
