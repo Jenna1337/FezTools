@@ -1394,8 +1394,22 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				targ.remove();
 				targparent.prepend(noimg);
 			});
-			
-			mapnode.src = levelinfo.Texture;
+			let cachedImage = localStorage?.getItem(levelinfo.Texture);
+			if(cachedImage!=null){
+				mapnode.src = cachedImage;
+			}else{
+				mapnode.src = levelinfo.Texture;
+				mapnode.addEventListener("load", function(evt){
+					var imageElement = evt.target;
+					var canvas = document.createElement('canvas');
+					var ctx = canvas.getContext('2d');
+					canvas.width = imageElement.naturalWidth;
+					canvas.height = imageElement.naturalHeight;
+					ctx.drawImage(imageElement, 0, 0);
+					let dataurl = canvas.toDataURL();
+					localStorage?.setItem(levelinfo.Texture, dataurl);
+				});
+			}
 			mapnode.setAttribute('draggable', false)
 			//mapnode.textContent = levelinfo.Name;//JSON.stringify(levelinfo);
 			mapnode.title = mapnode.alt = levelinfo.Name;//JSON.stringify(levelinfo);
