@@ -30,7 +30,7 @@ noscript {
 	--tablebg: transparent;
 	--tabledatabg: transparent;
 }
-#tablemain {
+.tablemain {
 }
 .tableentry{
 	border: 1px solid black;
@@ -75,10 +75,10 @@ noscript {
 .tabledata.primitive{
 	display: inline-block;
 }
-#tablemain>div>.tableentry>.tablehead{
+.tablemain>.tableentry>.tablehead{
 	color: white;
 }
-#tablemain>div{
+.tablemain{
 	background-color: black;
 	background-color: var(--tablebg);
 	margin-block-end: 1lh;
@@ -957,8 +957,11 @@ function WorldMap(maptree, LinkThickness, fullcube)
 
 const hideByDefault = false;
 
-function MakeCollapsible(jsonData){
+function MakeCollapsible(jsonData, root=true){
 	var rootelem = document.createElement("div");
+	if(root){
+		rootelem.classList.add("tablemain");
+	}
 	Object.entries(jsonData).forEach(([key,val])=>{
 		let te = document.createElement("div");
 		te.className = "tableentry";
@@ -968,7 +971,7 @@ function MakeCollapsible(jsonData){
 		
 		let td;
 		if(val!==null && "object"===(typeof(val))){
-			td = MakeCollapsible(val);
+			td = MakeCollapsible(val, false);
 			td.classList.toggle("hidden", hideByDefault);
 			//td.style.display = "none";
 			
@@ -2101,18 +2104,9 @@ function GetAllWorldData(maptree,LinkThickness,fullcube){
 	return {"worldmap":worldmap,"allworlddata":allworlddata};
 }
 document.addEventListener("DOMContentLoaded",()=>{
-	var tablecontainer = document.getElementById("tablemain");
-	//tablecontainer.appendChild(MakeCollapsible(WorldInfo));
-	//tablecontainer.appendChild(MakeCollapsible(maptree));
-	
-	console.log("allworlddata",allworlddata);
-	//tablecontainer.appendChild(MakeCollapsible(worldloot));
-	//tablecontainer.appendChild(MakeCollapsible(allworlddata));
-	
 	allworlddata = GetAllWorldData(maptree,0.05375,true).allworlddata;
+	console.log("allworlddata",allworlddata);
 	worldloot = worldloot.sort((a,b)=>a.LevelName.localeCompare(b.LevelName));
-	//document.getElementById("realtable").appendChild(MakeTable(allworlddata));
-	//document.getElementById("realtable").appendChild(MakeTable(worldloot));
 	
 	mapViewer = MapViewer3D(maptree, allworlddata, worldmap, document.getElementById("mapcontainer"));
 })
@@ -2186,8 +2180,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </head>
 <body>
 <div id="mapcontainer"></div>
-<div id="tablemain"></div>
-<div id="realtable"></div>
 <svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
 	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />
