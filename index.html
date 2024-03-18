@@ -707,7 +707,7 @@ function WorldMap(maptree, LinkThickness, fullcube)
 	})();
 	
 	function GetTexture(filepath){
-		return filepath+".png";//TODO
+		return filepath.toLowerCase()+".png";//TODO
 	}
 	function DrawCube(Size, Position, color){
 		const cubesize = 50;
@@ -810,19 +810,19 @@ function WorldMap(maptree, LinkThickness, fullcube)
 		
 		if (group != null)
 		{
-			group.Texture = GetTexture("Other Textures/map_screens/" + node.LevelName);
+			group.Texture = GetTexture("map_screens/" + node.LevelName);
 			
 			if (node.LevelName == "SEWER_QR")
 			{
 				sewerQRGroup = group;
 				sewerQRXbox = group.Texture;
-				sewerQRSony = GetTexture("Other Textures/map_screens/" + node.LevelName + "_SONY");
+				sewerQRSony = GetTexture("map_screens/" + node.LevelName + "_SONY");
 			}
 			else if (node.LevelName == "ZU_HOUSE_QR")
 			{
 				zuhouseQRGroup = group;
 				zuhouseQRXbox = group.Texture;
-				zuhouseQRSony = GetTexture("Other Textures/map_screens/" + node.LevelName + "_SONY");
+				zuhouseQRSony = GetTexture("map_screens/" + node.LevelName + "_SONY");
 			}
 		}
 		for (var c2 of node.Connections)
