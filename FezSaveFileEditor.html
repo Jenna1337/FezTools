@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="description" content="FEZ Save File Editor" />
+<meta name="keywords" content="FEZ,Save,File,Editor" />
+<meta name="author" content="Jenna Sloan" />
+<meta name="color-scheme" content="light dark" />
+<title>FEZ Save File Editor version whatever</title>
+<!--
+TODO add a web app manifest? 
+see https://developer.mozilla.org/en-US/docs/Web/Manifest
+-->
+<link rel="manifest" href='data:application/javascript,{
+	"name": "FEZ Save File Editor",
+	"short_name": "FEZ Save Editor",
+	"start_url": "https://sloan4.com/tools/FezSaveFileEditor.html",
+	"display": "standalone",
+	"description": "FEZ Save File Editor",
+	"icons": [
+		{
+			"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJxSURBVHhe7ZovUBtBFIcvmAZ3TE1uqk5UUNXggkQCqnWpBBdc6opENqrEgSSooFpcry6nCjIyM0ynwSXurjX09r3fQbnJMdO7LXvMvo958234kzB7v9t9bHAEQRAEQbCWGlyKm88vbzAsxXj7B0aPxxJsLTIBsLXIBMDWIhMAW4tMAGwtMgGwtcgEwNYiEwBbi/UTUNNxmHG6fYVROV4buB5yC8DWIhMAW4tMAGwtxrfBnyffyLMZyRlPI/I8JjkRXJTlOruxwt5aXSa/eP6bLAkwnYDvh5yAd5tNckrTx6XTRHA5Jw+CCbnpc7RkEYSNoe759L5XDJMrpSrLbu+SqiztDZ/qbBRRSQJgY8TJrajqFjUuufIvIhjHVGpXUDVLXlSVJAA2htrny+71/8I0aTBUpUgC4Mpz1G1SFSWOIpQaq09wafkXmYHzrHAz9alzTu5318nDkLfAg3aDrIv3x9wArfncCn8cXJArMwG9Dk/AF/QA19MpOUs9p0G8t5MswHX5B1c9dv9sTJY1AK4cDc9bWO5KTrkuqr6w8pAEwBUAy/J/5u5VeCQJgI1TtCOMoxnV39f2IeJku1CVYn0CKtMHHOyskdVfbArdjdBen/d9H2eDJ4H0AURlErCPBIwyCeiFu+SidFtH5L0+nyZ5SMAQZ4NaEtB2ftWKFp7CGMZ/gVbnK6UnLwHhJCAXpeVvkG8TgKZwGGpMwFOm8gnQtQakJ8oNl5//XBLAGE/AZpcTsPP2FT1OedPS2wfsH4c84AAk/QafN0gCYGN8OBxRAq7n/O7QBO8SqzP7e2Qe3pH7hQz8ffXkQ+EhYJYnwHH+AAts/6c7LFcjAAAAAElFTkSuQmCC",
+			"sizes": "64x64",
+			"type": "image/png",
+			"purpose": "any",
+			"orientation": "any"
+		}
+	]
+}' />
+
+<!--Note: some browsers (including Safari for iOS) don't like the following favicon for whatever reason-->
+<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAMMOAADDDgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMWQdQDFkHYcxZB048KLav/Cf1L/v31K/799S/+/eEv/v3dL/753S/+5d0v/uHdL/7h3S/+4d0v/tnVI/6trPP+va0L/rXdN/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvnZOALtxSBzDf1nj3raZ/+XApf/y6N3/5+nc/+Xn2v/l59r/5efa/+Tn2v/k59r/5Ofa/+bo3P/u49n/yZ1+/8CLa/+vcEL/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC9bDoAumUyHMN4SePnvqD/7LeW/+7w5/+N1qz/ftCg/3/Qof9/0KH/f9Ch/3/Qof9+0KD/jdas/+zu5P/TnXv/xJNw/6trO/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL1rOQC6ZDEcw3dJ4+i9n//stJH/8/Ho/7Hdwf+m2Lf/p9i4/6fYuP+n2Lj/p9i4/6bYt/+x3cH/8O/n/9Shfv/JlHb/sGo7/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHAKYABwCmQAcApoEHAKZ/BwCmfwcApn8HAKZ/BACofioUj424cU7x6b6g/+y0kf/u8Ob/jdar/37Qn/9/0KD/f9Cg/3/QoP9/0KD/ftCf/43Wq//s7uT/1aJ//8uad/+xazv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcApgAHAKaABwCm/wcApv8HAKb/BwCm/wcApv8GAKf/GguZ/69qVP/qv6X/67OQ//jr4v/t8Ob/6+/k/+vv5P/r7+T/6e7j/+nu4//p7uP/6+/l//Xp4P/aon//0Jx8/7JrPP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwCmAAcApoAHAKb/BwCm/wcApv8HAKb/BwCm/wYAp/8aC5n/r2tU/+rAp//pq4X/6q6H/+uviv/rr4r/66+K/+muif/eqYX/3KeD/9yng//cp4P/2qaA/9efd//Son//smw8/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHAKYABwCmgAcApv8HAKb/BwCm/wcApv8HAKb/BgCn/xoLmf+va1X/68Wt/+irhP/npXr/56V6/+elev/npHr/56R6/+SieP/dnHP/15ty/9abcv/Wm3L/1593/9eohf+0bT3/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcApgAHAKaABwCm/wcApv8HAKb/BwCm/wcApv8GAKf/GguZ/69rVf/wxq7/6auE/+Shd//koXf/5KF3/+SieP/konj/46F3/9yacf/WmXD/1Zlw/9WZcP/Xn3j/2KmK/7ltPv8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwCmAAcApoAHAKb/BwCm/wcApv8HAKb/BwCm/wYAp/8aC5n/sGtV//DHrv/nqoT/2Jx3/9abd//WnXj/1qF8/9aiff/WoXz/1Zt3/9Sadv/Umnb/1Jp1/9ifef/Zqoz/um0//yW0/38ltP9/JbT/fyW0/38ltP9/JbT/fyW0/38mu/99ETzEvwcApf8HAKb/BwCm/wcApv8HAKb/BgCn/xoLmf+wbFb/8Muy/+u0kv/36eH/+fHt//Xp4f/48e3/+fPv//nz7//68u7/+vLu//rz7//36eD/4qqH/9+vkf+7b0D/JbT//yW0//8ltP//JbT//yW0//8ltP//JbT//ya3//8WWtL/BgCk/wcApv8HAKb/BwCm/wcApv8GAKf/GguZ/7BtV//wzLP/7LaU//328f/69PD/3a+T//rz7/////////////////////////////z18P/pso//4ria/7t2Qf8ltP//JbT//yW0//8ltP//JbT//yW0//8ltP//Jrf//xZa0v8GAKT/BwCm/wcApv8HAKb/BwCm/wYAp/8aDJr/sHNd//DMtP/st5P//fbx//ny7v/Yo4P/+fHt/////////////////////////////PXx/+y5mP/nw6r/vXlE/yW0//8ltP//JbT//yW0//8ltP//JbT//yW0//8mt///FlrS/wYApP8HAKb/BwCm/wcApv8HAKb/BgCn/xsNm/+wemX/8NC3/+3Am//99/L/+vTw/92wk//68+/////////////////////////////9+ff/8NC//+e/p//Dglb/JbT//yW0//8ltP//JbT//yW0//8ltP//JbT//ya3//8WWtL/BgCk/wcApv8HAKb/BwCm/wcApv8GAKb/GxCg/7aLgP/v0Ln/8tS+//jt4//47+f/9ebb//ju5v/58Oj/+fDo//nw6P/58Oj/+fDp//jt4//qxrH/059+/8enjP8ltP//JbT//yW0//8ltP//JbT//yW0//8ltP//Jrf//xZa0v8GAKT/BwCm/wcApv8HAKb/BwCm/wYApv8ZEKP/n4GP/7eMiP+xe3L/sXVn/7FwYf+xcGH/sW9g/7FvYP+xb2D/sW9g/7FvYP+xcGH/sXZn/7CAdv+xlqD/rqe7/yW0//8ltP//JbT//yW0//8ltP//JbT//yW0//8mt///FlrS/wYApP8HAKb/BwCm/wcApv8HAKb/BwCm/wkCpv8aEKL/HBC2/xwNyP8cC8T/HAvD/xwLw/8cC8P/HAvD/xwLw/8cC8P/HAvD/xwLw/8cC8T/HA7J/x4T0P8dFdT/JbT//yW0//8ltP//JbT//yW0//8ltP//JbT//ya3//8WWtL/BgCk/wcApv8HAKb/BwCm/wcApv8HAKb/BwCm/wYApf8HAL//CADY/wgA1/8IANf/CADX/wgA1/8IANf/CADX/wgA1/8IANf/CADX/wgA1/8IANf/CADW/wgA1v8ltP//JbT//yW0//8ltP//JbT//yW0//8ltP//Jrf//xVa0f8FAKL/BgCk/wYApP8GAKT/BgCk/wYApP8GAKT/BgCj/wgAvf8JANf/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/yW0/4AltP+AJbT/gCW0/4AltP+AJbT/gCW0/4Amt/9+G3jhwBZZ0v8WWtL/FlrS/xZa0v8WWtL/FlrS/xZa0v8WXNL/Dy3U/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACa3/wAmt/+AJrf//ya3//8mt///Jrf//ya3//8mt///Jrf//ye6//8XW+r/CADV/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJbT/ACW0/4AltP//JbT//yW0//8ltP//JbT//yW0//8ltP//Jrf//xda6v8IANX/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAltP8AJbT/gCW0//8ltP//JbT//yW0//8ltP//JbT//yW0//8mt///F1rq/wgA1f8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACW0/wAltP+AJbT//yW0//8ltP//JbT//yW0//8ltP//JbT//ya3//8XWur/CADV/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJbT/ACW0/4AltP//JbT//yW0//8ltP//JbT//yW0//8ltP//Jrf//xda6v8IANX/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAltP8AJbT/gCW0//8ltP//JbT//yW0//8ltP//JbT//yW0//8mt///F1rq/wgA1f8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACW0/wAltP+AJbT//yW0//8ltP//JbT//yW0//8ltP//JbT//ya3//8XWur/CADV/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8JANb/CQDW/wkA1v8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJbT/ACW0/3IltP/nJbT/4yW0/+MltP/jJbT/4yW0/+MltP/jJrf/4xda6uMIANXjCQDW4wkA1uMJANbjCQDW4wkA1uMJANbjCQDW4wkA1uMJANbjCQDW4wkA1uMJANbjCQDW4wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAltP8AJbT/DiW0/x0ltP8cJbT/HCW0/xwltP8cJbT/HCW0/xwmt/8cF1rqHAgA1RwJANYcCQDWHAkA1hwJANYcCQDWHAkA1hwJANYcCQDWHAkA1hwJANYcCQDWHAkA1hwJANYcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//4AAP/+AAD//gAA//4AAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD///////////////8=" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+	--test: 2px;
+}
+*:not(body) {
+	margin: 0;
+}
+*:not(body):not(button):not(input) {
+	padding: 0;
+}
+#savedataform {
+	background-color: whitesmoke;
+	border: 1px solid lightgray;
+	padding: 2px;
+}
+.field {/* both field-inner and field-outer */
+	border: none;
+	border-radius: 3px;
+}
+.field-outer {/* includes notes */
+	display: inline-block;
+	border: 1px solid olive;
+	background-color: lightyellow;
+	margin: 2px;
+}
+.field-inner, .collapsible {/* excludes notes */
+	border: 1px solid grey;
+	background-color: gainsboro;
+	display: block;
+	margin: -1px;/*hide notes border*/
+	padding: 3px;
+}
+.collapsible:not(.field) {
+	border-radius: inherit;
+	margin: 2px !important;
+}
+.object {
+	border: 1px solid dimgrey;
+	background-color: silver;
+	border-radius: inherit;
+	height: auto;
+	overflow: hidden;
+}
+.collapsible > .collapselabel {
+	display: block;
+}
+.collapsible > .collapselabel::before {
+	content: "\25BE\FE0E";
+	width: 1ex;
+	display: inline-block;
+	margin-left: -1.5ex;
+	margin-right: 0.5ex;
+}
+.collapsible.collapsed > .collapselabel::before {
+	content: "\25B8\FE0E";
+}
+.collapsed > .object {
+	/*height: 0px;*/
+	overflow: hidden;
+}
+.collapsed > .object * {
+	display: none;
+}
+.listbuttoncontainer {
+	margin-bottom: 4px;
+}
+.listitem {
+	display: flex;
+	border: 1px solid #404040;
+	background-color: grey;
+	border-radius: inherit;
+	/*padding: 2px;*/
+	margin-top: 2px;
+}
+.notes {
+	display: inline-block;
+	color: dimgrey;
+	margin: 2px;
+}
+.note-container {
+	margin-top: 2px;
+}
+input[data-fieldname]{
+	margin-left: 3px;
+}
+label, .collapselabel{
+	margin-left: 1ex;
+}
+label:empty, .collapselabel:empty {
+	display: none;
+}
+br {
+	height: 0;
+	width: 0;
+}
+.truthlabel {
+	margin: 0;
+	width: 5ex;
+	display: inline-block;
+}
+.viewlabel {
+	margin: 0;
+	margin-left: 3px;
+	width: 11ex;
+	display: inline-block;
+}
+.actortypelabel {
+	margin: 0;
+	margin-left: 3px;
+	width: 22ex;
+	display: inline-block;
+}
+input:invalid{
+	background-color: red;
+}
+#saveslotinput{
+	/*width: 1em;*/
+	/*appearance: textfield;*/
+}
+.timelabel {
+	display: inline-block;
+}
+input[type=checkbox]{
+	margin: 3px;
+}
+.nofieldname {
+	margin-left: 2px !important;
+}
+*:focus, label:focus, .collapselabel:focus {
+	transition-duration: 0s;
+	outline: 5px auto blue;
+	outline: 5px auto highlight;
+}
+input[type=number]{
+	/* 17 from String(Number.MIN_SAFE_INTEGER).length */
+	min-width: 17ch;
+	min-width: calc(17ch + 4px);
+}
+input[type=text]{
+	/* 21 from String(Int64.MinValue).length */
+	min-width: 22ch;
+	min-width: calc(21ch + 4px);
+}
+input[type=text][pattern="\\d\*"]{
+	/* 20 from String(Int64.MinValue).length */
+	min-width: 21ch;
+	min-width: calc(20ch + 4px);
+}
+#menubar input, #menubar button, #settingsbox button {
+	margin: 2px;
+}
+#settingsbox {
+	/* Note: position: fixed; can cause overlapping on small screens*/
+	position: sticky;
+	float: right;
+	top: 0;
+	right: 0;
+	text-align: right;
+	z-index: 69;
+	line-height: 1;
+}
+label[data-dangerous="true"]::before {
+	content: "\26A0\FE0E";
+	
+}
+label[data-dangerous="true"] + input[type=checkbox]:checked {
+	filter: hue-rotate(180deg);
+}
+</style>
+<style id="style-transition">
+*:not(input,button) {
+	/*Note: this doesn't transition default values*/
+	/*Note: transition can look strange on inputs and buttons*/
+	transition-property: color, background-color, color-scheme, border;
+	transition-duration: 0s;
+	transition-timing-function: linear;
+}
+</style>
+<style id="style-experimental-alt-modes" disabled="true">
+#savedataform.gridmode {
+	display: grid;
+	grid-auto-columns: max-content;
+	grid-auto-rows: min-content;
+	grid-auto-flow: dense;
+	grid-gap: 0;
+	grid-template-columns: 1fr;
+	repeat(auto-fit, minmax(fit-content, 1fr));
+}
+.gridmode .field-outer {
+	display: inline-grid;
+}
+.testmode .field-outer {
+	display: block;
+	width: fit-content;
+}
+.gridmode br, .testmode br {
+	display: none;
+}
+.compactmode, .compactmode .listitem {
+	padding: 0;
+	margin: 0;
+}
+.compactmode *:not(.field-inner){
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.compactmode .field-inner{
+	padding: 0 !important;
+}
+</style>
+<style id="color-scheme">
+body[data-color-scheme=light]/*, @media (prefers-color-scheme: light)*/ {
+	background-color: white;
+	color: black;
+	color-scheme: light;
+	
+	#savedataform {
+		background-color: whitesmoke;
+		border: 1px solid lightgray;
+	}
+	.field-outer {/* includes notes */
+		border: 1px solid olive;
+		background-color: lightyellow;
+	}
+	.field-inner, .collapsible {/* excludes notes */
+		border: 1px solid grey;
+		background-color: gainsboro;
+	}
+	.object {
+		border: 1px solid dimgrey;
+		background-color: silver;
+	}
+	.listitem {
+		border: 1px solid #404040;
+		background-color: grey;
+	}
+	.notes {
+		color: dimgrey;
+	}
+}
+body[data-color-scheme=dark]/*, @media (prefers-color-scheme: dark)*/ {
+	background-color: black;
+	color: white;
+	color-scheme: dark;
+	
+	#savedataform {
+		background-color: #0a0a0a;
+		border: 1px solid #2c2c2c;
+	}
+	.field-outer {/* includes notes */
+		border: 1px solid olive;
+		background-color: hsl(60, 100%, 6%);
+	}
+	.field-inner, .collapsible {/* excludes notes */
+		border: 1px solid #7f7f7f;
+		background-color: #232323;
+	}
+	.object {
+		border: 1px solid #969696;
+		background-color: #3f3f3f;
+	}
+	.listitem {
+		border: 1px solid #bfbfbf;
+		background-color: #7f7f7f;
+	}
+	.notes {
+		color: #969696;
+	}
+}
+</style>
+<!-- from https://sloan4.com/games/libs/StyleSheetUtils.js -->
+<script id="CSSSelectorScript">
+'use strict';
+(function(){
+StyleSheetList.prototype.find = Array.prototype.find;
+CSSRuleList.prototype.find = Array.prototype.find;
+StyleSheet.prototype.findRule = function(compfunc){
+	var result;
+	this.cssRules.find((rule)=>{
+		if(compfunc(rule))
+		{
+			result = rule;
+			return true;
+		}
+		return false;
+	});
+	return result;
+}
+StyleSheetList.prototype.findRule = function(compfunc){
+	var result;
+	this.find((sheet)=>{
+		return ((result=sheet.findRule(compfunc))!=undefined);
+	})
+	return result;
+}
+})()
+</script>
+<script id="UnstyledElementsFinder">
+"use strict";
+window.addEventListener("load",()=>{
+	window.s=Array.prototype.map.call(document.styleSheets,a=>Array.prototype.map.call(a.cssRules,a=>a.selectorText)).flat();
+	window.z=Array.prototype.map.call(document.querySelectorAll("*"),a=>["#"+a.id,...Array.prototype.map.call(a.classList,a=>"."+a)]).flat().filter((a,b,c)=>c.indexOf(a)==b).filter(a=>!a.match(/\d$/)).filter(a=>!a.startsWith("#datalist"));
+	for(var i of z)if(!s.includes(i))console.log(i);
+	//for(var i of s)if(!z.includes(i))console.log(i);
+	console.log('%c Stop looking at the console. ', 'background: #EFF; color: red; font-size: 5em;');
+});
+</script>
+<script id="st" src="st.php?page=FezSaveFileEditor"></script>
+<script>
+"use strict";
+window.addEventListener("DOMContentLoaded", ()=>{
+	//hack to not have the page transition upon load
+	window.requestAnimationFrame(()=>{window.requestAnimationFrame(()=>{
+		document.styleSheets.findRule((st)=>{
+			//should select the global selector with a transition-duration value set
+			return st.style.transitionProperty!="" && st.selectorText.match(/\*?|\*?\s*:\s*not\(/)!==null;
+		}).style.transitionDuration = "0.125s";
+	});});
+	document.getElementById("themebutton").addEventListener("click", function(){ document.body.dataset['colorScheme'] = (document.body.dataset['colorScheme']=='dark')?'light':'dark'; });
+	document.getElementById("settingsbox").style.visibility = "visible";
+	document.getElementById("menubar").style.visibility = "visible";
+	window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e){ document.body.dataset['colorScheme'] = window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light';});
+	document.body.dataset['colorScheme'] = window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light';
+
+	document.getElementById("color-scheme").disabled = true;
+	document.getElementsByName("color-scheme")[0].content = "normal";
+
+	document.getElementById("color-scheme").disabled = false;
+	document.getElementsByName("color-scheme")[0].content = "normal";
+});
+
+var o = (function(){
+
+//from FezSaveFileStructure.tsv, which is the first page of FezSaveFileStructure.xlsx
+var spreadsheetdata = `"Note: the data in this table is pulled and derived from the other tables on the other pages in this file. Currently, this table lists all the field names and their associated types in no particular order. For the proper order of these fields, please see the type's associated table."								
+Field Name	Field Type	Usage Notes	Underlaying C# Type	JavaScript Equivalent	byte size	HTML input type	HTML attributes	DataView r/w type
+SaveData.Version	long	const value (6)	Int64	BigInt	8	number		BigInt64
+SaveData.CreationTime	long	DateTime.Now.ToFileTimeUtc()	Int64	BigInt	8	number		BigInt64
+SaveData.Finished32	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.Finished64	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasFPView	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasStereo3D	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.CanNewGamePlus	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.IsNewGamePlus	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.OneTimeTutorials	"Dictionary<string, bool>"	"used to keep track of some of Dot's tutorial text; key is GameText key, and value should only ever really be true"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Level	string	current level name	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.View	Viewpoint	Note: Viewpoint is saved as int	int	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Ground	Vector3		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.TimeOfDay	TimeSpan		long	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.UnlockedWarpDestinations	List<string>	"used for big hub warp gates; includes ""NATURE_HUB"" by default"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Keys	int		Int32	Number	4	number		Int32
+SaveData.CubeShards	int		Int32	Number	4	number		Int32
+SaveData.SecretCubes	int		Int32	Number	4	number		Int32
+SaveData.CollectedParts	int		Int32	Number	4	number		Int32
+SaveData.CollectedOwls	int		Int32	Number	4	number		Int32
+SaveData.PiecesOfHeart	int		Int32	Number	4	number		Int32
+SaveData.Maps	List<string>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Artifacts	List<ActorType>	Note: ActorType is saved as int	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.EarnedAchievements	List<string>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.EarnedGamerPictures	List<string>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.ScriptingState	string		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.FezHidden	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.GlobalWaterLevelModifier	float?		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.HasHadMapHelp	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.CanOpenMap	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.AchievementCheatCodeDone	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.AnyCodeDeciphered	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.MapCheatCodeDone	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.World	"Dictionary<string, LevelSaveData>"	level name -> LevelSaveData	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.ScoreDirty	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasDoneHeartReboot	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.PlayTime	long	"play time, in ticks (for reference, there are 10000000 (ten million) ticks in a second)"	Int64	BigInt	8	number		BigInt64
+SaveData.IsNew	bool	"Should only be true if the save file exists, but the save data is clear"	Boolean	Boolean	1	checkbox		Int8
+LevelSaveData.DestroyedTriles	List<TrileEmplacement>	"bell cube, bombable walls, permanent despawning groups (dunno what that means), NameOfGodPuzzle treasure, treasure chest treasures, tuning fork treasures, cube bits, TetrisPuzzle treasure, and UnfoldPuzzle treasure"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveTriles	List<TrileEmplacement>	doors	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveArtObjects	List<int>	"clock tower cubes, bell, bit doors, the mailbox, NameOfGodPuzzle (hardcoded to 0), treasure chests, that one openable bookcase, turing forks, the spinning rings animation in STARGATE (hardcoded to 0), TetrisPuzzle (hardcoded to 0), and UnfoldPuzzle (hardcoded to 0). All the ones that are not hardcoded to 0 use the Id of the associated ArtObject "	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveEvents	List<int>	keeps track of Level Scripts that have OneTime set to true and that have already been activated	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveGroups	List<int>	Permanent PushSwitches (which I think is all the ones used in-game) and the glowing on the door in Waterfall	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveVolumes 	List<int>	"typically used for Volumes that have codes that should only be activated once (e.g., the waterfall and the moria door in Waterfall)"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveNPCs	List<int>	Owls 	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.PivotRotations	"Dictionary<int, int>"	"keeps track of the rotations of all the things you can spin around (time switches, tombstones, those big platforms you can push to rotate, that one bookcase, etc.)"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.LastStableLiquidHeight	float?	null if no liquid	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.ScriptingState	string		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.FirstVisit	bool		Boolean	Boolean	1	checkbox		Int8
+LevelSaveData.FilledConditions	WinConditions	could be dynamically recalculated	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+WinConditions.LockedDoorCount	int	doors that have locks	Int32	Number	4	number		Int32
+WinConditions.UnlockedDoorCount	int	doors that don't have locks	Int32	Number	4	number		Int32
+WinConditions.ChestCount	int	number of treasure chests	Int32	Number	4	number		Int32
+WinConditions.CubeShardCount	int	number of larger golden cubes	Int32	Number	4	number		Int32
+WinConditions.OtherCollectibleCount	int	"used for maps, artifacts, anticubes, or any other collectible that isn't a golden cube"	Int32	Number	4	number		Int32
+WinConditions.SplitUpCount	int	number of cube bits	Int32	Number	4	number		Int32
+WinConditions.ScriptIds	List<int>	script IDs that count towards win conditions	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+WinConditions.SecretCount	int	used for puzzles	Int32	Number	4	number		Int32
+Viewpoint	int		Int32	Number	4	number		Int32
+ActorType	int		Int32	Number	4	number		Int32
+"Dictionary<TKey,TValue>.Count"	int		Int32	Number	4	number		Int32
+"Dictionary<TKey,TValue>.Key[n]"	Tkey		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+"Dictionary<TKey,TValue>.Value[n]"	TValue		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+List<T>.Count	int		Int32	Number	4	number		Int32
+List<T>.this[n]	T		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+TimeSpan	long	stored as ticks	Int64	BigInt	8	number		BigInt64
+float?.HasValue	bool		Boolean	Boolean	1	checkbox		Int8
+float?.Value	float	only exists if HasValue	Single	Number	4	number	"step=""any"""	Float32
+string.HasValue	bool		Boolean	Boolean	1	checkbox		Int8
+string.Length	7BitEncodedInt	"only exists if HasValue; Length of the string in bytes, not chars. Stored as Int32 7 bits at a time. The high bit of the byte when on means to continue reading more bytes. Max of 5 bytes."	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+string.Value	StringLiteral	only exists if HasValue	String	String	Variable	text		Custom
+Vector3.X	float		Single	Number	4	number	"step=""any"""	Float32
+Vector3.Y	float		Single	Number	4	number	"step=""any"""	Float32
+Vector3.Z	float		Single	Number	4	number	"step=""any"""	Float32
+TrileEmplacement.X	int		Int32	Number	4	number		Int32
+TrileEmplacement.Y	int		Int32	Number	4	number		Int32
+TrileEmplacement.Z	int		Int32	Number	4	number		Int32
+bool	bool		Boolean	Boolean	1	checkbox		Int8
+byte	byte		Byte	Number	1	number		Int8
+short	short		Int16	Number	2	number		Int16
+int	int		Int32	Number	4	number		Int32
+long	long		Int64	BigInt	8	number		BigInt64
+float	float		Single	Number	4	number	"step=""any"""	Float32
+double	double		Double	Number	8	number	"step=""any"""	Float64
+StringLiteral	StringLiteral		String	String	Variable	text		Custom
+`;
+var o = ({});
+
+//note: strips quotation marks; could cause problems with the "HTML attributes"/"inputattr" column/property
+spreadsheetdata.replaceAll("\"","").split("\n").slice(2).map(a=>a.split("\t")).forEach(a=>{
+	var tv=a[0].split("\.")
+	var tp=tv[0];
+	o[tp] ??= ([]);
+	o[tp].push({"fieldname":tv[1],"fieldtype":a[1],"notes":a[2],"csharptype":a[3],"jseqv":a[4],"bytesize":a[5],"inputtype":a[6],"inputattr":a[7],"dataviewrwtype":a[8]});
+});
+
+o["string"] = ([{"fieldname":undefined,"fieldtype":"string","notes":"","jseqv":"string","inputtype":"text","inputattr":"","dataviewrwtype":"String"}]);//so the user doesn't have a length field for text. Note: this removes the null checkbox
+
+return o;
+})();
+
+//newly generated save file
+var newsave = "data:application/octet-stream;base64,fFRNh4oBAAAGAAAAAAAAAHAYMgYk5dkBAAAAAAAAEAAAAAERRE9UX0xPQ0tFRF9ET09SX0EAARBET1RfTlVUX05fQk9MVF9BAAELRE9UX1BJVk9UX0EAARFET1RfVElNRV9TV0lUQ0hfQQABD0RPVF9UT01CU1RPTkVfQQABDERPVF9UUkVBU1VSRQABC0RPVF9WQUxWRV9BAAETRE9UX1dFSUdIVF9TV0lUQ0hfQQABDERPVF9MRVNTRVJfQQABCkRPVF9XQVJQX0EAAQpET1RfQk9NQl9BAAELRE9UX0NMT0NLX0EAAQtET1RfQ1JBVEVfQQABD0RPVF9URUxFU0NPUEVfQQABCkRPVF9XRUxMX0EAAQtET1RfV09SS0lORwABDkdPTUVaX0hPVVNFXzJEAAAAAAAAAAAAAAAAAAAAAADgNJVkAAAAAQAAAAEKTkFUVVJFX0hVQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ==";//unpadded because otherwise it's 54616 characters long
+
+this['209.4%save'] = "data:application/octet-stream;base64,4gnrtYoBAAAGAAAAAAAAAMBTbz7lT84BAQEBAAEBEgAAAAERRE9UX0xPQ0tFRF9ET09SX0EAARBET1RfTlVUX05fQk9MVF9BAQELRE9UX1BJVk9UX0EBARFET1RfVElNRV9TV0lUQ0hfQQABD0RPVF9UT01CU1RPTkVfQQEBDERPVF9UUkVBU1VSRQABC0RPVF9WQUxWRV9BAQETRE9UX1dFSUdIVF9TV0lUQ0hfQQEBDERPVF9MRVNTRVJfQQEBCkRPVF9XQVJQX0EBAQpET1RfQk9NQl9BAQELRE9UX0NMT0NLX0EBAQtET1RfQ1JBVEVfQQABD0RPVF9URUxFU0NPUEVfQQEBCkRPVF9XRUxMX0EBAQtET1RfV09SS0lORwEBCURPVF9LRVlfQQEBD0RPVF9CTEFDS0hPTEVfQQEBFlZJTExBR0VWSUxMRV8zRF9FTkRfNjQBAAAAAAC8QQAAzEEAAPRBV4NPX2gAAAAFAAAAAQpOQVRVUkVfSFVCAQ5JTkRVU1RSSUFMX0hVQgEOR1JBVkVZQVJEX0dBVEUBDVpVX0NJVFlfUlVJTlMBCVNFV0VSX0hVQgAAAAAgAAAAIAAAAAAAAAAEAAAAAwAAAAkAAAABC01BUF9DUllQVF9EAQhNQVBfQVJDSAEJTUFQX1BJVk9UAQtNQVBfQ1JZUFRfQgEMTUFQX1RSRUVfU0tZAQtNQVBfQ1JZUFRfQwELTUFQX0NSWVBUX0EBCk1BUF9SSVRVQUwBC01BUF9NWVNURVJZBAAAADcAAAA6AAAAOAAAADkAAAAKAAAAAQ5BY2hpZXZlbWVudF8wMgEOQWNoaWV2ZW1lbnRfMDgBDkFjaGlldmVtZW50XzExAQ5BY2hpZXZlbWVudF8wNQEOQWNoaWV2ZW1lbnRfMTABDkFjaGlldmVtZW50XzAzAQ5BY2hpZXZlbWVudF8wNwEOQWNoaWV2ZW1lbnRfMDYBDkFjaGlldmVtZW50XzAxAQ5BY2hpZXZlbWVudF8wNAAAAAABDEZST01fSE9VU0UyRAABGPCfwAEBAQEBmQAAAAEOR09NRVpfSE9VU0VfMkQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEPVklMTEFHRVZJTExF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AA0AAAAjAAAALQAAAA0AAAAgAAAAMgAAAA0AAAAgAAAANQAAAA0AAAAgAAAAMwAAAA0AAAAjAAAALgAAAA0AAAAjAAAAMgAAAA0AAAAhAAAALAAAAA4AAAAiAAAANQAAAA4AAAAiAAAALAAAAA4AAAAgAAAANQAAAA4AAAAhAAAALgAAAA4AAAAhAAAANQAAAA4AAAAhAAAANgAAAA4AAAAjAAAALgAAAA4AAAAjAAAALQAAAA4AAAAgAAAANgAAAA4AAAAiAAAALQAAAA4AAAAhAAAALQAAAA4AAAAiAAAANgAAAA4AAAAiAAAALgAAAA4AAAAWAAAANgAAABIAAAAWAAAAOAAAABIAAAAXAAAAOQAAABIAAAAVAAAANQAAABIAAAAYAAAAOQAAABIAAAAYAAAAOgAAABIAAAAXAAAANwAAABIAAAAWAAAANwAAABIAAAAWAAAAOQAAABIAAAAXAAAANgAAABIAAAAWAAAAOgAAABIAAAAWAAAANQAAABIAAAAXAAAAOgAAABIAAAAVAAAANgAAABIAAAAVAAAANQAAABEAAAAYAAAAPgAAABEAAAAYAAAAOQAAABEAAAAYAAAAOgAAABEAAAAVAAAANgAAABEAAAAYAAAAPAAAABEAAAAYAAAAPQAAABEAAAAYAAAAOQAAABAAAAAYAAAAOgAAABAAAAAYAAAAPQAAABAAAAAYAAAAOwAAABAAAAAVAAAANgAAABAAAAAVAAAANQAAABAAAAAYAAAAPAAAABAAAAAYAAAAPgAAABAAAAAWAAAANgAAAA8AAAAWAAAAPgAAAA8AAAAVAAAANQAAAA8AAAAVAAAANgAAAA8AAAAWAAAANQAAAA8AAAAYAAAAPgAAAA8AAAAXAAAAPgAAAA8AAAAXAAAAPQAAAA8AAAAYAAAAPQAAAA8AAAAiAAAARAAAAA0AAAAiAAAAJQAAABAAAAAiAAAAJwAAAA8AAAAiAAAAJwAAAA4AAAAiAAAAJwAAAA0AAAAiAAAAJwAAAAwAAAAgAAAAJwAAAAwAAAAeAAAAJwAAAAwAAAAfAAAAKQAAAAwAAAAdAAAAKQAAAAwAAAAcAAAAKQAAAAwAAAAbAAAAKQAAAAwAAAAbAAAAKQAAAA0AAAAbAAAAKQAAAA8AAAAbAAAAKQAAABAAAAAbAAAAKQAAABIAAAAbAAAAKQAAABMAAAAcAAAAKQAAABMAAAAeAAAAKQAAABMAAAAfAAAAKQAAABMAAAAfAAAAKgAAABMAAAAeAAAAKgAAABMAAAAdAAAAKgAAABMAAAAcAAAAKgAAABMAAAAbAAAAKgAAABMAAAAbAAAAKgAAABIAAAAbAAAAKgAAABEAAAAbAAAAKgAAABAAAAAbAAAAKgAAAA8AAAAbAAAAKgAAAA4AAAAbAAAAKgAAAA0AAAAbAAAAKgAAAAwAAAAcAAAAKgAAAAwAAAAdAAAAKgAAAAwAAAAeAAAAKgAAAAwAAAAfAAAAKgAAAAwAAAAeAAAAKAAAAAwAAAAgAAAAKAAAAAwAAAAiAAAAKAAAAAwAAAAiAAAAKAAAAA0AAAAiAAAAKAAAAA8AAAAiAAAAJgAAABAAAAAiAAAAJAAAAA8AAAAfAAAAKAAAAAwAAAAhAAAAKAAAAAwAAAAiAAAAKAAAABAAAAAiAAAAKAAAAA4AAAAiAAAAJgAAAA8AAAAiAAAAJAAAABAAAAAdAAAAKQAAABMAAAAbAAAAKQAAABEAAAAbAAAAKQAAAA4AAAAeAAAAKQAAAAwAAAAfAAAAJwAAAAwAAAAhAAAAJwAAAAwAAAAiAAAAJwAAABAAAAAiAAAAJQAAAA8AAAAbAAAAJQAAAA8AAAAbAAAAJAAAAA8AAAAbAAAAJAAAAA4AAAAbAAAAJQAAAA4AAAAbAAAAJAAAAA0AAAAbAAAAJAAAAAwAAAAcAAAAJQAAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAQZXRUxMXzIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAELU0VXRVJfU1RBUlQBAAAADQAAABUAAAAlAAAAAQAAAA8AAAAUAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAALAAAAAU0SmEEAAAAAAAACAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQlTRVdFUl9IVUICAAAACAAAACQAAAAJAAAAIgAAACoAAAAjAAAABQAAABMAAAAcAAAAEQAAABAAAAAiAAAAFAAAACQA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";//unpadded because otherwise it's 54616 characters long
+
+//save file with everything done that could be done
+var fullcompletionsave = "TBA";//TODO could use this for something
+
+//input making section
+var MakeInputs = (function(){
+	function MakeInputs(el,br=true,typename=null){
+		var elem = document.createElement("div");
+		el.forEach(a=>{
+			elem.appendChild(MakeInput(a,typename));
+			if(br)elem.appendChild(document.createElement("br"));
+		});
+		if(typename != null){
+			elem.title = typename;
+		}
+		return elem;
+	}
+	var idddd = 0;
+	var exiddd = ({});
+	function MakeInput(el,typename){
+		var outerfieldcontainer = document.createElement("div");
+		outerfieldcontainer.className = "field field-outer";
+		var innerfieldcontainer = document.createElement("div");
+		innerfieldcontainer.className = "field field-inner";
+		var elem;
+		//handles forwarding types
+		var ft = o[el.fieldtype];
+		if(ft != null && ft[0].fieldname == undefined){
+			el.bytesize = ft[0].bytesize;
+			el.jseqv = ft[0].jseqv;
+			el.inputtype = ft[0].inputtype;
+			el.inputattr = ft[0].inputattr;
+			el.dataviewrwtype = ft[0].dataviewrwtype;
+		}
+		var iscollapsible = false;
+		if(el["jseqv"]=="#N/A"){
+			elem = document.createElement("div");
+			
+			iscollapsible = true;
+			
+			if(ft != null){
+				elem.appendChild(MakeInputs(ft, true, el.fieldtype));
+			}
+			else{
+				//handles generics
+				if(el.fieldtype.includes("<")){
+					var generics = el.fieldtype.substring(0,el.fieldtype.length-1).split("<");
+					var gentype = generics[0];
+					var genpars = generics[1].split(",").map(a=>a.trim());
+					el.dataviewrwtype = "List";
+					elem.appendChild(MakeExpandableList(genpars));
+					//elem.setAttribute("role", "list");
+					elem.dataset["gentype"] = gentype;
+					elem.dataset["genpars"] = genpars.join(",");
+				}
+			}
+		}
+		else{
+			//primative type
+			elem = document.createElement("input");
+			elem.type = el.inputtype;
+			if(el.inputattr?.length>0){
+				el.inputattr.split(" ").map(a=>a.split("=",2)).forEach(a=>{
+					if(a.length>1){
+						elem.setAttribute(a[0],a[1]);
+					}
+				});
+			}
+			if(typename != null){
+				elem.dataset["containingtype"] = typename;
+			}
+			//because apparently input type="number" doesn't work well with big numbers
+			if(el.jseqv == "BigInt"){
+				elem.type = "text";
+				elem.inputmode = "numeric";
+				elem.pattern = "\\d*";
+			}
+		}
+		for(var i in el){
+			elem.dataset[i]=el[i];
+		}
+		if(el.notes != null && el.notes.length > 0){
+			var notes = document.createElement("span");
+			notes.className = "notes";
+			var txt = el.notes;
+			if(!txt.toLowerCase().startsWith("note: ")){
+				txt = "Note: " + txt;
+			}
+			notes.textContent = txt;
+			//notes.setAttribute("role", "note");
+			outerfieldcontainer.classList.add("note-container");//because Firefox doesn't have CSS ":has()"
+			outerfieldcontainer.appendChild(notes);
+			outerfieldcontainer.appendChild(document.createElement("br"));
+		}
+		//Note: if the collapsible element is a label, the accessibility checker complains with an irrelevant message
+		//Note: cannot be "div", as doing so causes a problem with reading save files for some reason; probably has something to do with the query selector used in iterateInputs, but idk how to fix that, so just don't use "div" here
+		var newlabel = document.createElement(iscollapsible ? "span" : "label");
+		newlabel.setAttribute("for",elem.id=("databox"+(++idddd)));
+		if(el.fieldname){
+			newlabel.textContent = el.fieldname + ":";
+		}else{
+			newlabel.textContent = el.fieldtype + ":";
+			newlabel.classList.add("nofieldname");
+		}
+		if(iscollapsible){
+			makeCollapsible(newlabel, innerfieldcontainer, elem);
+		}
+		innerfieldcontainer.appendChild(newlabel);
+		innerfieldcontainer.appendChild(elem);
+		outerfieldcontainer.appendChild(innerfieldcontainer);
+		var exid = exiddd[el.fieldname??""] ?? (exiddd[el.fieldname??""] = 0);
+		exiddd[el.fieldname??""]+=1;
+		outerfieldcontainer.id = el.fieldname + "_" + exid;
+		
+		if(elem.type == "checkbox"){
+			var truthlabel = document.createElement("label");
+			truthlabel.setAttribute("for","databox"+(idddd));
+			truthlabel.className = "truthlabel";
+			elem.addEventListener("change", function(evt){
+				truthlabel.textContent = elem.checked;
+			});
+			truthlabel.textContent = elem.checked ? "true" : "false";
+			innerfieldcontainer.appendChild(truthlabel);
+		}
+		if(el.fieldname == "Level"){
+			elem.setAttribute("list", "datalist-level-names");
+		}
+		if(el.fieldtype == "Viewpoint"){
+			elem.setAttribute("list", "datalist-viewpoints");
+			var viewlabel = document.createElement("label");
+			viewlabel.setAttribute("for","databox"+(idddd));
+			viewlabel.className = "viewlabel";
+			elem.addEventListener("change", function(evt){
+				viewlabel.textContent = document.getElementById("datalist-viewpoints").querySelector("[value=\""+elem.value+"\"]")?.textContent ?? "#VALUE!";
+			});
+			viewlabel.textContent = "None";
+			innerfieldcontainer.appendChild(viewlabel);
+			elem.max = document.getElementById("datalist-viewpoints").dataset["max"];
+			elem.min = document.getElementById("datalist-viewpoints").dataset["min"];
+			if(settings.unrestricted){
+				elem.dataset["max"] = elem.max; elem.max = undefined;
+				elem.dataset["min"] = elem.min; elem.min = undefined;
+			}
+		}
+		if(typename == "ActorType"){
+			elem.setAttribute("list", (settings.unrestricted ? "datalist-actor-types" : "datalist-artifacts-actor-types"));
+			var actortypelabel = document.createElement("label");
+			actortypelabel.setAttribute("for","databox"+(idddd));
+			actortypelabel.className = "actortypelabel";
+			elem.addEventListener("change", function(evt){
+				actortypelabel.textContent = document.getElementById("datalist-actor-types").querySelector("[value=\""+elem.value+"\"]")?.textContent ?? "#VALUE!";
+			});
+			actortypelabel.textContent = "None";
+			innerfieldcontainer.appendChild(actortypelabel);
+			elem.max = document.getElementById("datalist-artifacts-actor-types").dataset["max"];
+			elem.min = document.getElementById("datalist-artifacts-actor-types").dataset["min"];
+			if(settings.unrestricted){
+				elem.dataset["max"] = elem.max; elem.max = undefined;
+				elem.dataset["min"] = elem.min; elem.min = undefined;
+			}
+		}
+		elem.dataset["nullable"] = typename?.includes("?");
+		elem.title = (el.fieldtype + " " + (el.fieldname ?? ((typename != el.fieldtype) ? typename : ""))).trim();
+		switch(el.fieldtype){
+			case "string":
+				elem.title += "\nNote: for a null value, use "+NULLVAL;//TODO might want to move this tip elsewhere?
+				console.log(el.fieldtype);
+			default:
+				break;
+		}
+		outerfieldcontainer.title = elem.title;
+		
+		return outerfieldcontainer;
+	}
+	function makeCollapsible(newlabel, innerfieldcontainer, elem) {
+		elem.className = "object";
+		innerfieldcontainer.classList.add("collapsible");
+		newlabel.tabIndex = 0;
+		var ef = function(evt){
+			if(evt.type=="click" || evt.key === 'Enter' || evt.key === ' ' || evt.key === 'Spacebar' || evt.key === 'Space'){
+				if(!innerfieldcontainer.classList.contains("collapsed")){
+					var compstyle = window.getComputedStyle(elem);
+					var compheight = elem.getBoundingClientRect().height - parseInt(compstyle.paddingTop) - parseInt(compstyle.paddingBottom) - parseInt(compstyle.marginTop) - parseInt(compstyle.marginBottom);
+					innerfieldcontainer.classList.add("collapsed");
+					elem.dataset["fullheight"] = compheight;
+					elem.style.height = elem.dataset["fullheight"]+"px";
+					window.requestAnimationFrame(()=>{window.requestAnimationFrame(()=>{elem.style.height = "0px";});});
+				}
+				else
+				{
+					elem.style.height = elem.dataset["fullheight"]+"px";
+					innerfieldcontainer.classList.remove("collapsed");
+				}
+				if(evt.type=="keydown"){
+					evt.preventDefault();
+				}
+			}
+		};
+		newlabel.classList.add("collapselabel");
+		newlabel.addEventListener("click", ef);
+		newlabel.setAttribute("role", "button");
+		/*TODO add roles to more stuff
+		see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques
+		and https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles
+		*/
+		newlabel.addEventListener("keydown", ef);
+		newlabel.addEventListener("keypress", ef);
+		
+		elem.addEventListener("transitionend", function(evt){
+			if(!innerfieldcontainer.classList.contains("collapsed")){
+				window.requestAnimationFrame(()=>{window.requestAnimationFrame(()=>{elem.style.height = "auto";});});
+			}
+		});
+	}
+	var explistid = 0, collapsibleobjectid = 0;
+	function MakeExpandableList(typearr){
+		var elem = document.createElement("div");
+		elem.id = "explist"+ ++explistid;
+		elem.className = "listbuttoncontainer";
+		
+		var addbtn = document.createElement("button");
+		addbtn.textContent = "Add";
+		addbtn.onclick = function(){
+			var sub = document.createElement("div");
+			for(var i in typearr){
+				var genel = MakeInputs(o[typearr[i]],true,typearr[i]);
+				if(o[typearr[i]].length > 5) {//only really used for LevelSaveData
+					var containerdiv = document.createElement("div");
+					var newlabel = document.createElement("span");
+					newlabel.setAttribute("for",genel.id=("collapsibleobject"+(++collapsibleobjectid)));
+					newlabel.textContent = typearr[i] + ":";
+					makeCollapsible(newlabel, containerdiv, genel);
+					containerdiv.appendChild(newlabel);
+					containerdiv.appendChild(genel);
+					genel = containerdiv;
+				}
+				if(o[typearr[i]][0].fieldname == "X"){
+					genel.style.display = "flex";//hack to display Vector3 et al. on one line
+				}
+				//autosuggestions
+				switch(this.parentElement.parentElement.dataset["fieldname"]){
+					case "OneTimeTutorials":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-tutorials");
+						}
+						break;
+					case "World":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-level-names");
+						}
+						break;
+					case "EarnedAchievements":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-achievements");
+						}
+						break;
+					case "EarnedGamerPictures":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-gamer-pictures");
+						}
+						break;
+					case "UnlockedWarpDestinations":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-hub-level-names");
+						}
+						break;
+					case "Maps":
+						if(i==0){
+							genel.children[0].children[0].children[1].setAttribute("list", "datalist-maps");
+						}
+						break;
+					default:
+						break;
+				}
+				sub.appendChild(genel);
+			}
+			sub.className = "listitem";
+			//sub.setAttribute("role", "listitem");
+			this.parentElement.parentElement.appendChild(sub);
+		};
+		elem.appendChild(addbtn);
+		var rembtn = document.createElement("button");
+		rembtn.textContent = "Remove";
+		rembtn.onclick = function(){
+			if(this.parentElement.parentElement.children.length>1){
+				this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-1].remove()
+			}
+		};
+		elem.appendChild(rembtn);
+		
+		return elem;
+	}
+	return MakeInputs;
+})();
+
+
+
+var settings = {
+	"padSaveFiles": true,
+	"littleEndian": true,
+	"_unrestricted": false,
+	set unrestricted(val) {
+		this._unrestricted = val;
+		document.querySelectorAll("input[data-containingtype=\"ActorType\"]").forEach(a=>a.setAttribute("list", (settings.unrestricted ? "datalist-actor-types" : "datalist-artifacts-actor-types")));
+		if(val){
+			document.querySelectorAll("input[max]").forEach(a=>{a.dataset["max"] = a.max; a.max = undefined;});
+			document.querySelectorAll("input[min]").forEach(a=>{a.dataset["min"] = a.min; a.min = undefined;});
+		}else{
+			document.querySelectorAll("input[data-max]").forEach(a=>{a.max = a.dataset["max"];});
+			document.querySelectorAll("input[data-min]").forEach(a=>{a.min = a.dataset["min"];});
+		}
+	},
+	get unrestricted() {
+		return this._unrestricted;
+	},
+};
+const NULLVAL = "#NULL!";
+const MAX_BYTE_LENGTH = 40960;
+
+//saving and loading section
+var saveloadfuncs = (function(){
+	function getNullableCheckbox(a){
+		return Array.prototype.find.call(a.parentElement.parentElement.parentElement.children, a=>a?.children[0]?.children[1]?.dataset["fieldname"] ?? "%%%%%" == a.dataset["notes"]?.match("only exists if (.*)")[1]).children[0].children[1];
+	}
+	var byteOffset;
+	// read/write stuff
+	function readList(dataview, fieldfield){
+		var length = dataview.getInt32(byteOffset, settings.littleEndian);
+		byteOffset += 4;
+		
+		length = Math.max(0, Math.min(300, length));//just in case it loads bad files it doesn't freeze for a long time
+		
+		while(length > fieldfield.children.length-1){
+			fieldfield.children[0].children[0].click();//add
+		}
+		while(length < fieldfield.children.length-1){
+			fieldfield.children[0].children[1].click();//remove
+		}
+		iterateInputs(fieldfield,(tp)=>{
+			readType(dataview, tp);
+		});
+	}
+	function decode7BitEncodedInt(dataView) {
+		var value = 0;
+		var shift = 0;
+		var b;
+		
+		do {
+			b = dataView.getUint8(byteOffset);
+			value |= (b & 0x7F) << shift;
+			shift += 7;
+			byteOffset++;
+		} while (b & 0x80);
+		
+		return value;
+	}
+	function encode7BitEncodedInt(dataView, value) {
+		while (value >= 0x80) {
+			dataView.setUint8(byteOffset, (value & 0x7F) | 0x80);
+			value >>= 7;
+			byteOffset++;
+		}
+		
+		dataView.setUint8(byteOffset, value);
+		byteOffset++;
+	}
+	function readString(dataview, fieldfield){
+		var value;
+		var hasValue = Boolean(dataview.getInt8(byteOffset, settings.littleEndian));
+		byteOffset += 1;
+		
+		if(!hasValue){
+			value = NULLVAL;//because there is currently no other way for users to read the value as null
+		}else{
+			var length = decode7BitEncodedInt(dataview);
+			//var length = dataview.getUint8(byteOffset, settings.littleEndian);
+			//byteOffset += 1;
+			//if(length>127){
+			//	throw "string longer than 127 bytes";
+			//}
+			
+			var barr = new Int8Array(length);
+			for(var i=0;i<length;++i){
+				barr[i] = dataview.getInt8(byteOffset, settings.littleEndian);
+				byteOffset += 1;
+			}
+			var dec = new TextDecoder();
+			value = dec.decode(barr);
+		}
+		fieldfield.value = value;
+		return value;
+	}
+	function writeString(dataview, value){
+		var hasValue = (value != NULLVAL);//because there is currently no other way for users to write the value as null
+		dataview.setInt8(byteOffset, Number(hasValue), settings.littleEndian);
+		byteOffset+=1;
+		if(!hasValue){
+			value = null;
+		}else{
+			var enc = new TextEncoder();
+			var barr = enc.encode(value);
+			encode7BitEncodedInt(dataview, barr.length);
+			//if(barr.length>127){
+			//	throw "string longer than 127 bytes";
+			//}
+			//dataview.setInt8(byteOffset, barr.length, settings.littleEndian);
+			//byteOffset += 1;
+			
+			for(var i in barr){
+				dataview.setInt8(byteOffset, barr[i], settings.littleEndian);
+				byteOffset += 1;
+			}
+		}
+	}
+	function readType(dataview, fieldfield)
+	{
+		var dataviewrwtype = fieldfield.dataset["dataviewrwtype"];
+		var bytesize = fieldfield.dataset["bytesize"];
+		
+		if(fieldfield.dataset["nullable"] == "true" && fieldfield.dataset["notes"].length>0){
+			if(!getNullableCheckbox(fieldfield).checked){
+				fieldfield.value = "";
+				return;
+			}
+		}
+		switch(dataviewrwtype){
+			case "#N/A":
+				iterateInputs(fieldfield,(tp)=>{
+					readType(dataview, tp);
+				});
+				break;
+			case "Int8":
+			case "Int32":
+			case "Float32":
+			case "Float64":
+			case "BigInt64":
+				var retval = dataview["get"+dataviewrwtype](byteOffset, settings.littleEndian);
+				byteOffset += Number(bytesize);
+				if(fieldfield.type=="checkbox"){
+					fieldfield.checked = Boolean(retval);
+					//document.querySelector("label[for="+fieldfield.id+"].truthlabel").textContent = String(fieldfield.checked);
+				}else{
+					fieldfield.value = retval;
+				}
+				break;
+			case "String":
+				readString(dataview, fieldfield);
+				break;
+			case "List":
+				readList(dataview, fieldfield);
+				break;
+			default:
+				throw dataviewrwtype;
+		}
+		fieldfield.dispatchEvent(new Event("change"));
+	}
+	function writeType(dataview, dataviewrwtype, value)
+	{
+		switch(dataviewrwtype){
+			case "Int8":
+			case "Int32":
+			case "Float32":
+			case "Float64":
+			case "BigInt64":
+				return dataview["set"+dataviewrwtype](byteOffset, value, settings.littleEndian);
+			case "String":
+			case "string":
+				return writeString(dataview, value);
+			case "#N/A":
+				return;
+			default:
+				throw dataviewrwtype;
+		}
+	}
+	function iterateInputs(root, action){
+		var rid = "#"+(root.dataset["dataviewrwtype"] != "List" ? root.id : (root.id + " > div"));
+		var thisgeninputs = document.querySelectorAll(rid + " > div > .field-outer > .field-inner > *[data-fieldname]");
+		if(o[root.dataset["genpars"]?.split(",")?.at(1) ?? ""].length > 5) {
+			thisgeninputs = document.querySelectorAll(rid + " > div > .field-outer > .field-inner > *[data-fieldname]"
+			                                 + ", " + rid + " > .collapsible > .object > .field-outer > .field-inner > *[data-fieldname]");
+		}
+		thisgeninputs.forEach(action);
+	}
+	function loadFromDataView(dataview){
+		byteOffset = 0;
+		dataview.getBigInt64(0, settings.littleEndian);
+		byteOffset += 8;
+		//TODO probably should do something in the case where the Version field doesn't match the expected value
+		iterateInputs(document.getElementById("savedataform"), (tp)=>{
+			readType(dataview, tp);
+		})
+	}
+	
+	function calcStringEncodedByteCount(s){
+		var len = 0;
+		len += 1;//HasValue
+		if(s != NULLVAL){
+			var bytelen = (new TextEncoder().encode(s)).length;
+			len += Math.ceil(Number(bytelen).toString(2).length/7);//7BitEncodedInt Length
+			len += bytelen;//actual text data
+		}
+		return len;
+	}
+	function saveAsDataView(){
+		byteOffset = 0;
+		
+		var invalidinput = document.querySelector("input:invalid");
+		if(invalidinput){
+			invalidinput.focus();
+			return false;
+		}
+		
+		var inputs = document.querySelectorAll("*[data-fieldname]");
+		
+		//calculate the total bytes
+		var totalbytelength = Array.prototype.map.call(inputs,a=>{
+			if(a.dataset["nullable"] == "true" && a.dataset["notes"].length>0){
+				var qel = getNullableCheckbox(a);
+				return qel.checked ? Number(a.dataset["bytesize"]) : 0;
+			}
+			if(a.dataset["dataviewrwtype"] == "String"){
+				return calcStringEncodedByteCount(a.value);
+			}
+			if(a.dataset["dataviewrwtype"] == "List"){
+				return 4/*int size*/;
+			}
+			if(a.dataset["bytesize"] == "#N/A"){
+				return 0;
+			}
+			if(a.dataset["bytesize"] != "undefined"){
+				return a.dataset["bytesize"];
+			}
+			debugger;
+			throw a;
+		}).reduce((p, a) => p+Number(a), 0);//sum
+		totalbytelength += 8;//value written in EasyStorage.dll
+		//Note: written size is hardcoded as 40960 in EasyStorage.dll for some reason
+		if(totalbytelength > MAX_BYTE_LENGTH){
+			throw "Save file greater than the imposed limit!";
+		}
+		var dataview = new DataView(new ArrayBuffer(settings.padSaveFiles ? 40960 : totalbytelength));
+		
+		//value written in EasyStorage.dll
+		dataview.setBigInt64(0, BigInt(Date.now()), settings.littleEndian);
+		byteOffset += 8;
+		
+		Array.prototype.map.call(inputs,a=>{
+			if(a.dataset["gentype"]){
+				dataview.setInt32(byteOffset, a.children.length-1, settings.littleEndian);
+				byteOffset += 4;
+				return;
+			}
+			if(a.dataset["jseqv"] == "#N/A"){
+				return;
+			}
+			if(a.dataset["jseqv"] == "string"){
+				a.dataset["jseqv"] = "String";
+			}
+			var val = window[a.dataset["jseqv"]](a.value);
+			if(a.type == "checkbox"){
+				val = Number(a.checked);
+			}
+			if(a.dataset["nullable"] == "true" && a.dataset["notes"].length>0){
+				if(getNullableCheckbox(a).checked){
+					writeType(dataview, a.dataset["dataviewrwtype"], val);
+					if(a.dataset["bytesize"] != "undefined" && a.dataset["bytesize"] != "#N/A"){
+						byteOffset += Number(a.dataset["bytesize"]);
+					}
+				}
+			}
+			else{
+				writeType(dataview, a.dataset["dataviewrwtype"], val);
+				if(a.dataset["bytesize"] != "undefined" && a.dataset["bytesize"] != "#N/A"){
+					byteOffset += Number(a.dataset["bytesize"]);
+				}
+			}
+		});
+		var bytearr = new Uint8Array(dataview.buffer);
+		var blob = new Blob([bytearr]);
+		
+		var lnk=document.createElement("a");
+		lnk.setAttribute("href",window.URL.createObjectURL(blob));
+		var fname = document.getElementById("saveslotinput").value;
+		if(fname == null || fname.length<=0){
+			fname = "SaveSlot2";
+		}
+		lnk.setAttribute("download",fname);
+		lnk.click();
+		lnk.remove();
+	}
+	return {"saveAsDataView": saveAsDataView, "loadFromDataView": loadFromDataView};
+})();
+
+
+//initializing section
+window.addEventListener("DOMContentLoaded", ()=>{
+	window.loadnewsave = (function(){
+		const windowsFileTimeEpoch = 11644473600000n;
+		function formatTimeSpan(timespanstr, format){
+			var time = Number(timespanstr)/10000000;
+			var h = String(Math.floor(time/(60*60))).padStart(2,'0');
+			var m = String(Math.round((time/(60)) % 60)).padStart(2,'0');
+			var w,s = (w=(time) % 60).toFixed(7);if(w>=0 && w<10)s="0"+s;
+			switch(format){
+				case "ToD":
+					return h+":"+m+":"+s;
+				case "TimeSpan":
+					return h+" hours, "+m+" minutes, "+s+" seconds"
+			}
+			debugger;
+			throw "Invalid format: "+format;
+		}
+		
+		
+		//create and populate with the inputs 
+		var z = MakeInputs(o["SaveData"],true, "SaveData");
+		z.style.display = "contents";
+		document.getElementById("savedataform").appendChild(z);
+		
+		//add event listeners
+		document.getElementById("savefileinput").addEventListener("change", function(event){
+			document.getElementById("saveslotinput").value = event.target.files[0].name;
+			event.target.files[0].arrayBuffer().then(a=>saveloadfuncs.loadFromDataView(new DataView(a)));
+		});
+		
+		
+		//creation time display label
+		var creationtimeinput = document.querySelector("input[data-fieldname=CreationTime]");
+		var creationtimelabel = document.createElement("label");
+		creationtimelabel.setAttribute("for",creationtimeinput.id);
+		creationtimelabel.className = "timelabel";
+		creationtimeinput.addEventListener("change",function(evt){
+			try{
+				var dt = new Date(Number(BigInt(document.querySelector("input[data-fieldname=CreationTime]").value)/10000n-windowsFileTimeEpoch));
+				
+				var ofst = dt.getTimezoneOffset();
+				var localtimestring = (new Date(dt - ofst * 60 * 1000)).toISOString().replace('T',' at ').replace('Z',' UTC'+(-Math.sign(ofst) < 0 ? '-' : '+')+String(Math.abs(ofst/60*100)).padStart(4,'0').split(/(?=..$)/).join(':'));
+				var localtimestring_iso = (new Date(dt - ofst * 60 * 1000)).toISOString().replace('Z',(-Math.sign(ofst) < 0 ? '-' : '+')+String(Math.abs(ofst/60*100)).padStart(4,'0').split(/(?=..$)/).join(':'));
+				creationtimelabel.dataset['localtimestring'] = localtimestring;//TODO do something better with localtimestring?
+				creationtimelabel.dataset['localtimestring_iso'] = localtimestring_iso;//TODO do something better with localtimestring_iso?
+				creationtimelabel.dataset['globaltimestring'] = dt.toISOString();
+				//creationtimelabel.dataset['localetimestring'] = dt.toLocaleString();//doesn't display fractions of seconds
+				
+				creationtimelabel.title = creationtimeinput.parentElement.parentElement.title + "\n" + creationtimelabel.dataset['localtimestring_iso'];
+				creationtimelabel.textContent = creationtimelabel.dataset['globaltimestring'];
+			}catch(e){
+				creationtimelabel.textContent = NaN;
+			}
+		});
+		/*function mof(evt){
+			var isin = false;
+			switch(evt.type){
+				case "pointerover": isin = true; break;
+				case "pointerout": isin = false; break;
+				default: return;
+			}
+			creationtimelabel.textContent = creationtimelabel.dataset[isin ? 'localtimestring' : 'globaltimestring'];
+		}
+		creationtimelabel.addEventListener("pointerover", mof);
+		creationtimelabel.addEventListener("pointerout", mof);*/
+		creationtimeinput.after(creationtimelabel);
+		
+		
+		//time of day display label
+		var timeofdayinput = document.querySelector("input[data-fieldname=TimeOfDay]");
+		var timeofdaylabel = document.createElement("label");
+		timeofdaylabel.setAttribute("for",timeofdayinput.id);
+		timeofdaylabel.className = "timelabel";
+		timeofdayinput.addEventListener("change",function(evt){
+			timeofdaylabel.textContent = formatTimeSpan(document.querySelector("input[data-fieldname=TimeOfDay]").value, "ToD");
+		});
+		timeofdayinput.after(timeofdaylabel);
+		
+		
+		//play time display label
+		var playtimeinput = document.querySelector("input[data-fieldname=PlayTime]");
+		var playtimelabel = document.createElement("label");
+		playtimelabel.setAttribute("for",playtimeinput.id);
+		playtimelabel.className = "timelabel";
+		playtimeinput.addEventListener("change",function(evt){
+			playtimelabel.textContent = formatTimeSpan(document.querySelector("input[data-fieldname=PlayTime]").value, "TimeSpan");
+		});
+		playtimeinput.after(playtimelabel);
+		
+		//load new save file template and set the creation time to now
+		function loadnewsave(bypassprompt = false){
+			//TODO add an "undo" button?
+			//prompt user if they really want to clear the current save file
+			if (bypassprompt || window.confirm("Warning: this will discard any unsaved changed.\nAre you sure you want to continue?")) {
+				fetch(newsave).then(f => f.arrayBuffer().then(a=>saveloadfuncs.loadFromDataView(new DataView(a))));
+				requestAnimationFrame(()=>{requestAnimationFrame(()=>{
+				creationtimeinput.value = String((BigInt(Date.now())+windowsFileTimeEpoch)*10000n);
+				creationtimeinput.dispatchEvent(new Event("change"));
+				});});
+			}
+		}
+		return loadnewsave;
+	})();
+	
+	loadnewsave(true);
+});
+
+window.addEventListener("DOMContentLoaded", ()=>{
+	var settingsbox = document.getElementById("settingsbox");
+	Object.keys(settings).forEach((a,b)=>{
+		if(a.startsWith("_")){return;}
+		var c=document.createElement("input");
+		c.type="checkbox";
+		c.onclick=function(){settings[a]=c.checked;};
+		c.checked = settings[a];
+		c.id = "settings-"+a;
+		var l=document.createElement("label");
+		//var w=a.replaceAll(/([A-Z])/g," $1");
+		//w=w.charAt(0).toUpperCase()+w.slice(1);
+		l.style.textTransform = "capitalize";//could capitalize the words using JS
+		var dangerous = false;
+		l.setAttribute("for", c.id);
+		switch(a){
+			case "padSaveFiles":
+				l.title = c.title = "Determines if the file is saved using the minimum byte size required, or with the EasyStorage's hardcoded written length of "+MAX_BYTE_LENGTH+" bytes";
+				break;
+			case "littleEndian":
+				l.title = c.title = "Determines whether to save or load using little endian (default: true)\nWarning: changing this setting can cause problems saving or loading. \nOnly change if required.";
+				break;
+			case "unrestricted":
+				l.title = c.title = "Warning: may result in broken save files";
+				dangerous = true;
+				break;
+			default:
+				throw "Unhandled title setting for setting \""+a+"\"!";
+				break;
+		}
+		l.dataset['dangerous'] = dangerous ? 'true' : 'false';//just in case the browser does something strange
+		l.innerHTML = a.replaceAll(/([A-Z])/g," $1");//w;
+		settingsbox.appendChild(l);
+		settingsbox.appendChild(c);
+		settingsbox.appendChild(document.createElement("br"));
+	});
+});
+
+//TODO could do something with this
+//fetch(fullcompletionsave).then(f => f.arrayBuffer().then(a=>saveloadfuncs.loadFromDataView(new DataView(a))));
+//fetch(this['209.4%save']).then(f => f.arrayBuffer().then(a=>saveloadfuncs.loadFromDataView(new DataView(a))));
+
+document.title = document.title.replace("version whatever", "v"+new Date(document.lastModified).toISOString().replaceAll(/[-:]|\..*/g,'').replace('t','-'));
+
+</script>
+</head>
+<body lang="en-US" data-color-scheme="light">
+<!-- This content brought to you by Jenna Sloan -->
+<div id="settingsbox" style="visibility: hidden;" class="field-inner">
+	<button id="themebutton">Toggle Dark Theme</button><br />
+</div>
+<div id="menubar" style="visibility: hidden;">
+	<button id="loadnewsavebutton" onclick="loadnewsave()">New Save (will clear current data)</button><br />
+	<button id="loadsavefilebutton" onclick="document.getElementById('savefileinput').click()">Load Save File</button><input id="savefileinput" style="display: none;" type="file" /><br />
+	<button id="savefiledownloadbutton" onclick="saveloadfuncs.saveAsDataView()">Download Save File</button><label for="saveslotinput">Save as: </label><input id="saveslotinput" type="text" value="SaveSlot2" /><br />
+</div>
+<br />
+SaveData:<br />
+<div id="savedataform" class="notgridmode nottestmode notcompactmode"><noscript>This page requires JavaScript</noscript><!-- populated by the script below --></div>
+<div id="datalists">
+<datalist id="datalist-tutorials">
+	<option value="DOT_LOCKED_DOOR_A"></option>
+	<option value="DOT_NUT_N_BOLT_A"></option>
+	<option value="DOT_PIVOT_A"></option>
+	<option value="DOT_TIME_SWITCH_A"></option>
+	<option value="DOT_TOMBSTONE_A"></option>
+	<option value="DOT_TREASURE"></option>
+	<option value="DOT_VALVE_A"></option>
+	<option value="DOT_WEIGHT_SWITCH_A"></option>
+	<option value="DOT_LESSER_A"></option>
+	<option value="DOT_WARP_A"></option>
+	<option value="DOT_BOMB_A"></option>
+	<option value="DOT_CLOCK_A"></option>
+	<option value="DOT_CRATE_A"></option>
+	<option value="DOT_TELESCOPE_A"></option>
+	<option value="DOT_WELL_A"></option>
+	<option value="DOT_WORKING"></option>
+	<option value="DOT_BLACKHOLE_A"></option>
+	<option value="DOT_KEY_A"></option>
+	<!-- TODO dunno if we have all of them listed here -->
+</datalist>
+<!-- Note: could get most of this data from WorldInfo.json -->
+<datalist id="datalist-level-names">
+	<!-- Note: unused levels are commented out -->
+	<option value="ABANDONED_A"></option>
+	<option value="ABANDONED_B"></option>
+	<option value="ABANDONED_C"></option>
+	<option value="ANCIENT_WALLS"></option>
+	<option value="ARCH"></option>
+	<option value="BELL_TOWER"></option>
+	<option value="BIG_OWL"></option>
+	<option value="BIG_TOWER"></option>
+	<option value="BOILEROOM"></option>
+	<option value="CABIN_INTERIOR_A"></option>
+	<option value="CABIN_INTERIOR_B"></option>
+	<option value="CLOCK"></option>
+	<option value="CMY"></option>
+	<option value="CMY_B"></option>
+	<option value="CMY_FORK"></option>
+	<option value="CODE_MACHINE"></option>
+	<option value="CRYPT"></option>
+	<option value="EXTRACTOR_A"></option>
+	<option value="FIVE_TOWERS"></option>
+	<option value="FIVE_TOWERS_CAVE"></option>
+	<option value="FOX"></option>
+	<option value="FRACTAL"></option>
+	<option value="GEEZER_HOUSE"></option>
+	<option value="GLOBE"></option>
+	<option value="GLOBE_INT"></option>
+	<option value="GOMEZ_HOUSE"></option>
+	<option value="GRAVE_CABIN"></option>
+	<option value="GRAVE_GHOST"></option>
+	<option value="GRAVE_LESSER_GATE"></option>
+	<option value="GRAVE_TREASURE_A"></option>
+	<option value="GRAVEYARD_A"></option>
+	<option value="GRAVEYARD_GATE"></option>
+	<option value="INDUST_ABANDONED_A"></option>
+	<option value="INDUSTRIAL_CITY"></option>
+	<option value="INDUSTRIAL_HUB"></option>
+	<option value="INDUSTRIAL_SUPERSPIN"></option>
+	<option value="KITCHEN"></option>
+	<option value="LAVA"></option>
+	<option value="LAVA_FORK"></option>
+	<option value="LAVA_SKULL"></option>
+	<option value="LIBRARY_INTERIOR"></option>
+	<option value="LIGHTHOUSE"></option>
+	<option value="LIGHTHOUSE_HOUSE_A"></option>
+	<option value="LIGHTHOUSE_SPIN"></option>
+	<option value="MAUSOLEUM"></option>
+	<option value="MEMORY_CORE"></option>
+	<option value="MINE_A"></option>
+	<option value="MINE_BOMB_PILLAR"></option>
+	<option value="MINE_WRAP"></option>
+	<option value="NATURE_HUB"></option>
+	<option value="NUZU_ABANDONED_A"></option>
+	<option value="NUZU_ABANDONED_B"></option>
+	<option value="NUZU_BOILERROOM"></option>
+	<option value="NUZU_DORM"></option>
+	<option value="NUZU_SCHOOL"></option>
+	<option value="OBSERVATORY"></option>
+	<!--option value="OCTOHEAHEDRON"></option-->
+	<option value="OLDSCHOOL"></option>
+	<option value="OLDSCHOOL_RUINS"></option>
+	<option value="ORRERY"></option>
+	<option value="ORRERY_B"></option>
+	<option value="OWL"></option>
+	<option value="PARLOR"></option>
+	<option value="PIVOT_ONE"></option>
+	<option value="PIVOT_THREE"></option>
+	<option value="PIVOT_THREE_CAVE"></option>
+	<option value="PIVOT_TWO"></option>
+	<option value="PIVOT_WATERTOWER"></option>
+	<option value="PURPLE_LODGE"></option>
+	<option value="PURPLE_LODGE_RUIN"></option>
+	<option value="PYRAMID"></option>
+	<option value="QUANTUM"></option>
+	<option value="RAILS"></option>
+	<option value="RITUAL"></option>
+	<option value="SCHOOL"></option>
+	<option value="SEWER_FORK"></option>
+	<option value="SEWER_GEYSER"></option>
+	<option value="SEWER_HUB"></option>
+	<option value="SEWER_LESSER_GATE_B"></option>
+	<option value="SEWER_PILLARS"></option>
+	<option value="SEWER_PIVOT"></option>
+	<option value="SEWER_QR"></option>
+	<option value="SEWER_START"></option>
+	<option value="SEWER_TO_LAVA"></option>
+	<option value="SEWER_TREASURE_ONE"></option>
+	<option value="SEWER_TREASURE_TWO"></option>
+	<option value="SHOWERS"></option>
+	<option value="SKULL"></option>
+	<option value="SKULL_B"></option>
+	<option value="SPINNING_PLATES"></option>
+	<option value="STARGATE"></option>
+	<option value="STARGATE_RUINS"></option>
+	<option value="SUPERSPIN_CAVE"></option>
+	<option value="TELESCOPE"></option>
+	<option value="TEMPLE_OF_LOVE"></option>
+	<option value="THRONE"></option>
+	<option value="TREE"></option>
+	<option value="TREE_CRUMBLE"></option>
+	<option value="TREE_OF_DEATH"></option>
+	<option value="TREE_ROOTS"></option>
+	<option value="TREE_SKY"></option>
+	<option value="TRIPLE_PIVOT_CAVE"></option>
+	<option value="TWO_WALLS"></option>
+	<option value="VILLAGEVILLE_3D"></option>
+	<option value="VISITOR"></option>
+	<option value="WALL_HOLE"></option>
+	<option value="WALL_INTERIOR_A"></option>
+	<option value="WALL_INTERIOR_B"></option>
+	<option value="WALL_INTERIOR_HOLE"></option>
+	<option value="WALL_KITCHEN"></option>
+	<option value="WALL_SCHOOL"></option>
+	<option value="WALL_VILLAGE"></option>
+	<option value="WATER_PYRAMID"></option>
+	<option value="WATER_TOWER"></option>
+	<option value="WATER_WHEEL"></option>
+	<option value="WATER_WHEEL_B"></option>
+	<option value="WATERFALL"></option>
+	<!--option value="WATERFALL_ALT"></option-->
+	<option value="WATERTOWER_SECRET"></option>
+	<option value="WEIGHTSWITCH_TEMPLE"></option>
+	<option value="WELL_2"></option>
+	<option value="WINDMILL_CAVE"></option>
+	<option value="WINDMILL_INT"></option>
+	<option value="ZU_4_SIDE"></option>
+	<option value="ZU_BRIDGE"></option>
+	<option value="ZU_CITY"></option>
+	<option value="ZU_CITY_RUINS"></option>
+	<option value="ZU_CODE_LOOP"></option>
+	<option value="ZU_FORK"></option>
+	<option value="ZU_HEADS"></option>
+	<option value="ZU_HOUSE_EMPTY"></option>
+	<option value="ZU_HOUSE_EMPTY_B"></option>
+	<option value="ZU_HOUSE_QR"></option>
+	<!--option value="ZU_HOUSE_RUIN_GATE"></option-->
+	<option value="ZU_HOUSE_RUIN_VISITORS"></option>
+	<option value="ZU_HOUSE_SCAFFOLDING"></option>
+	<option value="ZU_LIBRARY"></option>
+	<option value="ZU_SWITCH"></option>
+	<option value="ZU_SWITCH_B"></option>
+	<option value="ZU_TETRIS"></option>
+	<option value="ZU_THRONE_RUINS"></option>
+	<option value="ZU_UNFOLD"></option>
+	<option value="ZU_ZUISH"></option>
+	<!-- intro levels -->
+	<option value="ELDERS"></option>
+	<option value="GEEZER_HOUSE_2D"></option>
+	<option value="GOMEZ_HOUSE_2D"></option>
+	<option value="KITCHEN_2D"></option>
+	<option value="PARLOR_2D"></option>
+	<option value="SCHOOL_2D"></option>
+	<option value="VILLAGEVILLE_2D"></option>
+	<!-- ending levels -->
+	<option value="DRUM"></option>
+	<option value="GOMEZ_HOUSE_END_32"></option>
+	<option value="GOMEZ_HOUSE_END_64"></option>
+	<option value="HEX_REBUILD"></option>
+	<option value="VILLAGEVILLE_3D_END_32"></option>
+	<option value="VILLAGEVILLE_3D_END_64"></option>
+</datalist>
+<datalist id="datalist-hub-level-names">
+	<option value="GRAVEYARD_GATE"></option>
+	<option value="INDUSTRIAL_HUB"></option>
+	<option value="NATURE_HUB"></option>
+	<option value="SEWER_HUB"></option>
+	<option value="ZU_CITY_RUINS"></option>
+</datalist>
+<datalist id="datalist-achievements">
+	<!-- Assuming these are all the same for all versions; these values are from the Steam version -->
+	<option value="Achievement_01"></option>
+	<option value="Achievement_02"></option>
+	<option value="Achievement_03"></option>
+	<option value="Achievement_04"></option>
+	<option value="Achievement_05"></option>
+	<option value="Achievement_06"></option>
+	<option value="Achievement_07"></option>
+	<option value="Achievement_08"></option>
+	<option value="Achievement_09"></option>
+	<option value="Achievement_10"></option>
+	<option value="Achievement_11"></option>
+	<option value="Achievement_12"></option>
+</datalist>
+<datalist id="datalist-gamer-pictures">
+	<!-- This appears to be unused on the Steam version -->
+</datalist>
+<datalist id="datalist-maps">
+	<!-- hopefully I spelled all these correctly -->
+	<option value="map_arch"></option>
+	<option value="map_crypt_a"></option>
+	<option value="map_crypt_b"></option>
+	<option value="map_crypt_c"></option>
+	<option value="map_crypt_d"></option>
+	<option value="map_mystery"></option>
+	<option value="map_pivot"></option>
+	<option value="map_ritual"></option>
+	<option value="map_tree_sky"></option>
+</datalist>
+<datalist id="datalist-viewpoints" data-min="0" data-max="7">
+	<option value="0">None</option>
+	<option value="1">Front</option>
+	<option value="2">Right</option>
+	<option value="3">Back</option>
+	<option value="4">Left</option>
+	<option value="5">Up</option>
+	<option value="6">Down</option>
+	<option value="7">Perspective</option>
+</datalist>
+<datalist id="datalist-actor-types" data-min="0" data-max="86">
+	<option value= "0">None</option>
+	<option value= "1">Ladder</option>
+	<option value= "2">Bouncer</option>
+	<option value= "3">Sign</option>
+	<option value= "4">GoldenCube</option>
+	<option value= "5">PickUp</option>
+	<option value= "6">Bomb</option>
+	<option value= "7">Destructible</option>
+	<option value= "8">DestructiblePermanent</option>
+	<option value= "9">Vase</option>
+	<option value="10">Door</option>
+	<option value="11">Heart</option>
+	<option value="12">Watcher</option>
+	<option value="13">Crystal</option>
+	<option value="14">BlackHole</option>
+	<option value="15">Vine</option>
+	<option value="16">BigBomb</option>
+	<option value="17">TntBlock</option>
+	<option value="18">TntPickup</option>
+	<option value="19">MotorBlock</option>
+	<option value="20">Hurt</option>
+	<option value="21">Checkpoint</option>
+	<option value="22">TreasureChest</option>
+	<option value="23">CubeShard</option>
+	<option value="24">BigHeart</option>
+	<option value="25">SkeletonKey</option>
+	<option value="26">ExploSwitch</option>
+	<option value="27">PushSwitch</option>
+	<option value="28">EightBitDoor</option>
+	<option value="29">PushSwitchSticky</option>
+	<option value="30">PushSwitchPermanent</option>
+	<option value="31">SuckBlock</option>
+	<option value="32">WarpGate</option>
+	<option value="33">OneBitDoor</option>
+	<option value="34">SpinBlock</option>
+	<option value="35">PivotHandle</option>
+	<option value="36">FourBitDoor</option>
+	<option value="37">LightningPlatform</option>
+	<option value="38">LightningGhost</option>
+	<option value="39">Tombstone</option>
+	<option value="40">SplitUpCube</option>
+	<option value="41">UnlockedDoor</option>
+	<option value="42">Hole</option>
+	<option value="43">Couch</option>
+	<option value="44">Valve</option>
+	<option value="45">Rumbler</option>
+	<option value="46">Waterfall</option>
+	<option value="47">Trickle</option>
+	<option value="48">Drips</option>
+	<option value="49">Geyser</option>
+	<option value="50">ConnectiveRail</option>
+	<option value="51">BoltHandle</option>
+	<option value="52">BoltNutBottom</option>
+	<option value="53">BoltNutTop</option>
+	<option value="54">CodeMachine</option>
+	<option value="55">NumberCube</option>
+	<option value="56">LetterCube</option>
+	<option value="57">TriSkull</option>
+	<option value="58">Tome</option>
+	<option value="59">SecretCube</option>
+	<option value="60">LesserGate</option>
+	<option value="61">Crumbler</option>
+	<option value="62">LaserEmitter</option>
+	<option value="63">LaserBender</option>
+	<option value="64">LaserReceiver</option>
+	<option value="65">RebuildingHexahedron</option>
+	<option value="66">TreasureMap</option>
+	<option value="67">Timeswitch</option>
+	<option value="68">TimeswitchMovingPart</option>
+	<option value="69">Mail</option>
+	<option value="70">Mailbox</option>
+	<option value="71">Bookcase</option>
+	<option value="72">TwoBitDoor</option>
+	<option value="73">SixteenBitDoor</option>
+	<option value="74">ThirtyTwoBitDoor</option>
+	<option value="75">SixtyFourBitDoor</option>
+	<option value="76">Owl</option>
+	<option value="77">Bell</option>
+	<option value="78">RotatingGroup</option>
+	<option value="79">BigWaterfall</option>
+	<option value="80">Telescope</option>
+	<option value="81">SinkPickup</option>
+	<option value="82">QrCode</option>
+	<option value="83">FpsPost</option>
+	<option value="84">PieceOfHeart</option>
+	<option value="85">SecretPassage</option>
+	<option value="86">Piston</option>
+</datalist>
+<datalist id="datalist-artifacts-actor-types" data-min="55" data-max="58">
+	<option value="55">NumberCube</option>
+	<option value="56">LetterCube</option>
+	<option value="57">TriSkull</option>
+	<option value="58">Tome</option>
+</datalist>
+</div>
+</body>
+</html>
