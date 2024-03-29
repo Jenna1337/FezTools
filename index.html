@@ -5,6 +5,43 @@
 <title>FEZ tools index</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light dark" />
+<style>
+/* @supports is for older browsers so it doesn't display an empty block or improperly styled mask */
+@supports (mask-size: contain) and (mask-repeat: no-repeat) and (mask-position: center center) and (mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="1" width="1" viewbox="0 0 1 1"></svg>')){
+	/* adds an icon to links for "open in new tab" links and external links */
+	/* Note the [target="_blank"] selector applies to links that open in new tabs,
+	   and the selector checking all the [href] should apply to most external links. */
+	/* Note: it might be faster and more flexible to apply this style in JS */
+	/* a:not(:has(i:empty))[target="_blank"]::after, */
+	/* a:not(:has(i:empty)):not([href^="."]):not([href^="/"]):not([href^="#"]):not([href*="github"])::after,*/
+	.external-link::after {
+		content: "";
+		display: inline-block;
+		height: 2ex;
+		width: 2ex;
+		vertical-align: -0.25ex;
+		margin-inline-start: 0.25ex;
+		mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewbox="0 0 48 48"><path d="M36 24c-1.2 0-2 .8-2 2v12c0 1.2-.8 2-2 2H10c-1.2 0-2-.8-2-2V16c0-1.2.8-2 2-2h12c1.2 0 2-.8 2-2s-.8-2-2-2H10c-3.4 0-6 2.6-6 6v22c0 3.4 2.6 6 6 6h22c3.4 0 6-2.6 6-6V26c0-1.2-.8-2-2-2z"/><path d="M43.8 5.2c-.2-.4-.6-.8-1-1-.2-.2-.6-.2-.8-.2H30c-1.2 0-2 .8-2 2s.8 2 2 2h7.2L18.6 26.6c-.8.8-.8 2 0 2.8.4.4.8.6 1.4.6s1-.2 1.4-.6L40 10.8V18c0 1.2.8 2 2 2s2-.8 2-2V6c0-.2 0-.6-.2-.8z"/></svg>');
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center center;
+		background-color: currentColor;
+	}
+}
+</style>
+<script>
+window.addEventListener("load", function(){
+	/* adds an icon to links for external links */
+	var links = document.getElementsByTagName("a");
+	var currenthostname = window.location.hostname;
+	for(var i=0; i<links.length; ++i){
+		var link = links[i];
+		if(link.textContent.trim().length>0 && !link.href.includes("github") && link.hostname != currenthostname){
+			link.classList.add("external-link");
+		}
+	}
+});
+</script>
 </head>
 <body>
 <h1>FEZ tools</h1>
@@ -12,6 +49,8 @@
 <li><a href="FezWorldMapViewer.html">Fez World Map Viewer</a></li>
 <li><a href="FezSaveFileEditor.html">FEZ Save File Editor</a></li>
 <li><a href="FezScriptEntityTypeDescriptorTableFormatter.html">Fez ScriptEntityTypeDescriptors Table Formatter</a></li>
+<li><a href="https://sloan4.com/tools/FezFontComparer.html">Fez Font Comparer</a></li>
+<li><a href="https://sloan4.com/tools/FezFontComparer2.html">Fez Font Comparer2</a></li>
 </ul>
 </body>
 </html>
