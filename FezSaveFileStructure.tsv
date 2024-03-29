@@ -1,0 +1,86 @@
+"Note: the data in this table is pulled and derived from the other tables on the other pages in this file. Currently, this table lists all the field names and their associated types in no particular order. For the proper order of these fields, please see the type's associated table."								
+Field Name	Field Type	Usage Notes	Underlaying C# Type	JavaScript Equivalent	byte size	HTML input type	HTML attributes	DataView r/w type
+SaveData.Version	long	const value (6)	Int64	BigInt	8	number		BigInt64
+SaveData.CreationTime	long	DateTime.Now.ToFileTimeUtc()	Int64	BigInt	8	number		BigInt64
+SaveData.Finished32	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.Finished64	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasFPView	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasStereo3D	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.CanNewGamePlus	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.IsNewGamePlus	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.OneTimeTutorials	"Dictionary<string, bool>"	"used to keep track of some of Dot's tutorial text; key is GameText key, and value should only ever really be true"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Level	string	current level name	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.View	Viewpoint	Note: Viewpoint is saved as int	int	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Ground	Vector3		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.TimeOfDay	TimeSpan		long	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.UnlockedWarpDestinations	List<String>	"used for big hub warp gates; includes ""NATURE_HUB"" by default"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Keys	int		Int32	Number	4	number		Int32
+SaveData.CubeShards	int		Int32	Number	4	number		Int32
+SaveData.SecretCubes	int		Int32	Number	4	number		Int32
+SaveData.CollectedParts	int		Int32	Number	4	number		Int32
+SaveData.CollectedOwls	int		Int32	Number	4	number		Int32
+SaveData.PiecesOfHeart	int		Int32	Number	4	number		Int32
+SaveData.Maps	List<String>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.Artifacts	List<ActorType>	Note: ActorType is saved as int	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.EarnedAchievements	List<String>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.EarnedGamerPictures	List<String>		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.ScriptingState	string		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.FezHidden	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.GlobalWaterLevelModifier	float?		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.HasHadMapHelp	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.CanOpenMap	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.AchievementCheatCodeDone	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.AnyCodeDeciphered	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.MapCheatCodeDone	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.World	"Dictionary<string, LevelSaveData>"	level name -> LevelSaveData	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+SaveData.ScoreDirty	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.HasDoneHeartReboot	bool		Boolean	Boolean	1	checkbox		Int8
+SaveData.PlayTime	long	"play time, in ticks (for reference, there are 10000000 (ten million) ticks in a second)"	Int64	BigInt	8	number		BigInt64
+SaveData.IsNew	bool	"Should only be true if the save file exists, but the save data is clear"	Boolean	Boolean	1	checkbox		Int8
+LevelSaveData.DestroyedTriles	List<TrileEmplacement>	"bell cube, bombable walls, permanent despawning groups (dunno what that means), NameOfGodPuzzle treasure, treasure chest treasures, tuning fork treasures, cube bits, TetrisPuzzle treasure, and UnfoldPuzzle treasure"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveTriles	List<TrileEmplacement>	doors	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveArtObjects	List<int>	"clock tower cubes, bell, bit doors, the mailbox, NameOfGodPuzzle (hardcoded to 0), treasure chests, that one openable bookcase, turing forks, the spinning rings animation in STARGATE (hardcoded to 0), TetrisPuzzle (hardcoded to 0), and UnfoldPuzzle (hardcoded to 0). All the ones that are not hardcoded to 0 use the Id of the associated ArtObject "	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveEvents	List<int>	keeps track of Level Scripts that have OneTime set to true and that have already been activated	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveGroups	List<int>	Permanent PushSwitches (which I think is all the ones used in-game) and the glowing on the door in Waterfall	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveVolumes 	List<int>	"typically used for Volumes that have codes that should only be activated once (e.g., the waterfall and the moria door in Waterfall)"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.InactiveNPCs	List<int>	Owls 	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.PivotRotations	"Dictionary<int, int>"	"keeps track of the rotations of all the things you can spin around (time switches, tombstones, those big platforms you can push to rotate, that one bookcase, etc.)"	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.LastStableLiquidHeight	float?	null if no liquid	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.ScriptingState	string		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+LevelSaveData.FirstVisit	bool		Boolean	Boolean	1	checkbox		Int8
+LevelSaveData.FilledConditions	WinConditions	could be dynamically recalculated	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+WinConditions.LockedDoorCount	int	doors that have locks	Int32	Number	4	number		Int32
+WinConditions.UnlockedDoorCount	int	doors that don't have locks	Int32	Number	4	number		Int32
+WinConditions.ChestCount	int	number of treasure chests	Int32	Number	4	number		Int32
+WinConditions.CubeShardCount	int	number of larger golden cubes	Int32	Number	4	number		Int32
+WinConditions.OtherCollectibleCount	int	"used for maps, artifacts, anticubes, or any other collectible that isn't a golden cube"	Int32	Number	4	number		Int32
+WinConditions.SplitUpCount	int	number of cube bits	Int32	Number	4	number		Int32
+WinConditions.ScriptIds	List<int>	script IDs that count towards win conditions	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+WinConditions.SecretCount	int	used for puzzles	Int32	Number	4	number		Int32
+Viewpoint	int		Int32	Number	4	number		Int32
+ActorType	int		Int32	Number	4	number		Int32
+"Dictionary<TKey,TValue>.Count"	int		Int32	Number	4	number		Int32
+"Dictionary<TKey,TValue>.Key[n]"	Tkey		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+"Dictionary<TKey,TValue>.Value[n]"	TValue		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+List<T>.Count	int		Int32	Number	4	number		Int32
+List<T>.this[n]	T		#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+TimeSpan	long	stored as ticks	Int64	BigInt	8	number		BigInt64
+float?.HasValue	bool		Boolean	Boolean	1	checkbox		Int8
+float?.Value	float	only exists if HasValue	Single	Number	4	number	"step=""any"""	Float32
+string.HasValue	bool		Boolean	Boolean	1	checkbox		Int8
+string.Length	7BitEncodedInt	"only exists if HasValue; Length of the string in bytes, not chars. Stored as Int32 7 bits at a time. The high bit of the byte when on means to continue reading more bytes. Max of 5 bytes."	#N/A	#N/A	#N/A	#N/A	#N/A	#N/A
+string.Value	StringLiteral	only exists if HasValue	String	String	Variable	text		Custom
+Vector3.X	float		Single	Number	4	number	"step=""any"""	Float32
+Vector3.Y	float		Single	Number	4	number	"step=""any"""	Float32
+Vector3.Z	float		Single	Number	4	number	"step=""any"""	Float32
+TrileEmplacement.X	int		Int32	Number	4	number		Int32
+TrileEmplacement.Y	int		Int32	Number	4	number		Int32
+TrileEmplacement.Z	int		Int32	Number	4	number		Int32
+bool	bool		Boolean	Boolean	1	checkbox		Int8
+byte	byte		Byte	Number	1	number		Int8
+short	short		Int16	Number	2	number		Int16
+int	int		Int32	Number	4	number		Int32
+long	long		Int64	BigInt	8	number		BigInt64
+float	float		Single	Number	4	number	"step=""any"""	Float32
+double	double		Double	Number	8	number	"step=""any"""	Float64
+StringLiteral	StringLiteral		String	String	Variable	text		Custom
