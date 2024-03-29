@@ -74,6 +74,12 @@ see https://developer.mozilla.org/en-US/docs/Web/Manifest
 	height: auto;
 	overflow: hidden;
 }
+.object:has(>.listbuttoncontainer){
+	display: grid;
+	grid-template-rows: auto auto;
+	grid-template-columns: min-content 1fr;
+	grid-column-gap: 2px;
+}
 .collapsible > .collapselabel {
 	display: block;
 }
@@ -96,6 +102,10 @@ see https://developer.mozilla.org/en-US/docs/Web/Manifest
 }
 .listbuttoncontainer {
 	margin-bottom: 4px;
+	grid-column: 1 / span 2;
+}
+.listremoveentrybutton {
+	margin-block: auto;
 }
 .listitem {
 	display: flex;
@@ -338,7 +348,6 @@ window.addEventListener("load",()=>{
 	console.log('%c Stop looking at the console. ', 'background: #EFF; color: red; font-size: 5em;');
 });
 </script>
-<script id="st" src="st.php?page=FezSaveFileEditor"></script>
 <script>
 "use strict";
 window.addEventListener("DOMContentLoaded", ()=>{
@@ -686,6 +695,7 @@ var MakeInputs = (function(){
 		});
 	}
 	var explistid = 0, collapsibleobjectid = 0;
+	const DO_GRID = true;
 	function MakeExpandableList(typearr){
 		var elem = document.createElement("div");
 		elem.id = "explist"+ ++explistid;
@@ -695,6 +705,19 @@ var MakeInputs = (function(){
 		addbtn.textContent = "Add";
 		addbtn.onclick = function(){
 			var sub = document.createElement("div");
+			{
+				let rembtn = document.createElement("button");
+				rembtn.textContent = "Remove";
+				rembtn.title = "Remove this entry from the parent Collection<"+typearr.join(", ")+">";
+				rembtn.className = "listremoveentrybutton";
+				rembtn.onclick = function(){
+					sub.remove();
+					rembtn.remove();
+				};
+				if(DO_GRID){
+					this.parentElement.parentElement.appendChild(rembtn);
+				}
+			}
 			for(var i in typearr){
 				var genel = MakeInputs(o[typearr[i]],true,typearr[i]);
 				if(o[typearr[i]].length > 5) {//only really used for LevelSaveData
@@ -753,10 +776,13 @@ var MakeInputs = (function(){
 		};
 		elem.appendChild(addbtn);
 		var rembtn = document.createElement("button");
-		rembtn.textContent = "Remove";
+		rembtn.textContent = "Remove Last Entry";
 		rembtn.onclick = function(){
 			if(this.parentElement.parentElement.children.length>1){
 				this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-1].remove()
+				if(DO_GRID){
+					this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-1].remove()
+				}
 			}
 		};
 		elem.appendChild(rembtn);
@@ -803,11 +829,15 @@ var saveloadfuncs = (function(){
 		
 		length = Math.max(0, Math.min(300, length));//just in case it loads bad files it doesn't freeze for a long time
 		
-		while(length > fieldfield.children.length-1){
+		let fieldchildrenlength = Array.from(fieldfield.children).filter(a=>a.classList.contains("listitem")).length;
+		
+		while(length > fieldchildrenlength){
 			fieldfield.children[0].children[0].click();//add
+			++fieldchildrenlength;
 		}
-		while(length < fieldfield.children.length-1){
+		while(length < fieldchildrenlength){
 			fieldfield.children[0].children[1].click();//remove
+			--fieldchildrenlength;
 		}
 		iterateInputs(fieldfield,(tp)=>{
 			readType(dataview, tp);
