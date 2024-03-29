@@ -94,7 +94,7 @@ see https://developer.mozilla.org/en-US/docs/Web/Manifest
 	content: "\25B8\FE0E";
 }
 .collapsed > .object {
-	/*height: 0px;*/
+	height: 0px !important;
 	overflow: hidden;
 }
 .collapsed > .object * {
@@ -214,7 +214,7 @@ label[data-dangerous="true"] + input[type=checkbox]:checked {
 *:not(input,button) {
 	/*Note: this doesn't transition default values*/
 	/*Note: transition can look strange on inputs and buttons*/
-	transition-property: color, background-color, color-scheme, border;
+	transition-property: color, background-color, color-scheme, border, height;
 	transition-duration: 0s;
 	transition-timing-function: linear;
 }
@@ -663,10 +663,10 @@ var MakeInputs = (function(){
 				if(!innerfieldcontainer.classList.contains("collapsed")){
 					var compstyle = window.getComputedStyle(elem);
 					var compheight = elem.getBoundingClientRect().height - parseInt(compstyle.paddingTop) - parseInt(compstyle.paddingBottom) - parseInt(compstyle.marginTop) - parseInt(compstyle.marginBottom);
-					innerfieldcontainer.classList.add("collapsed");
+					//innerfieldcontainer.classList.add("collapsed");
 					elem.dataset["fullheight"] = compheight;
 					elem.style.height = elem.dataset["fullheight"]+"px";
-					window.requestAnimationFrame(()=>{window.requestAnimationFrame(()=>{elem.style.height = "0px";});});
+					window.requestAnimationFrame(()=>{window.requestAnimationFrame(()=>{innerfieldcontainer.classList.add("collapsed");});});
 				}
 				else
 				{
