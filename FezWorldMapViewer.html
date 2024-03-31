@@ -1479,7 +1479,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					fval = a.Field.map(f=>levelinfo[f]).map(getFval).reduce((a,b)=>a+b,0);
 				}
 				else{
-					fval = getFval(levelinfo[a.Field]);
+					fval = getFval(levelinfo.Conditions[a.Field]) ?? getFval(levelinfo[a.Field]);
 				}
 				return Object.assign({}, a, {"ShowFlag":Boolean(fval)});
 			}).forEach(a=>{
