@@ -1,0 +1,281 @@
+
+#mapcontainer {
+	transform-style: flat;
+	overflow: hidden;
+	overflow: clip;
+	background-color: black;
+	color: white;
+	height: 100vh;
+	width: 100vw;
+	position: absolute;
+	top: 0;
+	left: 0;
+	cursor: grab;
+	user-select: none;
+	
+	& table, thead, tbody, tfoot, tr, th, td {
+		border-color: white;
+		padding-inline: 0.25em;
+	}
+	
+	--shortcutlinkhue: 0deg;
+}
+#mapcontainer>*{
+	position: absolute;
+	cursor: auto;
+	user-select: text;
+}
+#mapnodepanbox{
+	transform-style: flat;
+	cursor: grab;
+	pointer-events: none;
+	background: none;
+}
+#mapnodepanbox *{
+	/* TODO fix transitions? */
+	/*transition-property: translate, scale;
+	transition-duration: 0.2s;
+	transition-timing-function: linear;*/
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+#mapnodes, #maplinks {
+	translate: 50vw 50vh;
+	height: 100vh;
+	width: 100vw;
+	transform-style: preserve-3d;
+	transform-origin: top left;
+	pointer-events: none;
+	background: none;
+	z-index: 10;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.mapnode {
+	transform-style: flat;
+	background-color: black;
+	color: white;
+	word-wrap: anywhere;
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: center center;
+	outline: 2px solid white;
+	outline: var(--outlinesize) solid white;
+	pointer-events: auto;
+	pointer-events: all;
+	cursor: pointer;
+}
+@keyframes waves{
+	from {
+		outline-style: solid;
+		outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2);
+	}
+	to {
+		outline-style: double;
+		outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) * 1.5);
+	}
+}
+.nodebox.selected .mapnode, .mapnode:focus{
+	outline: 3.5px solid white;
+	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
+	outline-width: calc(calc(var(--outlinesize-hover) * 0.6 + var(--outlinesize) * 0.4) * 1.5);
+	outline-style: double;
+	outline-style: solid;
+}
+.animations {
+	& .nodebox.selected .mapnode, .mapnode:focus{
+		/*animation: 1s ease-in-out 0s alternate infinite waves;*/
+		animation: 1s ease-in 0s infinite waves;
+	}
+}
+.mapnode:hover {
+	outline: 5px solid gold;
+	outline: var(--outlinesize-hover) solid gold;
+}
+.mapnode:focus {
+	outline: 5px solid gold;
+	outline: var(--outlinesize-hover) solid #0078D7;
+	outline: var(--outlinesize-hover) solid highlight;
+}
+.nodebox {
+	transform-style: flat;
+	position: absolute;
+	height: 50px;
+	width: 50px;
+	overflow: visible;
+	font-size: 15px;
+}
+#nodeinfobox {
+	white-space: pre;
+	z-index: 1000;
+	background-color: black;
+	background-color: #000E;
+	color: white;
+	height: 100%;
+	overflow: scroll;
+	width: 20em;
+	font-size: 1em;
+	/*top: 1lh;*/
+	left: 0;
+}
+#nodeinfobox .hidenodeinfoboxbuttoncontainer {
+	font-size: larger;
+	font-weight: bold;
+	padding: 1ex;
+	display: inline-block;
+	color: white;
+	text-decoration: none;
+	/* border: 1px solid red;*/
+	width: 1lh;
+	text-align: center;
+}
+#nodeinfobox #hidenodeinfoboxbutton {
+	background-color: #A00;
+	background-color: #F00A;
+	opacity: 0.9;
+	position: fixed;
+	z-index: inherit;
+}
+#nodeinfobox #hidenodeinfoboxbutton:hover {
+	background-color: red;
+	background-color: #F00D;
+}
+#nodeinfobox #hidenodeinfoboxbutton:active {
+	background-color: #F33;
+	background-color: #F33D;
+}
+.hidden {
+	display: none !important;
+	visibility: hidden !important;
+}
+#maplegend {
+	z-index: 100;
+	background-color: black;
+	background-color: #000E;
+	color: white;
+	bottom: 0;
+	left: 0;
+	border: 1px solid white;
+	padding: 2px;
+}
+#mapcontainer hr {
+	border: 1px solid white;
+}
+#mapdebuginfo {
+	z-index: 10000;
+	background-color: black;
+	background-color: #111C;
+	color: white;
+	left: 0;
+	right: 40ch;
+	right: calc(36ch + 2ex + 10px);
+	right: calc(36ch + 2ex + 6px + 2ch);
+}
+@media (min-width: 1000px) {
+	#mapdebuginfo, #maplegend {
+		left: 20em;
+	}
+}
+
+#mapdebuginfo:has(~#mapsettings.collapsed){
+	right: 4ex;
+	right: 2lh;
+	right: calc(1lh + 2ex + 2px);
+}
+#mapdebuginfo:has(~#nodeinfobox.hidden){
+	left: 0;
+}
+#nodeinfobox.hidden~#maplegend{
+	left: 0;
+}
+#maplinks {
+	z-index: 1 !important;
+}
+#mapsettings {
+	z-index: 100000;
+	top: 0;
+	right: 0;
+	text-align: center;
+	background-color: black;
+	background-color: #000E;
+	padding: 1ex;
+	border: 1px solid white;
+	max-height: calc(100vh - 3lh - 2ex - 2px);
+	overflow: scroll;
+	overflow: auto;
+}
+#mapsettings input {
+	max-width: 19ch;
+	padding-block: 1px;
+	padding-inline: 2px;
+	font-family: inherit;
+	/*border-width: 2px;
+	border-radius: 2px;*/
+	margin: 0;
+}
+#mapsettings.collapsed {
+	height: 3ex;
+	height: 1lh;
+	width: 3ex;
+	width: 1lh;
+	overflow: hidden;
+	overflow: clip;
+}
+.maplink {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-style: preserve-3d;
+}
+.nomousebuttons .maplink{
+	pointer-events: all;
+	cursor: crosshair;
+}
+.maplink *{
+	background-color: white;
+	background-color: gray;
+	background-color: grey;
+	background-color: #7777;
+	/*Note: links are semitransparent so you can see other links crossing and layered
+			beneath the above links, and the opacity property doesn't do this*/
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-style: preserve-3d;
+}
+.mapnodeiconcontainer {
+	position: absolute;
+	top: 0;
+	left: 50px;
+	transform-origin: top left;
+	image-rendering: pixelated;
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: crisp-edges;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	line-height: 1;
+	/* TODO ensure icons meet WCAG standards for color contrast; */
+}
+.nodeicon {
+	display: block;
+	height: 1lh;
+	width: 1lh;
+}
+.maplink.selected * {
+	background-color: white;
+}
+.maplink.mapshortcutlink * {
+	background-color: red;
+	background-color: darkred;
+	background-color: #9007;
+	/*background-color: #d007;*/
+	background-color: hsla(var(--shortcutlinkhue), 100%, 30%, 45%);
+}
+.maplink.mapshortcutlink.selected * {
+	background-color: red;
+	background-color: hsla(var(--shortcutlinkhue), 100%, 50%, 100%);
+}

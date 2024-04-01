@@ -1,0 +1,114 @@
+:root {
+	--tablebg: transparent;
+	--tabledatabg: transparent;
+	--tablebordercolor: white;
+	--tableborder: 1px solid var(--tablebordercolor);
+	--tableentryborder: none;
+	--tabledataborder: 1px solid var(--tablebordercolor);
+	--tableinnermostentryborder: none;
+	--tableinnermostdataborder: none;
+}
+.tableentry{
+	border: 1px solid black;
+	border: var(--tableentryborder);
+	position: relative;
+	/*text-shadow: white 0 0 4px;*/
+	display: block;
+	padding: 2px;
+}
+.tabledata{
+	background-color: rgba(255,255,255,0.25);
+	background-color: var(--tabledatabg);
+	border: 1px solid black;
+	border: var(--tabledataborder);
+}
+.tableentry .tableentry:not(:has( .tableentry)){
+	display: inline-block;
+	border: none;
+	border: var(--tableinnermostentryborder);
+}
+.tableentry:not(:has( .tableentry))>.tabledata{
+	display: inline-block;
+	border: none;
+	border: var(--tableinnermostdataborder);
+}
+.tableentry:has(>.primitive):has(+.tableentry>.primitive)::after {
+	content: ", ";
+}
+.tablehead{
+	font-weight: bold;
+	/*border-bottom: 1px solid black;*/
+	display: inline-block;
+}
+.tabledata:not(.primitive){
+	padding-left: 3ex;
+}
+.tabledata.primitive{
+	display: inline-block;
+	padding-inline: 0.5ch;
+}
+.tabledata:has( .tabledata:not(.primitive)){
+	padding-left: 3ex !important;
+	display: flex !important;
+	flex-wrap: wrap;
+	padding-block-end: 2px;
+}
+.tabledata.primitive{
+	display: inline-block;
+}
+.tablemain>.tableentry>.tablehead{
+	color: white;
+}
+.tablemain{
+	background-color: black;
+	background-color: var(--tablebg);
+	margin-block-end: 1lh;
+}
+.tablehead:has(+.tabledata:not(.primitive)){
+	display: inline-block;
+	pointer-events: none;
+}
+.tablehead+.tabledata:not(.primitive){
+	display: inline-block;
+	padding-left: unset;
+}
+.tablehead:has(+.tabledata:not(.primitive))::before{
+	content: "";
+}
+.tablehead:has(+.tabledata[style*=none])::before, .tablehead:has(+.tabledata.hidden)::before{
+	content: " > " !important;
+}
+
+.tablehead:has(+.tabledata>.tableentry>.tabledata:not(.primitive)){
+	display: block;
+	pointer-events: all;
+}
+.tablehead:has(+.tabledata>.tableentry>.tabledata:not(.primitive)){
+	content: " v ";
+	cursor: pointer;
+	border-bottom: 1px solid black;
+	border-bottom: var(--tabledataborder);
+}
+.tablehead:has(+.tabledata>.tableentry>.tabledata:not(.primitive))::before{
+	content: " v ";
+}
+
+.hidden{
+	display: none !important;
+	height: 0 !important;
+	overflow: hidden;
+}
+
+table, thead, tbody, tfoot, tr, th, td {
+	border: 1px solid black;
+	border: var(--tableborder);
+	border-collapse: collapse;
+	padding: 0;
+	
+	& :empty{
+		border: inherit;
+	}
+}
+thead, tfoot {
+	font-weight: bold;
+}
