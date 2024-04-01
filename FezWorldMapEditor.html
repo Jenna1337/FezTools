@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Jenna Sloan">
+<title>Fez World Map Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+body {
+	font-family: monospace;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	overflow: clip;
+}
+noscript {
+	position: absolute;
+	z-index: 9999999;
+	color: white;
+	background-color: black;
+	height: 100vh;
+	width: 100vw;
+	font-size: min(100vh, calc(100vw / 30));
+	line-height: 100vh;
+	text-align: center;
+}
+</style>
+<link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
+<link rel='stylesheet' href='MapViewer3DStyles.css' id="MapViewer3DStyles" />
+<style id="fpscounterstyles">
+#fpscountercontainer
+{
+	z-index: 10000;
+	position: absolute;
+	top: 1lh;
+	left: 20em;
+	background-color: #111C;
+}
+</style>
+<style id="panrotationtoggletyles">
+#panrotationtogglebox {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	color: white;
+	background-color: black;
+	background-color: #000E;
+	border: 1px solid white;
+	border-radius: 4px;
+	line-height: 1;
+	z-index: 100;
+	text-align: right;
+	height: 48px;
+	width: 48px;
+	top: -60px;
+	margin: 0;
+	padding: 2px;
+	overflow: hidden;
+	overflow: clip;
+}
+#panrotationtogglebox * {
+	padding: 0;
+	margin: 0;
+	height: inherit;
+	width: inherit;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	transition-property: transform, transform-origin, z-index, opacity, font-weight;
+	transition-duration: 0.1s;
+	transition-timing-function: linear;
+	color: #DDD;
+}
+#panrotationtogglebutton {
+	color: cyan;
+	line-height: 1;
+	margin: 1px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+}
+/* #panrotationtogglebutton>* {
+	background-color: color-mix(in srgb, currentColor 35%, transparent);
+}*/
+#panrotationtogglebutton svg * {
+	color: inherit;
+	mix-blend-mode: difference;
+	font-size: 12px;
+}
+/* unvisited */   /* visited */
+#panrotationtogglebutton:link, #panrotationtogglebutton:visited {
+	/* Just use the styles defined above */
+}
+/* pointer over */
+#panrotationtogglebutton:hover {
+	color: yellow;
+	font-weight: bold;
+}
+#panrotationtogglebutton:hover:not([data-option]) #panrotationtogglebutton-pan,
+#panrotationtogglebutton:hover[data-option="pan-rotate"] #panrotationtogglebutton-pan,
+#panrotationtogglebutton:hover[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	transform: scale(0.85) translate(-1.2px, -1.2px);
+	color: white;
+}
+/* pointer down */
+#panrotationtogglebutton:active {
+	color: red;
+	font-weight: normal !important;
+}
+#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-pan,
+#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-pan,
+#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	transform: scale(0.8);
+	transform-origin: top left;
+	z-index: 20;
+	opacity: 1;
+}
+#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-rotate,
+#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-rotate,
+#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-pan {
+	transform: scale(0.5);
+	transform-origin: bottom right;
+	z-index: 1;
+	opacity: 0.6;
+}
+#panrotationtogglebutton-tinyswapicon {
+	color: white !important;
+	z-index: 99999;
+	transform-origin: top right;
+	transform: scale(0.35) translate(-5px,5px);
+}
+</style>
+<style id="viewsourcelinkstyles">
+#viewsourcebox {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	color: white;
+	background-color: black;
+	background-color: #000E;
+	padding: 2px;
+	border: 1px solid white;
+	border-radius: 4px;
+	margin: 2px;
+	line-height: 1;
+	z-index: 1000000000;
+	text-align: right;
+}
+#viewsource {
+	color: cyan;
+	padding: 2px;
+	margin: 2px;
+	line-height: 1;
+}
+/* unvisited */   /* visited */
+#viewsource:link, #viewsource:visited {
+	/* Just use the styles defined above */
+}
+/* pointer over */
+#viewsource:hover {
+	color: yellow;
+	font-weight: bold;
+}
+/* pointer down */
+#viewsource:active {
+	color: red;
+	font-weight: normal !important;
+}
+</style>
+<script src="WorldMap.js" id="WorldMap"></script>
+<script src="jsonToElements.js" id="jsonToElements"></script>
+<script src="MapViewer3D.js" id="MapViewer3D"></script>
+<script>
+const defaultmaptree = {"0":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":10},"Connections":[{"BranchOversize":0.25,"Face":"Back","Node":1},{"BranchOversize":0.25,"Face":"Front","Node":2},{"BranchOversize":0.25,"Face":"Right","Node":3},{"BranchOversize":0.25,"Face":"Left","Node":4},{"BranchOversize":0.5,"Face":"Down","Node":5},{"BranchOversize":0,"Face":"Top","Node":6},{"BranchOversize":0,"Face":"Right","Node":7}],"HasLesserGate":false,"HasWarpGate":true,"LevelName":"NATURE_HUB","NodeType":"Hub"},"1":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":3,"SplitUpCount":1,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Top","Node":8},{"BranchOversize":0,"Face":"Front","Node":9},{"BranchOversize":0,"Face":"Front","Node":10},{"BranchOversize":0,"Face":"Left","Node":11},{"BranchOversize":0,"Face":"Right","Node":12},{"BranchOversize":0,"Face":"Right","Node":13}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATERFALL","NodeType":"Node"},"10":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":29}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"MINE_A","NodeType":"Node"},"100":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"BIG_OWL","NodeType":"Lesser"},"101":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":114},{"BranchOversize":0,"Face":"Left","Node":115}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GRAVEYARD_A","NodeType":"Node"},"102":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":116}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"CRYPT","NodeType":"Node"},"103":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GRAVE_GHOST","NodeType":"Lesser"},"104":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"STARGATE_RUINS","NodeType":"Lesser"},"105":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":117},{"BranchOversize":0,"Face":"Left","Node":118}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"OBSERVATORY","NodeType":"Node"},"106":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":4,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Front","Node":119}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"CLOCK","NodeType":"Node"},"107":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_THRONE_RUINS","NodeType":"Lesser"},"108":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HOUSE_RUIN_VISITORS","NodeType":"Lesser"},"109":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HOUSE_QR","NodeType":"Lesser"},"11":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":30},{"BranchOversize":0,"Face":"Right","Node":31}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"CMY","NodeType":"Node"},"110":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"OLDSCHOOL_RUINS","NodeType":"Lesser"},"111":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PURPLE_LODGE_RUIN","NodeType":"Lesser"},"112":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":8},"Connections":[{"BranchOversize":0,"Face":"Back","Node":120},{"BranchOversize":0,"Face":"Back","Node":121},{"BranchOversize":0,"Face":"Left","Node":122},{"BranchOversize":0,"Face":"Left","Node":123},{"BranchOversize":0,"Face":"Left","Node":124}],"HasLesserGate":false,"HasWarpGate":true,"LevelName":"SEWER_HUB","NodeType":"Hub"},"113":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PIVOT_THREE_CAVE","NodeType":"Node"},"114":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"GRAVE_LESSER_GATE","NodeType":"Lesser"},"115":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"GRAVE_TREASURE_A","NodeType":"Lesser"},"116":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TREE_OF_DEATH","NodeType":"Lesser"},"117":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[4,7],"SecretCount":2,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TELESCOPE","NodeType":"Node"},"118":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":125},{"BranchOversize":0,"Face":"Right","Node":126}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"VISITOR","NodeType":"Node"},"119":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Right","Node":127}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_LIBRARY","NodeType":"Node"},"12":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[4],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"ZU_CODE_LOOP","NodeType":"Lesser"},"120":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_TREASURE_ONE","NodeType":"Lesser"},"121":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_PIVOT","NodeType":"Node"},"122":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":128}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_TO_LAVA","NodeType":"Node"},"123":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Right","Node":129}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_GEYSER","NodeType":"Node"},"124":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_QR","NodeType":"Lesser"},"125":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Front","Node":130}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ORRERY","NodeType":"Node"},"126":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[4],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"CODE_MACHINE","NodeType":"Node"},"127":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Left","Node":131}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LIBRARY_INTERIOR","NodeType":"Lesser"},"128":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Right","Node":132},{"BranchOversize":0,"Face":"Right","Node":133}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LAVA","NodeType":"Node"},"129":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Left","Node":134},{"BranchOversize":0,"Face":"Front","Node":135},{"BranchOversize":0,"Face":"Left","Node":136}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_PILLARS","NodeType":"Node"},"13":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_ZUISH","NodeType":"Lesser"},"130":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ORRERY_B","NodeType":"Lesser"},"131":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Right","Node":137}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GLOBE","NodeType":"Node"},"132":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"LAVA_SKULL","NodeType":"Lesser"},"133":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LAVA_FORK","NodeType":"Lesser"},"134":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_FORK","NodeType":"Lesser"},"135":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_TREASURE_TWO","NodeType":"Lesser"},"136":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"SEWER_LESSER_GATE_B","NodeType":"Lesser"},"137":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GLOBE_INT","NodeType":"Lesser"},"14":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LIGHTHOUSE_HOUSE_A","NodeType":"Lesser"},"15":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LIGHTHOUSE_SPIN","NodeType":"Node"},"16":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Top","Node":32},{"BranchOversize":0,"Face":"Left","Node":33}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATER_TOWER","NodeType":"Node"},"17":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_FORK","NodeType":"Lesser"},"18":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":34}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"FIVE_TOWERS","NodeType":"Node"},"19":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Front","Node":35}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WEIGHTSWITCH_TEMPLE","NodeType":"Node"},"2":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[17],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Back","Node":14},{"BranchOversize":0,"Face":"Right","Node":15},{"BranchOversize":0,"Face":"Top","Node":16},{"BranchOversize":0,"Face":"Down","Node":17}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"LIGHTHOUSE","NodeType":"Node"},"20":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":36}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATER_PYRAMID","NodeType":"Lesser"},"21":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"QUANTUM","NodeType":"Node"},"22":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Left","Node":37},{"BranchOversize":0,"Face":"Front","Node":38}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ANCIENT_WALLS","NodeType":"Node"},"23":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":8,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":-0.5,"Face":"Top","Node":39}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"BIG_TOWER","NodeType":"Node"},"24":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Right","Node":40},{"BranchOversize":0,"Face":"Right","Node":41},{"BranchOversize":0,"Face":"Right","Node":42},{"BranchOversize":0,"Face":"Right","Node":43},{"BranchOversize":0,"Face":"Right","Node":44}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_VILLAGE","NodeType":"Hub"},"25":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":10},"Connections":[{"BranchOversize":0,"Face":"Back","Node":45},{"BranchOversize":0,"Face":"Left","Node":46},{"BranchOversize":0,"Face":"Back","Node":47},{"BranchOversize":0,"Face":"Right","Node":48},{"BranchOversize":0,"Face":"Right","Node":49}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"INDUSTRIAL_CITY","NodeType":"Hub"},"26":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":10},"Connections":[{"BranchOversize":-0.5,"Face":"Down","Node":50},{"BranchOversize":0,"Face":"Front","Node":51},{"BranchOversize":0,"Face":"Left","Node":52},{"BranchOversize":0,"Face":"Left","Node":53},{"BranchOversize":0,"Face":"Back","Node":54},{"BranchOversize":0,"Face":"Left","Node":55}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_CITY","NodeType":"Hub"},"27":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[11],"SecretCount":2,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Right","Node":56},{"BranchOversize":1,"Face":"Top","Node":57},{"BranchOversize":0,"Face":"Back","Node":58}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TREE","NodeType":"Node"},"28":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATER_WHEEL_B","NodeType":"Lesser"},"29":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Right","Node":59}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"MINE_WRAP","NodeType":"Node"},"3":{"Conditions":{"ChestCount":2,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":3,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Front","Node":18},{"BranchOversize":0,"Face":"Left","Node":19}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ARCH","NodeType":"Node"},"30":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"CMY_B","NodeType":"Node"},"31":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"CMY_FORK","NodeType":"Lesser"},"32":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0.5,"Face":"Front","Node":60}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PIVOT_WATERTOWER","NodeType":"Node"},"33":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATERTOWER_SECRET","NodeType":"Lesser"},"34":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"FIVE_TOWERS_CAVE","NodeType":"Lesser"},"35":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Back","Node":61}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_SWITCH","NodeType":"Lesser"},"36":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TEMPLE_OF_LOVE","NodeType":"Lesser"},"37":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Right","Node":62}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_HOLE","NodeType":"Node"},"38":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_TETRIS","NodeType":"Lesser"},"39":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":4,"UnlockedDoorCount":16},"Connections":[{"BranchOversize":0,"Face":"Front","Node":63},{"BranchOversize":0,"Face":"Front","Node":64},{"BranchOversize":0,"Face":"Front","Node":65},{"BranchOversize":0,"Face":"Right","Node":66},{"BranchOversize":0,"Face":"Front","Node":67},{"BranchOversize":0,"Face":"Front","Node":68},{"BranchOversize":0,"Face":"Back","Node":69},{"BranchOversize":0,"Face":"Left","Node":70},{"BranchOversize":0,"Face":"Front","Node":71}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"VILLAGEVILLE_3D","NodeType":"Hub"},"4":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":8},"Connections":[{"BranchOversize":0,"Face":"Front","Node":20},{"BranchOversize":0,"Face":"Down","Node":21},{"BranchOversize":0,"Face":"Right","Node":22}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"BELL_TOWER","NodeType":"Node"},"40":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_INTERIOR_A","NodeType":"Lesser"},"41":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_INTERIOR_B","NodeType":"Lesser"},"42":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_INTERIOR_HOLE","NodeType":"Lesser"},"43":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_KITCHEN","NodeType":"Lesser"},"44":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WALL_SCHOOL","NodeType":"Lesser"},"45":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[5],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"NUZU_SCHOOL","NodeType":"Lesser"},"46":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"NUZU_BOILERROOM","NodeType":"Lesser"},"47":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"NUZU_ABANDONED_A","NodeType":"Lesser"},"48":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SHOWERS","NodeType":"Lesser"},"49":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"NUZU_DORM","NodeType":"Lesser"},"5":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":3,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0.5,"Face":"Front","Node":23},{"BranchOversize":0.5,"Face":"Right","Node":24},{"BranchOversize":0.5,"Face":"Back","Node":25},{"BranchOversize":0.5,"Face":"Left","Node":26}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"MEMORY_CORE","NodeType":"Node"},"50":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"STARGATE","NodeType":"Node"},"51":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"OLDSCHOOL","NodeType":"Lesser"},"52":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PURPLE_LODGE","NodeType":"Lesser"},"53":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HOUSE_SCAFFOLDING","NodeType":"Lesser"},"54":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HOUSE_EMPTY","NodeType":"Lesser"},"55":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HOUSE_EMPTY_B","NodeType":"Lesser"},"56":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Left","Node":72}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"CABIN_INTERIOR_B","NodeType":"Lesser"},"57":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[6],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Left","Node":73}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TREE_SKY","NodeType":"Node"},"58":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TREE_CRUMBLE","NodeType":"Node"},"59":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"MINE_BOMB_PILLAR","NodeType":"Node"},"6":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":1.25,"Face":"Top","Node":27}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TREE_ROOTS","NodeType":"Node"},"60":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":10},"Connections":[{"BranchOversize":0,"Face":"Back","Node":74},{"BranchOversize":0,"Face":"Right","Node":75},{"BranchOversize":0,"Face":"Left","Node":76},{"BranchOversize":0,"Face":"Back","Node":77},{"BranchOversize":0,"Face":"Back","Node":78}],"HasLesserGate":false,"HasWarpGate":true,"LevelName":"INDUSTRIAL_HUB","NodeType":"Hub"},"61":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"ZU_SWITCH_B","NodeType":"Lesser"},"62":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Back","Node":79}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"TWO_WALLS","NodeType":"Node"},"63":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GOMEZ_HOUSE","NodeType":"Lesser"},"64":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[4],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"BOILEROOM","NodeType":"Lesser"},"65":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SCHOOL","NodeType":"Lesser"},"66":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ABANDONED_A","NodeType":"Lesser"},"67":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PARLOR","NodeType":"Lesser"},"68":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"KITCHEN","NodeType":"Lesser"},"69":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ABANDONED_B","NodeType":"Lesser"},"7":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[5],"SecretCount":2,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"RITUAL","NodeType":"Lesser"},"70":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ABANDONED_C","NodeType":"Lesser"},"71":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GEEZER_HOUSE","NodeType":"Lesser"},"72":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Right","Node":80}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"GRAVE_CABIN","NodeType":"Node"},"73":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Right","Node":81},{"BranchOversize":0,"Face":"Front","Node":82}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"THRONE","NodeType":"Node"},"74":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Left","Node":83}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"INDUSTRIAL_SUPERSPIN","NodeType":"Node"},"75":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":84},{"BranchOversize":0,"Face":"Front","Node":85}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"RAILS","NodeType":"Node"},"76":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":3,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Back","Node":86},{"BranchOversize":0,"Face":"Right","Node":87}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PIVOT_ONE","NodeType":"Node"},"77":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"INDUST_ABANDONED_A","NodeType":"Lesser"},"78":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"NUZU_ABANDONED_B","NodeType":"Lesser"},"79":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Front","Node":88}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"FRACTAL","NodeType":"Node"},"8":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"FOX","NodeType":"Lesser"},"80":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":7,"UnlockedDoorCount":8},"Connections":[{"BranchOversize":0,"Face":"Front","Node":89},{"BranchOversize":0,"Face":"Left","Node":90},{"BranchOversize":0,"Face":"Left","Node":91}],"HasLesserGate":false,"HasWarpGate":true,"LevelName":"GRAVEYARD_GATE","NodeType":"Hub"},"81":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[5],"SecretCount":1,"SplitUpCount":2,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Back","Node":92}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_BRIDGE","NodeType":"Node"},"82":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_UNFOLD","NodeType":"Lesser"},"83":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"SUPERSPIN_CAVE","NodeType":"Lesser"},"84":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":5.5,"Face":"Down","Node":93}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WELL_2","NodeType":"Node"},"85":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":2,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Right","Node":94}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"TRIPLE_PIVOT_CAVE","NodeType":"Node"},"86":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Front","Node":95}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WINDMILL_INT","NodeType":"Lesser"},"87":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":3,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Front","Node":96},{"BranchOversize":0,"Face":"Left","Node":97}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"PIVOT_TWO","NodeType":"Node"},"88":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Left","Node":98}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_4_SIDE","NodeType":"Lesser"},"89":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":3,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":99}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SKULL","NodeType":"Node"},"9":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Back","Node":28}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WATER_WHEEL","NodeType":"Lesser"},"90":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":1,"SplitUpCount":1,"UnlockedDoorCount":0},"Connections":[{"BranchOversize":0,"Face":"Back","Node":100}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"OWL","NodeType":"Lesser"},"91":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":2,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":4,"UnlockedDoorCount":4},"Connections":[{"BranchOversize":0,"Face":"Right","Node":101},{"BranchOversize":0,"Face":"Front","Node":102},{"BranchOversize":0,"Face":"Right","Node":103}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"MAUSOLEUM","NodeType":"Node"},"92":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":14},"Connections":[{"BranchOversize":0,"Face":"Right","Node":104},{"BranchOversize":0,"Face":"Front","Node":105},{"BranchOversize":0,"Face":"Front","Node":106},{"BranchOversize":0,"Face":"Front","Node":107},{"BranchOversize":0,"Face":"Left","Node":108},{"BranchOversize":0,"Face":"Left","Node":109},{"BranchOversize":0,"Face":"Front","Node":110},{"BranchOversize":0,"Face":"Right","Node":111}],"HasLesserGate":false,"HasWarpGate":true,"LevelName":"ZU_CITY_RUINS","NodeType":"Hub"},"93":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[{"BranchOversize":0,"Face":"Right","Node":112}],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"SEWER_START","NodeType":"Node"},"94":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"SPINNING_PLATES","NodeType":"Node"},"95":{"Conditions":{"ChestCount":1,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"WINDMILL_CAVE","NodeType":"Lesser"},"96":{"Conditions":{"ChestCount":0,"CubeShardCount":1,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":6},"Connections":[{"BranchOversize":0,"Face":"Left","Node":113}],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"PIVOT_THREE","NodeType":"Node"},"97":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":0,"ScriptIds":[],"SecretCount":0,"SplitUpCount":1,"UnlockedDoorCount":2},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"EXTRACTOR_A","NodeType":"Lesser"},"98":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":false,"HasWarpGate":false,"LevelName":"ZU_HEADS","NodeType":"Lesser"},"99":{"Conditions":{"ChestCount":0,"CubeShardCount":0,"LockedDoorCount":0,"OtherCollectibleCount":1,"ScriptIds":[],"SecretCount":0,"SplitUpCount":0,"UnlockedDoorCount":0},"Connections":[],"HasLesserGate":true,"HasWarpGate":false,"LevelName":"SKULL_B","NodeType":"Lesser"}};
+
+var worldmap = null;
+var allworlddata = null;
+var worldloot = null;
+var mapViewer;
+function GetAllWorldData(maptree,LinkThickness,fullcube){
+	maptree = JSON.parse(JSON.stringify(maptree));
+	worldmap = null;
+	allworlddata = null;
+	worldloot = null;
+	worldmap = WorldMap(maptree,LinkThickness,fullcube);
+	
+	/**
+	Merges the worldmap and worldinfo, leaving the supplied objects unchanged.
+	*/
+	function consolidateMapData(worldmap){
+		var consolidata = {};
+		for(var nodedat of worldmap.NodesMesh){
+			let meshclone = Object.assign({}, nodedat);
+			delete meshclone.CustomData;
+			let objclone = Object.assign({}, nodedat.CustomData.Node, meshclone);
+			objclone.Connections = objclone.Connections.map(a=>{
+				let aclone = Object.assign({},a);
+				aclone.Node=aclone.Node.LevelName;
+				return aclone;
+			});
+			
+			delete objclone.Group;
+			objclone.Name = nodedat.CustomData.LevelName;
+			consolidata[nodedat.CustomData.LevelName] = objclone;
+		}
+		for(var k in consolidata){
+			let v=consolidata[k];
+			//if(v.Conditions)Object.entries(v.Conditions).forEach(a=>v["Conditions."+a[0]]=a[1]);
+			//Object.assign(v,v.Conditions);
+			//delete v.Conditions;
+			//delete v.Connections;
+			delete v.LevelName;
+			delete v.Color;
+			
+			consolidata[k] = v;
+		}
+		return consolidata;
+	}
+	allworlddata = consolidateMapData(worldmap);
+	allworlddata = Object.entries(allworlddata).filter(a=>(typeof({}))===(typeof(a[1]))).sort((a,b)=>a[0].localeCompare(b[0])).map(a=>a[1]);
+	return {"worldmap":worldmap,"allworlddata":allworlddata};
+}
+function ReloadFileInfoAndRebuildMap(){
+	let maptree = defaultmaptree;
+	
+	//resolve node references
+	Object.entries(maptree).map(([k,a])=>a.Connections.forEach((c,i)=>{
+		if(!maptree[c.Node]){
+			console.log(k,c);
+		}
+		maptree[k].Connections[i].Node=maptree[c.Node];
+	}));
+	
+	//TODO generate node Conditions from fezlvl files
+	
+	RebuildMap(maptree);
+}
+function RebuildMap(maptree){
+	allworlddata = GetAllWorldData(maptree,0.05375,true).allworlddata;
+	console.log("allworlddata",allworlddata);
+	
+	mapViewer = MapViewer3D(maptree, allworlddata, worldmap, document.getElementById("mapcontainer"));
+}
+document.addEventListener("DOMContentLoaded",()=>{
+	ReloadFileInfoAndRebuildMap();
+})
+fpsconttopleftelemname = "mapdebuginfo";
+
+//TODO turn ".primitive.tabledata" into input elements
+// var datasrc = document.querySelectorAll(".primitive.tabledata")
+// var datafieldname = document.querySelectorAll(".primitive.tabledata").previousElementSibling
+</script>
+<script id="fpscounterscript">
+var fpscountersetactive = null;
+var fpscountergetactive = null;
+document.addEventListener("DOMContentLoaded", ()=>{
+	var lastfpstime = 0;
+	var lasttimedifflog = [];
+	var fpscounter = document.getElementById("fpscounter");
+	var mindiff = 99999;
+	var maxfps = 60;
+	const fpscont = document.getElementById("fpscountercontainer");
+	const fpschartelem = document.getElementById("fpschart");
+	
+	//true if using `file` protocol, or reduced motion off and not mobile and more than 8 logical processors
+	var fpscounteractive = !(window.matchMedia("(prefers-reduced-motion)")?.matches??true)//reduced motion off
+			&& (!navigator.userAgent.match(/Mobile/i) && navigator.hardwareConcurrency>=8)//and not mobile and more than 8 logical processors
+			|| window.location.protocol.match(/^file/i);//if using `file` protocol
+	
+	function nextFrame(time){
+		var timediff = time - lastfpstime;
+		lastfpstime = time;
+		if(timediff < mindiff){
+			mindiff = timediff;
+			maxfps = 1000/mindiff;//Math.min(...lasttimedifflog);
+		}
+		lasttimedifflog.push(timediff);
+		var maxframes = Number(fpschartelem.dataset["maxlasttimediffloglen"]);
+		while(lasttimedifflog.length > maxframes){
+			lasttimedifflog.shift()
+		}
+		const fpschartwidth = Number(fpscont.getAttribute("width"));
+		const fpschartheight = Number(fpscont.getAttribute("height"));
+		var fpschartwidthmulti = fpschartwidth/maxframes;
+		var fpschartheightmulti = Math.floor(fpschartheight/maxfps);
+		var fpsavg = (1000/(lasttimedifflog.reduce((a,b)=>a+b)/lasttimedifflog.length)).toFixed(5);
+		var chartavg = fpsavg*fpschartheightmulti;
+		var xoffset = maxframes-lasttimedifflog.length;
+		fpscounter.textContent = fpsavg + " fps avg (last "+lasttimedifflog.length+" frames)\n"
+		                 + (1000/timediff).toFixed(5) + " fps";
+		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>((Number(a[0])+xoffset)*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
+		document.getElementById("fpschartavg").setAttribute("d", "M 0,"+chartavg+"h"+fpschartwidth);
+		
+		{
+			let fpsconttopleftelem = document.getElementById(fpsconttopleftelemname);
+			if(fpsconttopleftelem){
+				fpscont.style.top = window.getComputedStyle(fpsconttopleftelem).height;
+				fpscont.style.left = window.getComputedStyle(fpsconttopleftelem).left;
+			}
+		}
+		if(fpscounteractive){
+			window.requestAnimationFrame(nextFrame);
+		}
+	}
+	fpscountersetactive = function(active){
+		if(!fpscounteractive && active){
+			window.requestAnimationFrame(nextFrame);
+		}
+		fpscounteractive = active;
+	}
+	fpscountergetactive = function(){
+		return fpscounteractive;
+	}
+	
+	window.requestAnimationFrame(nextFrame);
+
+});
+</script>
+</head>
+<body>
+<input type="file" accept=".json" id="fezmapfileinput" />
+<input type="file" accept=".json" id="fezlvlfileinput"  multiple />
+<p style="position: absolute; top: calc(50vh - 0.5lh); left: calc(50vw - 8ch); z-index: 9999999999; color: red; font-weight: bold; font-size: larger; background-color: white; padding: 1ex; border: 1px solid red;">Work in progress</p>
+<div id="mapcontainer"></div>
+<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
+	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
+	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />
+	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
+</svg>
+<div id="viewsourcebox" style="max-width: 40ch">
+<div id="panrotationtogglebox">
+<a id="panrotationtogglebutton" title="Swap Pan/Rotate" href="#">
+<svg id="panrotationtogglebutton-pan" height="48" width="48" viewbox="0 0 48 48" role="presentation">
+	<path d="M24 0 l10 10h-5v9h9v-5l10,10 -10,10v-5h-9v9h5l-10,10 -10,-10h5v-9h-9v5l-10,-10 10,-10v5h9v-9h-5z" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
+	<text text-anchor="middle" dominant-baseline="central" y="24" x="24" fill="currentColor">Pan</text>
+</svg>
+<svg id="panrotationtogglebutton-rotate" height="48" width="48" viewBox="0 0 48 48" role="presentation">
+	<!--
+	<path d="M19 10h-5l10 -10 10 10h-5v28h5l-10 10 -10 -10h5v-28M10 29v5l-10 -10 10 -10v5h28v-5l10 10 -10 10v-5h-28" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
+	<path d="M17 8h-5l10 -8 10 8h-5q-10 16 0 32h5l-10 8 -10 -8h5q-11 -16 0 -32M8 32v5l-8 -10 8 -10v5q16 2 32 0v-5l8 10 -8 10v-5q-16 2 -32 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
+	-->
+	<path d="M20 7l-5 -1 13 -6 7 10 -5 -1q-10 15 0 30l5 -1 -7 10 -13 -6 5 -1q-11 -17 0 -34M7.5 30l-0.5 5 -7 -11 9 -9 -0.5 5q15.5 2 31 0l-0.5 -5 9 9 -7 11 -0.5 -5q-16.5 2 -33 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
+	<text text-anchor="middle" dominant-baseline="central" y="24.5" x="24" fill="currentColor">Rotate</text>
+</svg>
+<svg id="panrotationtogglebutton-tinyswapicon" height="48" width="48" viewbox="0 0 48 48" role="presentation">
+	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor" />
+	<!-- TODO make the swap icon nicer -->
+</svg>
+</a>
+<script style="display: none;">
+document.addEventListener("DOMContentLoaded",function(){
+	document.getElementById("panrotationtogglebutton").addEventListener("click", function(){
+		mapViewer.swapPanRotate = !mapViewer.swapPanRotate;
+		var s = document.getElementById("map_setting_swapPanRotate");
+		s.checked = mapViewer.swapPanRotate;
+		s.dispatchEvent(new Event("change"))
+	});
+});
+</script>
+</div>
+This web app created by <span id="createdbyspan">Jenna Sloan</span>
+Last Modified: <span id="lastmodifiedspan"></span>
+<a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezWorldMapViewer/blob/main/FezWorldMapViewer.html">
+<!--img src="https://github.githubassets.com/favicons/favicon-dark.png" style="height: 1lh; vertical-align: bottom;padding-inline-end: 0.5ex;"/-->View Source
+<span> on GitHub</span><!--span>🔗&#xFE0F;</span--><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
+0 48 48">
+<path d="M36 24c-1.2 0-2 0.8-2 2v12c0 1.2-0.8 2-2 2h-22c-1.2
+0-2-0.8-2-2v-22c0-1.2 0.8-2 2-2h12c1.2 0 2-0.8 2-2s-0.8-2-2-2h-12c-3.4
+0-6 2.6-6 6v22c0 3.4 2.6 6 6 6h22c3.4 0 6-2.6
+6-6v-12c0-1.2-0.8-2-2-2z"></path>
+<path d="M43.8 5.2c-0.2-0.4-0.6-0.8-1-1-0.2-0.2-0.6-0.2-0.8-0.2h-12c-1.2
+0-2 0.8-2 2s0.8 2 2 2h7.2l-18.6 18.6c-0.8 0.8-0.8 2 0 2.8 0.4 0.4 0.8
+0.6 1.4 0.6s1-0.2 1.4-0.6l18.6-18.6v7.2c0 1.2 0.8 2 2 2s2-0.8
+2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
+</svg></span>
+</a>
+</div>
+<noscript>
+This page requires JavaScript
+</noscript>
+</body>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+	try{
+		var lm = document.getElementById("lastmodifiedspan");
+		lm.textContent = (new Date(document.lastModified)).toISOString();
+		lm.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+	try{
+		var cb = document.getElementById("createdbyspan");
+		cb.textContent = Array.from(document.getElementsByTagName("meta"))
+				.filter(function(a){var n=a.getAttribute("name"); return n && n.toLowerCase()==="author";})
+				.map(a=>a.getAttribute("content"))
+				.join(", ");
+		cb.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+});
+
+function GetGithubSourceHref(){
+	let h=window.location.hostname.split(".");
+	let p=window.location.pathname.split("/").filter(a=>a.length>0);
+	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+(p[1] ?? "index.html");
+}
+if(window.location.hostname){
+	let href = GetGithubSourceHref();
+	if(href){
+		document.getElementById("viewsource").href = href;
+	}
+}
+//Array.from(document.styleSheets).map(ss=>[ss.ownerNode.id,Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="").map(r=>[r.style?.zIndex])])
+//Array.from(document.styleSheets).flatMap(ss=>Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="" && !Number.isNaN(Number(r.style?.zIndex))).map(r=>[r.selectorText,Number(r.style?.zIndex)])).sort((a,b)=>{var k=Number(a[1])-Number(b[1]);return Number.isNaN(k)?1:k;})
+</script>
+</html>
