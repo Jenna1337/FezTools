@@ -47,7 +47,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	const nodeOutlineSizeMultiplier = 2;
 	const sharedLinkNodeContainer = true;
 	const unscaleicons = true;
-	const addhiddenicons = false;
+	const addhiddenicons = true;
 	const dolinkoverlapcheck = true;
 	
 	var CurrentNode;
