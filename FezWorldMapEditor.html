@@ -221,8 +221,36 @@ function GetAllWorldData(maptree,LinkThickness,fullcube){
 	allworlddata = Object.entries(allworlddata).filter(a=>(typeof({}))===(typeof(a[1]))).sort((a,b)=>a[0].localeCompare(b[0])).map(a=>a[1]);
 	return {"worldmap":worldmap,"allworlddata":allworlddata};
 }
-function ReloadFileInfoAndRebuildMap(){
-	let maptree = defaultmaptree;
+async function ReloadFileInfoAndRebuildMap(defaultmap=false){
+	let maptree = null;
+	
+	let mapfile = document.getElementById("fezmapfileinput").files[0];
+	if(mapfile){
+		mapfile = await mapfile.text().then(a=>JSON.parse(a));
+	}else{
+		mapfile = null;
+	}
+	//TODO figure out how to load the files 
+	let lvlfiles = document.getElementById("fezlvlfileinput").files;
+	if(lvlfiles[0]){
+		async function s(a){
+			return await a.text().then(b=>JSON.parse(b));
+		}
+		z=Array.from(lvlfiles).map(a=>Object(s(a)))
+		debugger
+		//lvlfiles = JSON.parse(await lvlfiles.files[0].text()) : null;
+	}else{
+		lvlfiles = {};
+	}
+	
+	let tsfiles = document.getElementById("feztsfileinput");
+	
+	
+	if(defaultmap || !mapfile){
+		maptree = JSON.parse(JSON.stringify(defaultmaptree));
+	}else{
+		maptree = mapfile;
+	}
 	
 	//resolve node references
 	Object.entries(maptree).map(([k,a])=>a.Connections.forEach((c,i)=>{
@@ -243,6 +271,7 @@ function RebuildMap(maptree){
 	mapViewer = MapViewer3D(maptree, allworlddata, worldmap, document.getElementById("mapcontainer"));
 }
 document.addEventListener("DOMContentLoaded",()=>{
+	initMenubars(menubarbars);
 	ReloadFileInfoAndRebuildMap();
 })
 fpsconttopleftelemname = "mapdebuginfo";
@@ -292,7 +321,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>((Number(a[0])+xoffset)*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
 		document.getElementById("fpschartavg").setAttribute("d", "M 0,"+chartavg+"h"+fpschartwidth);
 		
-		{
+		if((typeof fpsconttopleftelemname)!==(typeof undefined)){
 			let fpsconttopleftelem = document.getElementById(fpsconttopleftelemname);
 			if(fpsconttopleftelem){
 				fpscont.style.top = window.getComputedStyle(fpsconttopleftelem).height;
@@ -317,13 +346,107 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 });
 </script>
+<!--Generates that lovely menubar-->
+<link rel='stylesheet' href='MenubarStyleSheet.css' id="MenubarStyleSheet" />
+<script src="MenubarGenerator.js" id="MenubarGenerator"></script>
+<script id="TheActualMenubars">
+var menubarbars = {
+	'menubar1': [
+		{
+			text: 'Game',
+			accessKey: 'G',
+			entries: [
+				{
+					text: 'New',
+					fun: (e)=>{
+						ReloadFileInfoAndRebuildMap(true);
+					},
+					accessKey: 'N',
+					shortcutkey: "F2",
+				},
+				{
+					separator: true,
+				},
+				{
+					text: 'Load fezmap file...',
+					fun: (e)=>{
+						document.getElementById("fezmapfileinput").click();
+					},
+					accessKey: 'm',
+				},
+				{
+					text: 'Load fezlvl files...',
+					fun: (e)=>{
+						document.getElementById("fezlvlfileinput").click();
+					},
+					accessKey: 'l',
+				},
+				{
+					text: 'Load fezts files...',
+					fun: (e)=>{
+						document.getElementById("feztsfileinput").click();
+					},
+					accessKey: 't',
+				},
+				{
+					separator: true,
+				},
+				{
+					text: 'Reload Files And Rebuild Map ',
+					fun: (e)=>{
+						ReloadFileInfoAndRebuildMap();
+					},
+					accessKey: 'R',
+					shortcutkey: "F3",
+				},/*
+				{
+					separator: true,
+				},
+				{
+					text: 'Exit',
+					fun: (e)=>{
+						//TODO
+					},
+					accessKey: 'x',
+				},*/
+			],
+		},
+		{
+			text: 'Help',
+			accessKey: 'H',
+			entries: [
+				{
+					text: 'Contents',
+					fun: (e)=>{
+						//TODO
+					},
+					accessKey: 'C',
+					shortcutkey: "F1",
+				},
+				{
+					text: 'About...',
+					fun: ()=>{
+						//TODO
+					},
+					accessKey: 'A',
+				},
+			],
+		},
+	],
+};
+</script>
 </head>
 <body>
-<input type="file" accept=".json" id="fezmapfileinput" />
-<input type="file" accept=".json" id="fezlvlfileinput"  multiple />
+<div id="menubar">
+<div id="menubar1" style="--tableborder: none;"><!-- menubar loads here --></div>
+<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="fezmapfileinput" />
+<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="fezlvlfileinput"  multiple />
+<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="feztsfileinput"  multiple />
+</div>
 <p style="position: absolute; top: calc(50vh - 0.5lh); left: calc(50vw - 8ch); z-index: 9999999999; color: red; font-weight: bold; font-size: larger; background-color: white; padding: 1ex; border: 1px solid red;">Work in progress</p>
-<div id="mapcontainer"></div>
-<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
+<div id="mapviewerbox">
+<div id="mapcontainer" style="height: calc(100vh - 2.2rlh); translate: 0 2.2rlh;"></div>
+<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none; translate: 0 2lh;">
 	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />
 	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
@@ -375,6 +498,7 @@ Last Modified: <span id="lastmodifiedspan"></span>
 2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
 </svg></span>
 </a>
+</div>
 </div>
 <noscript>
 This page requires JavaScript
