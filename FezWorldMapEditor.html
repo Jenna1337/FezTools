@@ -230,26 +230,68 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	}else{
 		mapfile = null;
 	}
-	//TODO figure out how to load the files 
-	let lvlfiles = document.getElementById("fezlvlfileinput").files;
-	if(lvlfiles[0]){
-		async function s(a){
-			return await a.text().then(b=>JSON.parse(b));
-		}
-		z=Array.from(lvlfiles).map(a=>Object(s(a)))
-		debugger
-		//lvlfiles = JSON.parse(await lvlfiles.files[0].text()) : null;
-	}else{
-		lvlfiles = {};
-	}
-	
-	let tsfiles = document.getElementById("feztsfileinput");
-	
-	
 	if(defaultmap || !mapfile){
 		maptree = JSON.parse(JSON.stringify(defaultmaptree));
 	}else{
 		maptree = mapfile;
+	}
+	
+	let trilesets = {};
+	{
+		const tsfiles = document.getElementById("feztsfileinput").files;
+		if(tsfiles[0]){
+			for(let i=0;i<tsfiles.length;++i){
+				let k = await tsfiles[i].text().then(b=>JSON.parse(b));
+				if(k.Name && k.Triles){
+					trilesets[k.Name.toUpperCase()] = k.Triles;
+				}else{
+					if(!k.Name){
+						console.log("Bad Name field in file \""+tsfiles[i].name+"\"");
+					}else{
+						console.log("No Triles specified in file \""+tsfiles[i].name+"\"");
+					}
+					//TODO add proper error handling
+				}
+			}
+		}
+	}
+	
+	let lvlfiles = document.getElementById("fezlvlfileinput").files;
+	if(lvlfiles[0]){
+		let z=[];
+		for(let i=0;i<lvlfiles.length;++i){
+			let k = await lvlfiles[i].text().then(b=>JSON.parse(b));
+			let tsname = k?.TrileSetName?.toUpperCase();
+			let ts = trilesets[tsname];
+			if(ts){
+				k.Triles = k.Triles.map(t=>{
+					let ti = ts[t.Id];
+					return Object.assign({},t,ti);
+				});
+			}else{
+				if(tsname){
+					console.log("Trile set not found: \""+tsname+"\" in \""+lvlfiles[i].name+"\"");
+				}else{
+					console.log("No trile set specified in file \""+lvlfiles[i].name+"\"");
+				}
+				//TODO add proper error handling
+			}
+			
+			z.push(k);
+		}
+		lvlfiles = z;
+	}else{
+		lvlfiles = [];
+	}
+	
+	{
+		let maptreeentries = Object.entries(maptree);
+		lvlfiles.forEach(lvl=>{
+			let maptreekey,maptreeentry,conds;
+			[maptreekey,maptreeentry] = maptreeentries.find(a=>a[1].LevelName===lvl.Name);
+			conds = maptreeentry.Conditions;
+			debugger
+		});
 	}
 	
 	//resolve node references
