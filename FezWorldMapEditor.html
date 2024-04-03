@@ -168,6 +168,7 @@ noscript {
 	font-weight: normal !important;
 }
 </style>
+<script src="FezUtils.js" id="FezUtils"></script>
 <script src="WorldMap.js" id="WorldMap"></script>
 <script src="jsonToElements.js" id="jsonToElements"></script>
 <script src="MapViewer3D.js" id="MapViewer3D"></script>
@@ -236,62 +237,145 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		maptree = mapfile;
 	}
 	
-	let trilesets = {};
 	{
-		const tsfiles = document.getElementById("feztsfileinput").files;
-		if(tsfiles[0]){
-			for(let i=0;i<tsfiles.length;++i){
-				let k = await tsfiles[i].text().then(b=>JSON.parse(b));
-				if(k.Name && k.Triles){
-					trilesets[k.Name.toUpperCase()] = k.Triles;
-				}else{
-					if(!k.Name){
-						console.log("Bad Name field in file \""+tsfiles[i].name+"\"");
-					}else{
-						console.log("No Triles specified in file \""+tsfiles[i].name+"\"");
-					}
-					//TODO add proper error handling
+		let TreeFillContext = {};
+		// string LevelName -> MapNode
+		TreeFillContext.LoadedNodes = {};
+		
+		// string TrileSetName -> TrileSet
+		TreeFillContext.TrileSetCache = {};
+		
+		//Fill function from FezEngine.Structure.MapNode
+		function Fill(context, parent, origin)
+		{
+			if (Valid)
+			{
+				return;
+			}
+			var trileSet = null;
+			var level;
+			try
+			{
+				level = await Array.prototype.find.call(document.getElementById("fezlvlfileinput").files,l=>l.name.toLowerCase()===LevelName.toLowerCase()+".fezlvl.json").text().then(a=>JSON.parse(a));
+				if (level.TrileSetName != null && !(trileSet=context.TrileSetCache[level.TrileSetName]))
+				{
+					context.TrileSetCache.push(level.TrileSetName, trileSet = await Array.prototype.find.call(document.getElementById("feztsfileinput").files,l=>l.name.toLowerCase()===TrileSetName.toLowerCase()+".fezts.json").text().then(a=>JSON.parse(a)););
 				}
 			}
-		}
-	}
-	
-	let lvlfiles = document.getElementById("fezlvlfileinput").files;
-	if(lvlfiles[0]){
-		let z=[];
-		for(let i=0;i<lvlfiles.length;++i){
-			let k = await lvlfiles[i].text().then(b=>JSON.parse(b));
-			let tsname = k?.TrileSetName?.toUpperCase();
-			let ts = trilesets[tsname];
-			if(ts){
-				k.Triles = k.Triles.map(t=>{
-					let ti = ts[t.Id];
-					return Object.assign({},t,ti);
-				});
-			}else{
-				if(tsname){
-					console.log("Trile set not found: \""+tsname+"\" in \""+lvlfiles[i].name+"\"");
-				}else{
-					console.log("No trile set specified in file \""+lvlfiles[i].name+"\"");
-				}
-				//TODO add proper error handling
+			catch (Exception)
+			{
+				Console.WriteLine("Warning : Level " + LevelName + " could not be loaded because it has invalid markup. Skipping...");
+				Valid = false;
+				return;
 			}
+			let MapNode = {};
+			let Conditions = {};
+			MapNode.Conditions = Conditions;
+			MapNode.NodeType = level.NodeType;
 			
-			z.push(k);
-		}
-		lvlfiles = z;
-	}else{
-		lvlfiles = [];
-	}
-	
-	{
-		let maptreeentries = Object.entries(maptree);
-		lvlfiles.forEach(lvl=>{
-			let maptreekey,maptreeentry,conds;
-			[maptreekey,maptreeentry] = maptreeentries.find(a=>a[1].LevelName===lvl.Name);
-			conds = maptreeentry.Conditions;
 			debugger
-		});
+				/*
+				Conditions.ChestCount = level.ArtObjects.Values.Count((ArtObjectInstance x) => x.ArtObjectName.IndexOf("treasure", StringComparison.InvariantCultureIgnoreCase) != -1) / 2;
+				Conditions.ScriptIds = (from x in level.Scripts.Values
+					where x.IsWinCondition
+					select x.Id).ToList();
+				Conditions.SplitUpCount = level.Triles.Values.Union(level.Triles.Values.Where((TrileInstance x) => x.Overlaps).SelectMany((TrileInstance x) => x.OverlappedTriles)).Count((TrileInstance x) => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type == ActorType.GoldenCube);
+				Conditions.CubeShardCount = level.Triles.Values.Count((TrileInstance x) => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type == ActorType.CubeShard);
+				Conditions.OtherCollectibleCount = level.Triles.Values.Count((TrileInstance x) => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type.IsTreasure() && trileSet[x.TrileId].ActorSettings.Type != ActorType.CubeShard) + level.ArtObjects.Values.Count((ArtObjectInstance x) => x.ArtObjectName == "treasure_mapAO");
+				Conditions.LockedDoorCount = level.Triles.Values.Count((TrileInstance x) => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type == ActorType.Door);
+				Conditions.UnlockedDoorCount = level.Triles.Values.Count((TrileInstance x) => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type == ActorType.UnlockedDoor);
+				int num = level.ArtObjects.Count((KeyValuePair<int, ArtObjectInstance> x) => x.Value.ArtObjectName.IndexOf("fork", StringComparison.InvariantCultureIgnoreCase) != -1);
+				int num2 = level.ArtObjects.Count((KeyValuePair<int, ArtObjectInstance> x) => x.Value.ArtObjectName.IndexOf("qr", StringComparison.InvariantCultureIgnoreCase) != -1);
+				int num3 = level.Volumes.Count((KeyValuePair<int, Volume> x) => x.Value.ActorSettings != null && x.Value.ActorSettings.CodePattern != null && x.Value.ActorSettings.CodePattern.Length != 0);
+				int num4 = ((!(LevelName == "OWL")) ? level.NonPlayerCharacters.Count((KeyValuePair<int, NpcInstance> x) => x.Value.Name == "Owl") : 0);
+				int num5 = level.ArtObjects.Count((KeyValuePair<int, ArtObjectInstance> x) => x.Value.ArtObjectName.Contains("BIT_DOOR") && !x.Value.ArtObjectName.Contains("BROKEN"));
+				int num6 = level.Scripts.Values.Count((Script s) => s.Actions.Any((ScriptAction a) => a.Object.Type == "Level" && a.Operation == "ResolvePuzzle"));
+				int num7 = (PuzzleLevels.Contains(LevelName) ? ((!(LevelName == "CLOCK")) ? 1 : 4) : 0);
+				Conditions.SecretCount = num + num2 + num3 + num4 + num6 + num7 + num5;
+				HasLesserGate = level.ArtObjects.Values.Any((ArtObjectInstance x) => x.ArtObjectName.IndexOf("lesser_gate", StringComparison.InvariantCultureIgnoreCase) != -1 && x.ArtObjectName.IndexOf("base", StringComparison.InvariantCultureIgnoreCase) == -1);
+				HasWarpGate = level.ArtObjects.Values.Any((ArtObjectInstance x) => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
+				*/
+			/*foreach (Script value5 in level.Scripts.Values)
+			{
+				foreach (ScriptAction action in value5.Actions)
+				{
+					if (!(action.Object.Type == "Level") || !action.Operation.Contains("Level"))
+					{
+						continue;
+					}
+					Connection connection = new Connection();
+					bool flag = true;
+					foreach (ScriptTrigger trigger in value5.Triggers)
+					{
+						if (trigger.Object.Type == "Volume" && trigger.Event == "Enter" && trigger.Object.Identifier.HasValue)
+						{
+							int value = trigger.Object.Identifier.Value;
+							if (!level.Volumes.TryGetValue(value, out var value2))
+							{
+								Console.WriteLine("Warning : A level-changing script links to a nonexistent volume in " + LevelName + " (Volume Id #" + value + ")");
+								flag = false;
+							}
+							else if (value2.ActorSettings != null && value2.ActorSettings.IsSecretPassage)
+							{
+								flag = false;
+							}
+							else
+							{
+								connection.Face = value2.Orientations.First();
+							}
+							break;
+						}
+					}
+					if (!flag)
+					{
+						continue;
+					}
+					let text = ((action.Operation == "ReturnToLastLevel") ? parent.LevelName : action.Arguments[0]);
+					switch (text)
+					{
+					case "THRONE":
+						if (LevelName == "ZU_CITY_RUINS")
+						{
+							continue;
+						}
+						break;
+					case "PYRAMID":
+					case "CABIN_INTERIOR_A":
+						continue;
+					}
+					if (text == "ZU_CITY_RUINS" && LevelName == "THRONE")
+					{
+						continue;
+					}
+					if (context.LoadedNodes.TryGetValue(text, out var value3))
+					{
+						break;
+					}
+					value3 = new MapNode
+					{
+						LevelName = text
+					};
+					context.LoadedNodes.push(text, value3);
+					connection.Node = value3;
+					if (connection.Node != parent)
+					{
+						if (parent != null && origin == connection.Face)
+						{
+							connection.Face = origin.GetOpposite();
+						}
+						Connections.push(connection);
+					}
+					break;
+				}
+			}
+			Valid = true;
+			foreach (var connection2 in Connections)
+			{
+				connection2.Node.Fill(context, this, connection2.Face);
+			}*/
+		}
+		let Root = { LevelName: "NATURE_HUB" };
+		Fill(TreeFillContext, null, 
 	}
 	
 	//resolve node references
