@@ -266,7 +266,35 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		const DEFAULT_INT_VALUE = 0;
 		const DEFAULT_BOOL_VALUE = false;
 		const DEFAULT_OBJ_VALUE = null;
+		
+		const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
+		const DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
+		const OppositeLevels = [
+			"NUZU_SCHOOL", "NUZU_ABANDONED_A", "ZU_HOUSE_EMPTY_B", "PURPLE_LODGE", "ZU_HOUSE_SCAFFOLDING", "MINE_BOMB_PILLAR", "CMY_B", "INDUSTRIAL_HUB", "SUPERSPIN_CAVE", "GRAVE_LESSER_GATE",
+			"THRONE", "VISITOR", "ORRERY", "LAVA_SKULL", "LAVA_FORK"
+		];
+		const BackLevels = [ "ABANDONED_B", "LAVA" ];
+		const LeftLevels = [];
+		const FrontLevels = [ "VILLAGEVILLE_3D", "ZU_LIBRARY" ];
+		const RightLevels = [ "WALL_SCHOOL", "WALL_KITCHEN", "WALL_INTERIOR_HOLE", "WALL_INTERIOR_B", "WALL_INTERIOR_A" ];
 		const PuzzleLevels = [ "ZU_ZUISH", "ZU_UNFOLD", "BELL_TOWER", "CLOCK", "ZU_TETRIS" ];
+		const OversizeLinks = {
+			"SEWER_START": 5.5,
+			"TREE": 1.25,
+			"TREE_SKY": 1,
+			"INDUSTRIAL_HUB": 0.5,
+			"VILLAGEVILLE_3D": -0.5,
+			"WALL_VILLAGE": 0.5,
+			"ZU_CITY": 0.5,
+			"INDUSTRIAL_CITY": 0.5,
+			"MEMORY_CORE": 0.5,
+			"BIG_TOWER": 0.5,
+			"STARGATE": -0.5,
+			"WATERFALL": 0.25,
+			"BELL_TOWER": 0.25,
+			"LIGHTHOUSE": 0.25,
+			"ARCH": 0.25
+		};
 		
 		class WinConditions{
 			constructor(){
@@ -330,39 +358,38 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				}
 				this.NodeType = level.NodeType;
 				
-				//destructure Action, Conditions, and Triggers
-				function destructureScript(scriptstring){
-					console.log(scriptstring);
-					return "";
+				function parseNullableInt(val){
+					return ({ "HasValue": Boolean(val), "Value": Number(val)});
 				}
+				//destructure Action, Conditions, and Triggers
 				level.Scripts = Object.fromEntries(Object.entries(level.Scripts).map(script => {
 					script[1].Triggers = script[1].Triggers.map(s=>{
 						let trigger = {"Object":{"Type":null,"Identifier":null}, "Event": null};
-						let e = s.match(/(?<ObjectType>\w+)(?<ObjectIdentifier>\[\d+\])?\.(?<Event>\w+)/);
-						trigger.Object.Type = e.groups.ObjectType;
-						trigger.Object.Identifier = e.groups.ObjectIdentifier;
-						trigger.Event = e.groups.Event;
+						let m = s.match(/(?<ObjectType>\w+)(?:\[(?<ObjectIdentifier>[+-]?\d+)\])?\.(?<Event>\w+)/);
+						trigger.Object.Type = m.groups.ObjectType;
+						trigger.Object.Identifier = parseNullableInt(m.groups.ObjectIdentifier);
+						trigger.Event = m.groups.Event;
 						return trigger;
 					});
 					script[1].Conditions = script[1].Conditions.map(s=>{
 						//console.log(s);//note: does not support add Operator and Value
 						let condition = {"Object":{"Type":null,"Identifier":null}, "Property": null, "Operator": null, "Value":null};
-						let e = s.match(/(?<ObjectType>\w+)(?<ObjectIdentifier>\[\d+\])?\.(?<Property>\w+)/);
-						condition.Object.Type = e.groups.ObjectType;
-						condition.Object.Identifier = e.groups.ObjectIdentifier;
-						condition.Property = e.groups.Property;
-						condition.Operator = e.groups.Operator;
-						condition.Value = e.groups.Value;
+						let m = s.match(/(?<ObjectType>\w+)(?:\[(?<ObjectIdentifier>[+-]?\d+)\])?\.(?<Property>\w+)/);
+						condition.Object.Type = m.groups.ObjectType;
+						condition.Object.Identifier = parseNullableInt(m.groups.ObjectIdentifier);
+						condition.Property = m.groups.Property;
+						condition.Operator = m.groups.Operator;
+						condition.Value = m.groups.Value;
 						return condition;
 					});
 					script[1].Actions = script[1].Actions.map(s=>{
 						//note: does not support Killswitch and Blocking
 						let action = {"Object":{"Type":null,"Identifier":null}, "Operation": null, "Arguments":[]};
-						let e = s.match(/(?<ObjectType>\w+)(?<ObjectIdentifier>\[\d+\])?\.(?<Operation>\w+)\((?<Arguments>.*?)\)/);
-						action.Object.Type = e.groups.ObjectType;
-						action.Object.Identifier = e.groups.ObjectIdentifier;
-						action.Operation = e.groups.Operation;
-						action.Arguments = e.groups.Arguments.split(",").map(a=>a.trim());
+						let m = s.match(/(?<ObjectType>\w+)(?:\[(?<ObjectIdentifier>[+-]?\d+)\])?\.(?<Operation>\w+)\((?<Arguments>.*?)\)/);
+						action.Object.Type = m.groups.ObjectType;
+						action.Object.Identifier = parseNullableInt(m.groups.ObjectIdentifier);
+						action.Operation = m.groups.Operation;
+						action.Arguments = m.groups.Arguments.split(",").map(a=>a.trim());
 						return action;
 					});
 					
@@ -395,7 +422,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				let ArtObjectValues = Object.values(level.ArtObjects);
 				let TrilesValues = Object.values(level.Triles);
 				
-				this.Conditions.ChestCount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1) / 2;
+				this.Conditions.ChestCount = Math.floor(ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1) / 2);
 				this.Conditions.ScriptIds = Object.entries(level.Scripts).filter(x=>x[1].IsWinCondition).map(x=>x[0]);
 				
 				//Note: as per https://fezmodding.github.io/wiki/content/formats/fezlvl#format-differences ,
@@ -461,11 +488,16 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								}
 								else if (value2.ActorSettings != null && value2.ActorSettings.IsSecretPassage)
 								{
+									//TODO handle secret passages so they can appear on the MapViewer3D
 									flag = false;
 								}
 								else
 								{
-									connection.Face = value2.Orientations.First();
+									if(action.Operation == "AllowPipeChangeLevel"){
+										connection.Face = FaceOrientation.Down;
+									}else{
+										connection.Face = value2.Orientations[0];
+									}
 								}
 								break;
 							}
@@ -474,17 +506,15 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 						{
 							continue;
 						}
-						switch (targetlevelname)
-						{
-						case "THRONE":
-							if (this.LevelName == "ZU_CITY_RUINS")
-							{
+						switch(targetlevelname){
+							case "THRONE":
+								if(this.LevelName == "ZU_CITY_RUINS"){
+									continue;
+								}
+								break;
+							case "PYRAMID":
+							case "CABIN_INTERIOR_A":
 								continue;
-							}
-							break;
-						case "PYRAMID":
-						case "CABIN_INTERIOR_A":
-							continue;
 						}
 						if (targetlevelname == "ZU_CITY_RUINS" && this.LevelName == "THRONE")
 						{
@@ -504,6 +534,27 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 							{
 								connection.Face = origin.GetOpposite();
 							}
+							
+							if(UpLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Top;
+							}else if(DownLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Down;
+							}else if(OppositeLevels.includes(targetlevelname)){
+								connection.Face = connection.Face.GetOpposite();
+							}else if(BackLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Back;
+							}else if(LeftLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Left;
+							}else if(RightLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Right;
+							}else if(FrontLevels.includes(targetlevelname)){
+								connection.Face = FaceOrientation.Front;
+							}
+							
+							if(OversizeLinks.hasOwnProperty(targetlevelname)){
+								connection.BranchOversize = OversizeLinks[targetlevelname];
+							}
+							
 							this.Connections.push(connection);
 						}
 						break;
