@@ -222,8 +222,8 @@ function GetAllWorldData(maptree,LinkThickness,fullcube){
 	allworlddata = Object.entries(allworlddata).filter(a=>(typeof({}))===(typeof(a[1]))).sort((a,b)=>a[0].localeCompare(b[0])).map(a=>a[1]);
 	return {"worldmap":worldmap,"allworlddata":allworlddata};
 }
-const ADD_EXTRA_INFO = true;
-const HIDE_INVALID_NODES = false;
+var ADD_EXTRA_INFO = true;
+var HIDE_INVALID_NODES = true;
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	let maptree = null;
 	
@@ -542,7 +542,14 @@ function RebuildMap(maptree){
 	allworlddata = GetAllWorldData(maptree,0.05375,true).allworlddata;
 	console.log("allworlddata",allworlddata);
 	
-	mapViewer = MapViewer3D(maptree, allworlddata, worldmap, document.getElementById("mapcontainer"));
+	//remove all event listeners and children
+	let oldmapcontainer = document.getElementById("mapcontainer");
+	let parentContainer = oldmapcontainer.parentElement;
+	let newmapcontainer = oldmapcontainer.cloneNode(false);
+	oldmapcontainer.remove();
+	//child order shouldn't matter
+	parentContainer.appendChild(newmapcontainer);
+	mapViewer = MapViewer3D(maptree, allworlddata, worldmap, newmapcontainer);
 }
 document.addEventListener("DOMContentLoaded",()=>{
 	initMenubars(menubarbars);
@@ -627,8 +634,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
 var menubarbars = {
 	'menubar1': [
 		{
-			text: 'Game',
-			accessKey: 'G',
+			text: 'File',
+			accessKey: 'F',
 			entries: [
 				{
 					text: 'New',
@@ -690,6 +697,34 @@ var menubarbars = {
 					},
 					accessKey: 'x',
 				},*/
+			],
+		},
+		{
+			text: 'View',
+			accessKey: 'V',
+			entries: [
+				{
+					text: 'Hide invalid nodes',
+					fun: (e)=>{
+						HIDE_INVALID_NODES = e.isChecked();
+						ReloadFileInfoAndRebuildMap();
+					},
+					accessKey: 'i',
+					shortcutkey: "F7",
+					toggleable: true,
+					checked: true,
+				},
+				{
+					text: 'Add extra info',
+					fun: (e)=>{
+						ADD_EXTRA_INFO = e.isChecked();
+						ReloadFileInfoAndRebuildMap();
+					},
+					accessKey: 'e',
+					shortcutkey: "F8",
+					toggleable: true,
+					checked: true,
+				},
 			],
 		},
 		{
