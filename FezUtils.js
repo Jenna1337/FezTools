@@ -1,3 +1,7 @@
+Array.prototype.count = function(condwhere){
+	return this.filter(condwhere).length;
+}
+
 class Matrix{
 	constructor(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44){
 		this.M11=m11;
@@ -140,4 +144,23 @@ String.prototype.AsVector = function()
 	}
 }
 
+String.prototype.IsTreasure = function()
+{
+	switch (String(this))
+	{
+		case "CubeShard":
+		case "SkeletonKey":
+		case "NumberCube":
+		case "LetterCube":
+		case "TriSkull":
+		case "Tome":
+		case "SecretCube":
+		case "TreasureMap":
+		case "Mail":
+		case "PieceOfHeart":
+			return true;
+		default:
+			return false;
+	}
+}
 

@@ -222,6 +222,8 @@ function GetAllWorldData(maptree,LinkThickness,fullcube){
 	allworlddata = Object.entries(allworlddata).filter(a=>(typeof({}))===(typeof(a[1]))).sort((a,b)=>a[0].localeCompare(b[0])).map(a=>a[1]);
 	return {"worldmap":worldmap,"allworlddata":allworlddata};
 }
+const ADD_EXTRA_INFO = true;
+const HIDE_INVALID_NODES = false;
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	let maptree = null;
 	
@@ -256,6 +258,9 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		
 		// string TrileSetName -> TrileSet
 		treeFillContext.TrileSetCache = {};
+		
+		// string filename -> ArtObjectInstance
+		treeFillContext.ArtObjectCache = {};
 		
 		const Hub = "NATURE_HUB";
 		const DEFAULT_INT_VALUE = 0;
@@ -366,33 +371,63 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				
 				level.Triles = level.Triles.map(t=>{
 					t.TrileId = t.Id;
-					t.TrileId = t.Id;
+					if(t.Overlaps){
+						debugger
+					}
 					return t;
 				});
-				level.ArtObjects = Object.fromEntries(Object.entries(level.ArtObjects).map(ao=>{
-					ao[1].ArtObjectName = ao[1].Name;
-					//TODO instantiate ArtObjects
-					return ao;
-				}));
+				for(let i in level.ArtObjects){
+					let ao = level.ArtObjects[i];
+					if((typeof ao)!=(typeof ({}))){
+						continue;
+					}
+					var aoInstance = null;
+					if (ao.Name != null && !(aoInstance=context.ArtObjectCache[ao.Name]))
+					{
+						let artobjectfilename = ao.Name.toLowerCase()+".fezao.json";
+						context.ArtObjectCache[ao.Name] = 
+							aoInstance = await Array.prototype.find.call(document.getElementById("fezaofileinput").files,l=>(l.name.toLowerCase()===artobjectfilename)).text().then(a=>JSON.parse(a));
+					}
+					ao.ArtObjectName = aoInstance.Name.toUpperCase();
+					ao.Type = aoInstance.ActorType;
+					level.ArtObjects[i] = ao;
+				}
+				let ArtObjectValues = Object.values(level.ArtObjects);
+				let TrilesValues = Object.values(level.Triles);
 				
-				this.Conditions.ChestCount = Object.values(level.ArtObjects).filter(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1).length / 2;
+				this.Conditions.ChestCount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1) / 2;
 				this.Conditions.ScriptIds = Object.entries(level.Scripts).filter(x=>x[1].IsWinCondition).map(x=>x[0]);
 				
-				this.Conditions.SplitUpCount = null//Object.values(level.Triles).Union(level.Triles.Values.Where(x => x.Overlaps).SelectMany(x => x.OverlappedTriles)).Count(x => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type == ActorType.GoldenCube);//TODO
-				this.Conditions.CubeShardCount = Object.values(level.Triles).filter(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "CubeShard").length;
-				this.Conditions.OtherCollectibleCount = null//Object.values(level.Triles).Count(x => x.TrileId >= 0 && trileSet[x.TrileId].ActorSettings.Type.IsTreasure() && trileSet[x.TrileId].ActorSettings.Type != ActorType.CubeShard) + level.ArtObjects.Values.Count((ArtObjectInstance x) => x.ArtObjectName == "treasure_mapAO");//TODO
-				this.Conditions.LockedDoorCount = Object.values(level.Triles).filter(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "Door").length;
-				this.Conditions.UnlockedDoorCount = Object.values(level.Triles).filter(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "UnlockedDoor").length;
-				let forkcount = Object.values(level.ArtObjects).filter(x => x.ArtObjectName.toLowerCase().indexOf("fork") != -1).length;
-				let qrcount = Object.values(level.ArtObjects).filter(x => x.ArtObjectName.toLowerCase().indexOf("qr") != -1).length;
-				let codecount = Object.values(level.Volumes).filter(x => x.ActorSettings != null && x.ActorSettings.CodePattern != null && x.ActorSettings.CodePattern.Length != 0).length;
-				let owlcount = ((!(this.LevelName == "OWL")) ? Object.values(level.NonPlayerCharacters).filter(x => x.Name == "Owl").length : 0);
-				let bitdoorcount = Object.values(level.ArtObjects).filter(x => x.ArtObjectName.includes("BIT_DOOR") && !x.ArtObjectName.includes("BROKEN")).length;
-				let puzzlecount = Object.values(level.Scripts).filter(s => s.Actions.some(a => a.Object.Type == "Level" && a.Operation == "ResolvePuzzle")).length;
+				//Note: as per https://fezmodding.github.io/wiki/content/formats/fezlvl#format-differences ,
+				//  the OverlappedTriles property of TrileInstance has been removed. All overlapped triles are stored in Level's Triles list.
+				this.Conditions.SplitUpCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");//TrilesValues.Union(TrilesValues.Where(x => x.Overlaps).SelectMany(x => x.OverlappedTriles)).count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");
+				this.Conditions.CubeShardCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "CubeShard");
+				this.Conditions.OtherCollectibleCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type.IsTreasure() && trileSet[x.TrileId].Type != "CubeShard") + ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO");
+				
+				this.Conditions.LockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "Door");
+				this.Conditions.UnlockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "UnlockedDoor");
+				
+				let forkcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("fork") != -1);
+				let qrcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("qr") != -1);
+				let codecount = Object.values(level.Volumes).count(x => x.ActorSettings != null && x.ActorSettings.CodePattern != null && x.ActorSettings.CodePattern.length != 0);
+				let owlcount = ((!(this.LevelName == "OWL")) ? Object.values(level.NonPlayerCharacters).count(x => x.Name == "Owl") : 0);
+				let bitdoorcount = ArtObjectValues.count(x => x.ArtObjectName.includes("BIT_DOOR") && !x.ArtObjectName.includes("BROKEN"));
+				let puzzlecount = Object.values(level.Scripts).count(s => s.Actions.some(a => a.Object.Type == "Level" && a.Operation == "ResolvePuzzle"));
 				let hardcodedpuzzlecount = (PuzzleLevels.includes(this.LevelName) ? ((!(this.LevelName == "CLOCK")) ? 1 : 4) : 0);
 				this.Conditions.SecretCount = forkcount + qrcount + codecount + owlcount + bitdoorcount + puzzlecount + hardcodedpuzzlecount;
-				this.HasLesserGate = Object.values(level.ArtObjects).some(x => x.ArtObjectName.toLowerCase().indexOf("lesser_gate") != -1 && x.ArtObjectName.toLowerCase().indexOf("base") == -1);
-				this.HasWarpGate = Object.values(level.ArtObjects).some(x => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
+				
+				this.HasLesserGate = ArtObjectValues.some(x => x.ArtObjectName.toLowerCase().indexOf("lesser_gate") != -1 && x.ArtObjectName.toLowerCase().indexOf("base") == -1);
+				this.HasWarpGate = ArtObjectValues.some(x => x.ArtObjectName.match(/GATE_GRAVEAO|GATEAO|GATE_INDUSTRIALAO|GATE_SEWERAO|ZU_GATEAO|GRAVE_GATEAO/));//.some(x => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
+				
+				if(ADD_EXTRA_INFO){
+					this.forkcount            = forkcount           ;
+					this.qrcount              = qrcount             ;
+					this.codecount            = codecount           ;
+					this.owlcount             = owlcount            ;
+					this.bitdoorcount         = bitdoorcount        ;
+					this.puzzlecount          = puzzlecount         ;
+					this.hardcodedpuzzlecount = hardcodedpuzzlecount;
+				}
 				
 				for(let script of Object.values(level.Scripts))
 				{
@@ -486,7 +521,16 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		treeFillContext.LoadedNodes[Hub] = Root;
 		await Root.Fill(treeFillContext, null, FaceOrientation.Front);
 		
-		maptree = Object.fromEntries(Object.entries(treeFillContext.LoadedNodes).filter(a=>a[1].Valid));
+		maptree = treeFillContext.LoadedNodes;
+		if(HIDE_INVALID_NODES){
+			maptree = Object.fromEntries(Object.entries(maptree)
+				.filter(a=>a[1].Valid)
+				.map(node=>{
+					node[1].Connections = node[1].Connections.filter(c=>c.Node.Valid);
+					return node;
+				})
+			);
+		}
 		maptree[0] = maptree[Hub];
 	}
 	
@@ -676,12 +720,12 @@ var menubarbars = {
 <body>
 <div id="menubar">
 <div id="menubar1" style="--tableborder: none;"><!-- menubar loads here --></div>
-<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="fezmapfileinput" />
-<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="fezlvlfileinput"  multiple />
-<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="feztsfileinput"  multiple />
-<input type="file" accept=".json" oninput="ReloadFileInfoAndRebuildMap()" id="fezaofileinput"  multiple />
+<input type="file" accept=".fezmap.json" oninput="ReloadFileInfoAndRebuildMap()" id="fezmapfileinput" title="fezmapfileinput" />
+<input type="file" accept=".fezlvl.json" oninput="ReloadFileInfoAndRebuildMap()" id="fezlvlfileinput" title="fezlvlfileinput"  multiple />
+<input type="file" accept=".fezts.json" oninput="ReloadFileInfoAndRebuildMap()" id="feztsfileinput"  title="feztsfileinput"  multiple />
+<input type="file" accept=".fezao.json" oninput="ReloadFileInfoAndRebuildMap()" id="fezaofileinput"  title="fezaofileinput"  multiple />
 </div>
-<p style="position: absolute; top: calc(50vh - 0.5lh); left: calc(50vw - 8ch); z-index: 9999999999; color: red; font-weight: bold; font-size: larger; background-color: white; padding: 1ex; border: 1px solid red;">Work in progress</p>
+<!--p style="position: absolute; top: calc(50vh - 0.5lh); left: calc(50vw - 8ch); z-index: 9999999999; color: red; font-weight: bold; font-size: larger; background-color: white; padding: 1ex; border: 1px solid red;">Work in progress</p-->
 <div id="mapviewerbox">
 <div id="mapcontainer" style="height: calc(100vh - 2.2rlh); translate: 0 2.2rlh;"></div>
 <svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none; translate: 0 2lh;">
