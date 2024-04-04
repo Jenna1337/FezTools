@@ -325,7 +325,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		}
 		class Connection{
 			constructor(){
-				this.Face = FaceOrientation[0];
+				this.Face = null;
 				this.Node = DEFAULT_OBJ_VALUE;
 				this.BranchOversize = DEFAULT_INT_VALUE;
 			}
@@ -508,7 +508,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								}
 								else
 								{
-									if(!USE_FEZMAP_INFO){
+									if(!USE_FEZMAP_INFO || connection.Face==null){
 										if(action.Operation == "AllowPipeChangeLevel"){
 											connection.Face = FaceOrientation.Down;
 										}else{
@@ -547,7 +547,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 						connection.Node = value3;
 						if (connection.Node != parent)
 						{
-							if(!USE_FEZMAP_INFO){
+							if(!USE_FEZMAP_INFO || connection.Face==null){
 								if (parent != null && origin == connection.Face)
 								{
 									connection.Face = origin.GetOpposite();
@@ -572,6 +572,9 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								if(OversizeLinks.hasOwnProperty(targetlevelname)){
 									connection.BranchOversize = OversizeLinks[targetlevelname];
 								}
+							}
+							if(connection.Face==null){
+								connection.Face = FaceOrientation[0];
 							}
 							this.Connections.push(connection);
 						}
@@ -630,72 +633,7 @@ fpsconttopleftelemname = "mapdebuginfo";
 // var datasrc = document.querySelectorAll(".primitive.tabledata")
 // var datafieldname = document.querySelectorAll(".primitive.tabledata").previousElementSibling
 </script>
-<script id="fpscounterscript">
-var fpscountersetactive = null;
-var fpscountergetactive = null;
-document.addEventListener("DOMContentLoaded", ()=>{
-	var lastfpstime = 0;
-	var lasttimedifflog = [];
-	var fpscounter = document.getElementById("fpscounter");
-	var mindiff = 99999;
-	var maxfps = 60;
-	const fpscont = document.getElementById("fpscountercontainer");
-	const fpschartelem = document.getElementById("fpschart");
-	
-	//true if using `file` protocol, or reduced motion off and not mobile and more than 8 logical processors
-	var fpscounteractive = !(window.matchMedia("(prefers-reduced-motion)")?.matches??true)//reduced motion off
-			&& (!navigator.userAgent.match(/Mobile/i) && navigator.hardwareConcurrency>=8)//and not mobile and more than 8 logical processors
-			|| window.location.protocol.match(/^file/i);//if using `file` protocol
-	
-	function nextFrame(time){
-		var timediff = time - lastfpstime;
-		lastfpstime = time;
-		if(timediff < mindiff){
-			mindiff = timediff;
-			maxfps = 1000/mindiff;//Math.min(...lasttimedifflog);
-		}
-		lasttimedifflog.push(timediff);
-		var maxframes = Number(fpschartelem.dataset["maxlasttimediffloglen"]);
-		while(lasttimedifflog.length > maxframes){
-			lasttimedifflog.shift()
-		}
-		const fpschartwidth = Number(fpscont.getAttribute("width"));
-		const fpschartheight = Number(fpscont.getAttribute("height"));
-		var fpschartwidthmulti = fpschartwidth/maxframes;
-		var fpschartheightmulti = Math.floor(fpschartheight/maxfps);
-		var fpsavg = (1000/(lasttimedifflog.reduce((a,b)=>a+b)/lasttimedifflog.length)).toFixed(5);
-		var chartavg = fpsavg*fpschartheightmulti;
-		var xoffset = maxframes-lasttimedifflog.length;
-		fpscounter.textContent = fpsavg + " fps avg (last "+lasttimedifflog.length+" frames)\n"
-		                 + (1000/timediff).toFixed(5) + " fps";
-		fpschartelem.setAttribute("d", "M"+Object.entries(lasttimedifflog).map(a=>((Number(a[0])+xoffset)*fpschartwidthmulti+","+(1000/a[1]*fpschartheightmulti).toFixed(3))).join(" "));
-		document.getElementById("fpschartavg").setAttribute("d", "M 0,"+chartavg+"h"+fpschartwidth);
-		
-		if((typeof fpsconttopleftelemname)!==(typeof undefined)){
-			let fpsconttopleftelem = document.getElementById(fpsconttopleftelemname);
-			if(fpsconttopleftelem){
-				fpscont.style.top = window.getComputedStyle(fpsconttopleftelem).height;
-				fpscont.style.left = window.getComputedStyle(fpsconttopleftelem).left;
-			}
-		}
-		if(fpscounteractive){
-			window.requestAnimationFrame(nextFrame);
-		}
-	}
-	fpscountersetactive = function(active){
-		if(!fpscounteractive && active){
-			window.requestAnimationFrame(nextFrame);
-		}
-		fpscounteractive = active;
-	}
-	fpscountergetactive = function(){
-		return fpscounteractive;
-	}
-	
-	window.requestAnimationFrame(nextFrame);
-
-});
-</script>
+<script src="fpscounterscript.js" id="fpscounterscript"></script>
 <!--Generates that lovely menubar-->
 <link rel='stylesheet' href='MenubarStyleSheet.css' id="MenubarStyleSheet" />
 <script src="MenubarGenerator.js" id="MenubarGenerator"></script>
@@ -871,8 +809,8 @@ document.addEventListener("DOMContentLoaded",function(){
 This web app created by <span id="createdbyspan">Jenna Sloan</span>
 Last Modified: <span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezTools/blob/main/FezWorldMapEditor.html">
-<!--img src="https://github.githubassets.com/favicons/favicon-dark.png" style="height: 1lh; vertical-align: bottom;padding-inline-end: 0.5ex;"/-->View Source
-<span> on GitHub</span><!--span>🔗&#xFE0F;</span--><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
+View Source
+<span> on GitHub</span><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
 0 48 48">
 <path d="M36 24c-1.2 0-2 0.8-2 2v12c0 1.2-0.8 2-2 2h-22c-1.2
 0-2-0.8-2-2v-22c0-1.2 0.8-2 2-2h12c1.2 0 2-0.8 2-2s-0.8-2-2-2h-12c-3.4
@@ -924,7 +862,5 @@ if(window.location.hostname){
 		document.getElementById("viewsource").href = href;
 	}
 }
-//Array.from(document.styleSheets).map(ss=>[ss.ownerNode.id,Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="").map(r=>[r.style?.zIndex])])
-//Array.from(document.styleSheets).flatMap(ss=>Array.from(ss.rules).filter(r=>r.style?.zIndex!=null && r.style?.zIndex!=="" && !Number.isNaN(Number(r.style?.zIndex))).map(r=>[r.selectorText,Number(r.style?.zIndex)])).sort((a,b)=>{var k=Number(a[1])-Number(b[1]);return Number.isNaN(k)?1:k;})
 </script>
 </html>
