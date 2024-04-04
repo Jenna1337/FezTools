@@ -389,12 +389,15 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					}
 					return _fval;
 				}
+				function getFvalFromFieldName(fname){
+					return getFval(levelinfo.Conditions[fname]) ?? getFval(levelinfo[fname]);
+				}
 				var fval;
 				if(Array.isArray(a.Field)){ 
-					fval = a.Field.map(f=>levelinfo[f]).map(getFval).reduce((a,b)=>a+b,0);
+					fval = a.Field.map(f=>getFvalFromFieldName(f)).reduce((a,b)=>a+b,0);
 				}
 				else{
-					fval = getFval(levelinfo.Conditions[a.Field]) ?? getFval(levelinfo[a.Field]);
+					fval = getFvalFromFieldName(a.Field);
 				}
 				return Object.assign({}, a, {"ShowFlag":Boolean(fval)});
 			}).forEach(a=>{
