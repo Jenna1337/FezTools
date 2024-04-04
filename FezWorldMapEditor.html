@@ -259,12 +259,13 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	
 	if(defaultmap || !mapfile){
 		maptree = JSON.parse(JSON.stringify(defaultmaptree));
-		resolveMapTreeReferences(maptree);
 	}
 	else{
 		maptree = mapfile;
-		resolveMapTreeReferences(maptree);
-		
+	}
+	resolveMapTreeReferences(maptree);
+	
+	{
 		let treeFillContext = {};
 		// string LevelName -> MapNode
 		treeFillContext.LoadedNodes = {};
