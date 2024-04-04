@@ -235,8 +235,55 @@ function NotifyUser(noticelevel, text){
 			break;
 	}
 }
+
+const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
+const DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
+const OppositeLevels = [
+	"NUZU_SCHOOL", "NUZU_ABANDONED_A", "ZU_HOUSE_EMPTY_B", "PURPLE_LODGE", "ZU_HOUSE_SCAFFOLDING", "MINE_BOMB_PILLAR", "CMY_B", "INDUSTRIAL_HUB", "SUPERSPIN_CAVE", "GRAVE_LESSER_GATE",
+	"THRONE", "VISITOR", "ORRERY", "LAVA_SKULL", "LAVA_FORK"
+];
+const BackLevels = [ "ABANDONED_B", "LAVA" ];
+const LeftLevels = [];
+const FrontLevels = [ "VILLAGEVILLE_3D", "ZU_LIBRARY" ];
+const RightLevels = [ "WALL_SCHOOL", "WALL_KITCHEN", "WALL_INTERIOR_HOLE", "WALL_INTERIOR_B", "WALL_INTERIOR_A" ];
+const PuzzleLevels = [ "ZU_ZUISH", "ZU_UNFOLD", "BELL_TOWER", "CLOCK", "ZU_TETRIS" ];
+const OversizeLinks = {
+	"SEWER_START": 5.5,
+	"TREE": 1.25,
+	"TREE_SKY": 1,
+	"INDUSTRIAL_HUB": 0.5,
+	"VILLAGEVILLE_3D": -0.5,
+	"WALL_VILLAGE": 0.5,
+	"ZU_CITY": 0.5,
+	"INDUSTRIAL_CITY": 0.5,
+	"MEMORY_CORE": 0.5,
+	"BIG_TOWER": 0.5,
+	"STARGATE": -0.5,
+	"WATERFALL": 0.25,
+	"BELL_TOWER": 0.25,
+	"LIGHTHOUSE": 0.25,
+	"ARCH": 0.25
+};
 var ADD_EXTRA_INFO = true;
 var HIDE_INVALID_NODES = true;
+var USE_FEZMAP_INFO = true;
+
+//TODO make these customizable
+const MapGenSettings = {
+	"Up Levels": {"Value": UpLevels, "Description": "The links to these levels will go in this direction."},
+	"Down Levels": {"Value": DownLevels, "Description": "The links to these levels will go in this direction."},
+	"Back Levels": {"Value": BackLevels, "Description": "The links to these levels will go in this direction."},
+	"Left Levels": {"Value": LeftLevels, "Description": "The links to these levels will go in this direction."},
+	"Front Levels": {"Value": FrontLevels, "Description": "The links to these levels will go in this direction."},
+	"Right Levels": {"Value": RightLevels, "Description": "The links to these levels will go in this direction."},
+	"Opposite Levels": {"Value": OppositeLevels, "Description": "TODO"},
+	"Puzzle Levels": {"Value": PuzzleLevels, "Description": "These levels will have 1 added to their SecretCount, except the level \"CLOCK\", which will have 4 added instead."},
+	"Oversize Links": {"Value": OversizeLinks, "Description": "The links to these levels will be extended by their assosiated value."},
+	
+	"USE_FEZMAP_INFO": {"Description": "TODO", get Value(){ return USE_FEZMAP_INFO; }, set Value(v){ USE_FEZMAP_INFO = v; }},
+	"ADD_EXTRA_INFO": {"Description": "TODO", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
+}
+
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	let maptree = null;
 	
@@ -280,37 +327,6 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		const DEFAULT_INT_VALUE = 0;
 		const DEFAULT_BOOL_VALUE = false;
 		const DEFAULT_OBJ_VALUE = null;
-		
-		const USE_FEZMAP_INFO = true;
-		
-		const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
-		const DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
-		const OppositeLevels = [
-			"NUZU_SCHOOL", "NUZU_ABANDONED_A", "ZU_HOUSE_EMPTY_B", "PURPLE_LODGE", "ZU_HOUSE_SCAFFOLDING", "MINE_BOMB_PILLAR", "CMY_B", "INDUSTRIAL_HUB", "SUPERSPIN_CAVE", "GRAVE_LESSER_GATE",
-			"THRONE", "VISITOR", "ORRERY", "LAVA_SKULL", "LAVA_FORK"
-		];
-		const BackLevels = [ "ABANDONED_B", "LAVA" ];
-		const LeftLevels = [];
-		const FrontLevels = [ "VILLAGEVILLE_3D", "ZU_LIBRARY" ];
-		const RightLevels = [ "WALL_SCHOOL", "WALL_KITCHEN", "WALL_INTERIOR_HOLE", "WALL_INTERIOR_B", "WALL_INTERIOR_A" ];
-		const PuzzleLevels = [ "ZU_ZUISH", "ZU_UNFOLD", "BELL_TOWER", "CLOCK", "ZU_TETRIS" ];
-		const OversizeLinks = {
-			"SEWER_START": 5.5,
-			"TREE": 1.25,
-			"TREE_SKY": 1,
-			"INDUSTRIAL_HUB": 0.5,
-			"VILLAGEVILLE_3D": -0.5,
-			"WALL_VILLAGE": 0.5,
-			"ZU_CITY": 0.5,
-			"INDUSTRIAL_CITY": 0.5,
-			"MEMORY_CORE": 0.5,
-			"BIG_TOWER": 0.5,
-			"STARGATE": -0.5,
-			"WATERFALL": 0.25,
-			"BELL_TOWER": 0.25,
-			"LIGHTHOUSE": 0.25,
-			"ARCH": 0.25
-		};
 		
 		class WinConditions{
 			constructor(){
@@ -424,6 +440,8 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 					if((typeof ao)!=(typeof ({}))){
 						continue;
 					}
+					//Note: if we assume the file name is the same as the art object name, the following statement would be accurate, but we wouldn't be able to determine the ActorType
+					ao.ArtObjectName = ao.Name?.toUpperCase();
 					var aoInstance = null;
 					if (ao.Name != null && !(aoInstance=context.ArtObjectCache[ao.Name]))
 					{
@@ -432,13 +450,13 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 							aoInstance = await Array.prototype.find.call(document.getElementById("fezaofileinput").files,l=>(l.name.toLowerCase()===artobjectfilename)).text().then(a=>JSON.parse(a));
 					}
 					ao.ArtObjectName = aoInstance.Name.toUpperCase();
-					ao.Type = aoInstance.ActorType;
+					ao.ActorType = aoInstance.ActorType;
 					level.ArtObjects[i] = ao;
 				}
 				let ArtObjectValues = Object.values(level.ArtObjects);
 				let TrilesValues = Object.values(level.Triles);
 				
-				//Note: I think (not 100% certain) that this is equivalent to   this.Conditions.ChestCount = ArtObjectValues.count(x => x.Type === "TreasureChest");
+				//Note: I think (not 100% certain) that this is equivalent to   this.Conditions.ChestCount = ArtObjectValues.count(x => x.ActorType === "TreasureChest");
 				this.Conditions.ChestCount = Math.floor(ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1) / 2);
 				this.Conditions.ScriptIds = Object.entries(level.Scripts).filter(x=>x[1].IsWinCondition).map(x=>x[0]);
 				
@@ -446,27 +464,27 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				//  the OverlappedTriles property of TrileInstance has been removed. All overlapped triles are stored in Level's Triles list.
 				this.Conditions.SplitUpCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");//TrilesValues.Union(TrilesValues.Where(x => x.Overlaps).SelectMany(x => x.OverlappedTriles)).count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");
 				this.Conditions.CubeShardCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "CubeShard");
-				//Note: I think (not 100% certain) that `ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO")` is equivalent to   `ArtObjectValues.count(x => x.Type === "TreasureMap")`
+				//Note: I think (not 100% certain) that `ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO")` is equivalent to   `ArtObjectValues.count(x => x.ActorType === "TreasureMap")`
 				this.Conditions.OtherCollectibleCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type.IsTreasure() && trileSet[x.TrileId].Type != "CubeShard") + ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO");
 				
 				this.Conditions.LockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "Door");
 				this.Conditions.UnlockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "UnlockedDoor");
 				
-				//Note: I think (not 100% certain) that this is equivalent to   let forkcount = ArtObjectValues.count(x => x.Type === "Rumbler");
+				//Note: I think (not 100% certain) that this is equivalent to   let forkcount = ArtObjectValues.count(x => x.ActorType === "Rumbler");
 				let forkcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("fork") != -1);
-				//Note: I think (not 100% certain) that this is equivalent to   let qrcount = ArtObjectValues.count(x => x.Type === "QrCode");
+				//Note: I think (not 100% certain) that this is equivalent to   let qrcount = ArtObjectValues.count(x => x.ActorType === "QrCode");
 				let qrcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("qr") != -1);
 				let codecount = Object.values(level.Volumes).count(x => x.ActorSettings != null && x.ActorSettings.CodePattern != null && x.ActorSettings.CodePattern.length != 0);
 				let owlcount = ((!(this.LevelName == "OWL")) ? Object.values(level.NonPlayerCharacters).count(x => x.Name == "Owl") : 0);
-				//Note: I think (not 100% certain) that this is equivalent to   let bitdoorcount = ArtObjectValues.count(x => x.Type.includes("BitDoor"));
+				//Note: I think (not 100% certain) that this is equivalent to   let bitdoorcount = ArtObjectValues.count(x => x.ActorType.includes("BitDoor"));
 				let bitdoorcount = ArtObjectValues.count(x => x.ArtObjectName.includes("BIT_DOOR") && !x.ArtObjectName.includes("BROKEN"));
 				let puzzlecount = Object.values(level.Scripts).count(s => s.Actions.some(a => a.Object.Type == "Level" && a.Operation == "ResolvePuzzle"));
 				let hardcodedpuzzlecount = (PuzzleLevels.includes(this.LevelName) ? ((!(this.LevelName == "CLOCK")) ? 1 : 4) : 0);
 				this.Conditions.SecretCount = forkcount + qrcount + codecount + owlcount + bitdoorcount + puzzlecount + hardcodedpuzzlecount;
 				
-				//Note: I think (not 100% certain) that this is equivalent to   this.HasLesserGate = ArtObjectValues.some(x => x.Type === "LesserGate");
+				//Note: I think (not 100% certain) that this is equivalent to   this.HasLesserGate = ArtObjectValues.some(x => x.ActorType === "LesserGate");
 				this.HasLesserGate = ArtObjectValues.some(x => x.ArtObjectName.toLowerCase().indexOf("lesser_gate") != -1 && x.ArtObjectName.toLowerCase().indexOf("base") == -1);
-				//Note: I think (not 100% certain) that this is equivalent to   this.HasWarpGate = ArtObjectValues.some(x => x.Type === "WarpGate");
+				//Note: I think (not 100% certain) that this is equivalent to   this.HasWarpGate = ArtObjectValues.some(x => x.ActorType === "WarpGate");
 				this.HasWarpGate = ArtObjectValues.some(x => x.ArtObjectName.match(/GATE_GRAVEAO|GATEAO|GATE_INDUSTRIALAO|GATE_SEWERAO|ZU_GATEAO|GRAVE_GATEAO/));//.some(x => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
 				
 				if(ADD_EXTRA_INFO){
