@@ -438,7 +438,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				let ArtObjectValues = Object.values(level.ArtObjects);
 				let TrilesValues = Object.values(level.Triles);
 				
-				//this.Conditions.ChestCount = ArtObjectValues.count(x => x.Type === "TreasureChest");
+				//Note: I think (not 100% certain) that this is equivalent to   this.Conditions.ChestCount = ArtObjectValues.count(x => x.Type === "TreasureChest");
 				this.Conditions.ChestCount = Math.floor(ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("treasure") != -1) / 2);
 				this.Conditions.ScriptIds = Object.entries(level.Scripts).filter(x=>x[1].IsWinCondition).map(x=>x[0]);
 				
@@ -446,26 +446,27 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				//  the OverlappedTriles property of TrileInstance has been removed. All overlapped triles are stored in Level's Triles list.
 				this.Conditions.SplitUpCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");//TrilesValues.Union(TrilesValues.Where(x => x.Overlaps).SelectMany(x => x.OverlappedTriles)).count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type == "GoldenCube");
 				this.Conditions.CubeShardCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "CubeShard");
+				//Note: I think (not 100% certain) that `ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO")` is equivalent to   `ArtObjectValues.count(x => x.Type === "TreasureMap")`
 				this.Conditions.OtherCollectibleCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type.IsTreasure() && trileSet[x.TrileId].Type != "CubeShard") + ArtObjectValues.count(x => x.ArtObjectName == "treasure_mapAO");
 				
 				this.Conditions.LockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "Door");
 				this.Conditions.UnlockedDoorCount = TrilesValues.count(x => x.TrileId >= 0 && trileSet[x.TrileId].Type === "UnlockedDoor");
 				
-				//let forkcount = ArtObjectValues.count(x => x.Type === "Rumbler");
+				//Note: I think (not 100% certain) that this is equivalent to   let forkcount = ArtObjectValues.count(x => x.Type === "Rumbler");
 				let forkcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("fork") != -1);
-				//let qrcount = ArtObjectValues.count(x => x.Type === "QrCode");
+				//Note: I think (not 100% certain) that this is equivalent to   let qrcount = ArtObjectValues.count(x => x.Type === "QrCode");
 				let qrcount = ArtObjectValues.count(x => x.ArtObjectName.toLowerCase().indexOf("qr") != -1);
 				let codecount = Object.values(level.Volumes).count(x => x.ActorSettings != null && x.ActorSettings.CodePattern != null && x.ActorSettings.CodePattern.length != 0);
 				let owlcount = ((!(this.LevelName == "OWL")) ? Object.values(level.NonPlayerCharacters).count(x => x.Name == "Owl") : 0);
-				//let bitdoorcount = ArtObjectValues.count(x => x.Type.includes("BitDoor"));
+				//Note: I think (not 100% certain) that this is equivalent to   let bitdoorcount = ArtObjectValues.count(x => x.Type.includes("BitDoor"));
 				let bitdoorcount = ArtObjectValues.count(x => x.ArtObjectName.includes("BIT_DOOR") && !x.ArtObjectName.includes("BROKEN"));
 				let puzzlecount = Object.values(level.Scripts).count(s => s.Actions.some(a => a.Object.Type == "Level" && a.Operation == "ResolvePuzzle"));
 				let hardcodedpuzzlecount = (PuzzleLevels.includes(this.LevelName) ? ((!(this.LevelName == "CLOCK")) ? 1 : 4) : 0);
 				this.Conditions.SecretCount = forkcount + qrcount + codecount + owlcount + bitdoorcount + puzzlecount + hardcodedpuzzlecount;
 				
-				//this.HasLesserGate = ArtObjectValues.some(x => x.Type === "LesserGate");
+				//Note: I think (not 100% certain) that this is equivalent to   this.HasLesserGate = ArtObjectValues.some(x => x.Type === "LesserGate");
 				this.HasLesserGate = ArtObjectValues.some(x => x.ArtObjectName.toLowerCase().indexOf("lesser_gate") != -1 && x.ArtObjectName.toLowerCase().indexOf("base") == -1);
-				//this.HasWarpGate = ArtObjectValues.some(x => x.Type === "WarpGate");
+				//Note: I think (not 100% certain) that this is equivalent to   this.HasWarpGate = ArtObjectValues.some(x => x.Type === "WarpGate");
 				this.HasWarpGate = ArtObjectValues.some(x => x.ArtObjectName.match(/GATE_GRAVEAO|GATEAO|GATE_INDUSTRIALAO|GATE_SEWERAO|ZU_GATEAO|GRAVE_GATEAO/));//.some(x => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
 				
 				if(ADD_EXTRA_INFO){
