@@ -470,13 +470,14 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				this.HasWarpGate = ArtObjectValues.some(x => x.ArtObjectName.match(/GATE_GRAVEAO|GATEAO|GATE_INDUSTRIALAO|GATE_SEWERAO|ZU_GATEAO|GRAVE_GATEAO/));//.some(x => x.ArtObjectName == "GATE_GRAVEAO" || x.ArtObjectName == "GATEAO" || x.ArtObjectName == "GATE_INDUSTRIALAO" || x.ArtObjectName == "GATE_SEWERAO" || x.ArtObjectName == "ZU_GATEAO" || x.ArtObjectName == "GRAVE_GATEAO");
 				
 				if(ADD_EXTRA_INFO){
-					this.forkcount            = forkcount           ;
-					this.qrcount              = qrcount             ;
-					this.codecount            = codecount           ;
-					this.owlcount             = owlcount            ;
-					this.bitdoorcount         = bitdoorcount        ;
-					this.puzzlecount          = puzzlecount         ;
-					this.hardcodedpuzzlecount = hardcodedpuzzlecount;
+					this.ExtraInfo = {};
+					this.ExtraInfo.ForkCount            = forkcount           ;
+					this.ExtraInfo.QrCount              = qrcount             ;
+					this.ExtraInfo.CodeCount            = codecount           ;
+					this.ExtraInfo.OwlCount             = owlcount            ;
+					this.ExtraInfo.BitDoorCount         = bitdoorcount        ;
+					this.ExtraInfo.PuzzleCount          = puzzlecount         ;
+					this.ExtraInfo.HardcodedPuzzleCount = hardcodedpuzzlecount;
 				}
 				
 				for(let script of Object.values(level.Scripts))
@@ -767,7 +768,7 @@ var menubarbars = {
 };
 </script>
 </head>
-<body>
+<body class="tabledataasblocks">
 <div id="menubar" class="menubar">
 <div id="menubar1" style="--tableborder: none;"><!-- menubar loads here --></div>
 <input type="file" accept=".fezmap.json" oninput="ReloadFileInfoAndRebuildMap()" id="fezmapfileinput" title="fezmapfileinput" />

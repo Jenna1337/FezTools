@@ -75,7 +75,7 @@
 .tablehead:has(+.tabledata:not(.primitive))::before{
 	content: "";
 }
-.tablehead:has(+.tabledata[style*=none])::before, .tablehead:has(+.tabledata.hidden)::before{
+.tablehead:has(+.tabledata[style*=none]:not(:empty))::before, .tablehead:has(+.tabledata.hidden:not(:empty))::before{
 	content: " > " !important;
 }
 
@@ -111,4 +111,30 @@ table, thead, tbody, tfoot, tr, th, td {
 }
 thead, tfoot {
 	font-weight: bold;
+}
+.tabledataasblocks {
+	& .tableentry .tableentry:not(:has(.tableentry)) {
+		display: block;
+	}
+	& .tablehead + .tabledata:not(.primitive) {
+		display: block;
+	}
+	& .tablehead:has(+.tabledata:not(.primitive)){
+		display: block;
+		pointer-events: all;
+	}
+	.tablehead:has(+.tabledata>.tableentry>.tabledata){
+		content: " v ";
+		cursor: pointer;
+		border-bottom: 1px solid black;
+		border-bottom: var(--tabledataborder);
+	}
+	& .tablehead:has(+.tabledata>.tableentry>.tabledata)::before{
+		content: " v ";
+	}
+	& .tabledata:has( .tabledata){
+		padding-left: 3ex !important;
+		display: block !important;
+		padding-block-end: 2px;
+	}
 }
