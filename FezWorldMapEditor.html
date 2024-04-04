@@ -222,6 +222,19 @@ function GetAllWorldData(maptree,LinkThickness,fullcube){
 	allworlddata = Object.entries(allworlddata).filter(a=>(typeof({}))===(typeof(a[1]))).sort((a,b)=>a[0].localeCompare(b[0])).map(a=>a[1]);
 	return {"worldmap":worldmap,"allworlddata":allworlddata};
 }
+function NotifyUser(noticelevel, text){
+	switch(noticelevel){
+		case "log":
+		case "warn":
+		case "error":
+			console[noticelevel](text);
+			//TODO display these in a box the user can see
+			break;
+		default:
+			throw "Unknown Notice Level: \""+noticelevel+"\"";
+			break;
+	}
+}
 var ADD_EXTRA_INFO = true;
 var HIDE_INVALID_NODES = true;
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
@@ -266,6 +279,8 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		const DEFAULT_INT_VALUE = 0;
 		const DEFAULT_BOOL_VALUE = false;
 		const DEFAULT_OBJ_VALUE = null;
+		
+		const USE_FEZMAP_INFO = true;
 		
 		const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
 		const DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
@@ -352,7 +367,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 				catch (Exception)
 				{
 					console.error(Exception);
-					console.warn("Warning : Level " + this.LevelName + " could not be loaded because it has invalid markup. Skipping...");
+					NotifyUser("warn", "Warning : Level " + this.LevelName + " could not be loaded because it has invalid markup. Skipping...");
 					this.Valid = false;
 					return;
 				}
@@ -483,7 +498,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								let value2;
 								if (!(value2 = level.Volumes[value]))
 								{
-									console.warn("Warning : A level-changing script links to a nonexistent volume in " + this.LevelName + " (Volume Id #" + value + ")");
+									NotifyUser("warn", "Warning : A level-changing script links to a nonexistent volume in " + this.LevelName + " (Volume Id #" + value + ")");
 									flag = false;
 								}
 								else if (value2.ActorSettings != null && value2.ActorSettings.IsSecretPassage)
@@ -493,10 +508,12 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								}
 								else
 								{
-									if(action.Operation == "AllowPipeChangeLevel"){
-										connection.Face = FaceOrientation.Down;
-									}else{
-										connection.Face = value2.Orientations[0];
+									if(!USE_FEZMAP_INFO){
+										if(action.Operation == "AllowPipeChangeLevel"){
+											connection.Face = FaceOrientation.Down;
+										}else{
+											connection.Face = value2.Orientations[0];
+										}
 									}
 								}
 								break;
@@ -530,31 +547,32 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 						connection.Node = value3;
 						if (connection.Node != parent)
 						{
-							if (parent != null && origin == connection.Face)
-							{
-								connection.Face = origin.GetOpposite();
+							if(!USE_FEZMAP_INFO){
+								if (parent != null && origin == connection.Face)
+								{
+									connection.Face = origin.GetOpposite();
+								}
+								
+								if(UpLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Top;
+								}else if(DownLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Down;
+								}else if(OppositeLevels.includes(targetlevelname)){
+									connection.Face = connection.Face.GetOpposite();
+								}else if(BackLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Back;
+								}else if(LeftLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Left;
+								}else if(RightLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Right;
+								}else if(FrontLevels.includes(targetlevelname)){
+									connection.Face = FaceOrientation.Front;
+								}
+								
+								if(OversizeLinks.hasOwnProperty(targetlevelname)){
+									connection.BranchOversize = OversizeLinks[targetlevelname];
+								}
 							}
-							
-							if(UpLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Top;
-							}else if(DownLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Down;
-							}else if(OppositeLevels.includes(targetlevelname)){
-								connection.Face = connection.Face.GetOpposite();
-							}else if(BackLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Back;
-							}else if(LeftLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Left;
-							}else if(RightLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Right;
-							}else if(FrontLevels.includes(targetlevelname)){
-								connection.Face = FaceOrientation.Front;
-							}
-							
-							if(OversizeLinks.hasOwnProperty(targetlevelname)){
-								connection.BranchOversize = OversizeLinks[targetlevelname];
-							}
-							
 							this.Connections.push(connection);
 						}
 						break;
