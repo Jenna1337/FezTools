@@ -351,7 +351,17 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			mapnode.title = mapnode.alt = levelinfo.Name;//JSON.stringify(levelinfo);
 			Object.entries(levelinfo).forEach(ldat=>{
 				if(!["Position","Connections","Entrances","BaseElement"].includes(ldat[0])){
-					nodebox.dataset[ldat[0]] = ldat[1];//mostly for quick searching and stuff //TODO add searching
+					//mostly for quick searching and stuff //TODO add searching
+					if((typeof ldat[1]) == (typeof ({}))){
+						for(let p in ldat[1]){
+							if((typeof ldat[1][p]) != (typeof function(){})){
+								nodebox.dataset[ldat[0]+"---"+p] = ldat[1][p];
+							}
+						}
+					}
+					else{
+						nodebox.dataset[ldat[0]] = ldat[1];
+					}
 				}
 			});
 			nodebox.dataset.allLevelInfoData = JSON.stringify(levelinfo);
