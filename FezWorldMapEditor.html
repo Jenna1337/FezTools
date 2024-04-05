@@ -270,18 +270,19 @@ var USE_FEZMAP_INFO = true;
 
 //TODO make these customizable
 const MapGenSettings = {
-	"Up Levels": {"Value": UpLevels, "Description": "The links to these levels will go in this direction."},
-	"Down Levels": {"Value": DownLevels, "Description": "The links to these levels will go in this direction."},
-	"Back Levels": {"Value": BackLevels, "Description": "The links to these levels will go in this direction."},
-	"Left Levels": {"Value": LeftLevels, "Description": "The links to these levels will go in this direction."},
-	"Front Levels": {"Value": FrontLevels, "Description": "The links to these levels will go in this direction."},
-	"Right Levels": {"Value": RightLevels, "Description": "The links to these levels will go in this direction."},
-	"Opposite Levels": {"Value": OppositeLevels, "Description": "TODO"},
+	"Up Levels": {"Value": UpLevels, "Description": "The links to these levels will go up."},
+	"Down Levels": {"Value": DownLevels, "Description": "The links to these levels will go down."},
+	"Back Levels": {"Value": BackLevels, "Description": "The links to these levels will go towards the back."},
+	"Left Levels": {"Value": LeftLevels, "Description": "The links to these levels will go left."},
+	"Front Levels": {"Value": FrontLevels, "Description": "The links to these levels will go towards the front."},
+	"Right Levels": {"Value": RightLevels, "Description": "The links to these levels will go right."},
+	"Opposite Levels": {"Value": OppositeLevels, "Description": "The links to these levels will go the direction the origin door is facing."},
+	"Note": {"Value": undefined, "Description": "Any levels not in any of the above categories will go the opposite direction the origin door is facing."},
 	"Puzzle Levels": {"Value": PuzzleLevels, "Description": "These levels will have 1 added to their SecretCount, except the level \"CLOCK\", which will have 4 added instead."},
 	"Oversize Links": {"Value": OversizeLinks, "Description": "The links to these levels will be extended by their assosiated value."},
 	
-	"USE_FEZMAP_INFO": {"Description": "TODO", get Value(){ return USE_FEZMAP_INFO; }, set Value(v){ USE_FEZMAP_INFO = v; }},
-	"ADD_EXTRA_INFO": {"Description": "TODO", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
+	"USE_FEZMAP_INFO": {"Description": "If set, will use the OversizeLinks and link directions from the supplied fezmap file.", get Value(){ return USE_FEZMAP_INFO; }, set Value(v){ USE_FEZMAP_INFO = v; }},
+	"ADD_EXTRA_INFO": {"Description": "If set, will add the individual items that make up Conditions SecretCount for each node.", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
 }
 
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
@@ -377,13 +378,19 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 					if (level.TrileSetName != null && !(trileSet=context.TrileSetCache[level.TrileSetName]))
 					{
 						let trilesetfilename = level.TrileSetName.toLowerCase()+".fezts.json";
+						let tsfile = Array.prototype.find.call(document.getElementById("feztsfileinput").files,l=>(l.name.toLowerCase()===trilesetfilename));
+						if(tsfile){
 						context.TrileSetCache[level.TrileSetName] = 
-							trileSet = await Array.prototype.find.call(document.getElementById("feztsfileinput").files,l=>(l.name.toLowerCase()===trilesetfilename)).text().then(a=>JSON.parse(a)?.Triles);
+							trileSet = await tsfile.text().then(a=>JSON.parse(a)?.Triles);
+						}else{
+							throw "TrileSet file not found: \""+trilesetfilename+"\" in level file \""+levelfilename+"\"";
+						}
 					}
 				}
 				catch (Exception)
 				{
-					console.error(Exception);
+					//console.error(Exception);
+					NotifyUser("error", Exception);
 					NotifyUser("warn", "Warning : Level " + this.LevelName + " could not be loaded because it has invalid markup. Skipping...");
 					this.Valid = false;
 					return;
@@ -446,11 +453,15 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 					if (ao.Name != null && !(aoInstance=context.ArtObjectCache[ao.Name]))
 					{
 						let artobjectfilename = ao.Name.toLowerCase()+".fezao.json";
-						context.ArtObjectCache[ao.Name] = 
-							aoInstance = await Array.prototype.find.call(document.getElementById("fezaofileinput").files,l=>(l.name.toLowerCase()===artobjectfilename)).text().then(a=>JSON.parse(a));
+						let aofile = Array.prototype.find.call(document.getElementById("fezaofileinput").files,l=>(l.name.toLowerCase()===artobjectfilename));
+						if(aofile){
+							context.ArtObjectCache[ao.Name] = aoInstance = await aofile.text().then(a=>JSON.parse(a));
+						}
 					}
-					ao.ArtObjectName = aoInstance.Name.toUpperCase();
-					ao.ActorType = aoInstance.ActorType;
+					if(aoInstance){
+						ao.ArtObjectName = aoInstance.Name.toUpperCase();
+						ao.ActorType = aoInstance.ActorType;
+					}
 					level.ArtObjects[i] = ao;
 				}
 				let ArtObjectValues = Object.values(level.ArtObjects);
@@ -531,7 +542,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								else if (value2.ActorSettings != null && value2.ActorSettings.IsSecretPassage)
 								{
 									//handle secret passages so they can appear on the MapViewer3D
-									if(ADD_EXTRA_INFO){
+									/*if(ADD_EXTRA_INFO)*/{
 										this.Entrances ??= [];
 										this.Entrances.push({
 												"LevelName": this.LevelName,
@@ -723,6 +734,20 @@ var menubarbars = {
 						document.getElementById("fezaofileinput").click();
 					},
 					accessKey: 'a',
+				},
+				{
+					separator: true,
+				},
+				{
+					text: 'Save as...',
+					fun: (e)=>{
+						//TODO sterilize allworlddata and save it to a JSON file
+					},
+					accessKey: 'S',
+					shortcutkey: "F6",
+				},
+				{
+					separator: true,
 				},
 				{
 					separator: true,
