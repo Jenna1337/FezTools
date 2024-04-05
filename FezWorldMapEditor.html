@@ -530,7 +530,18 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 								}
 								else if (value2.ActorSettings != null && value2.ActorSettings.IsSecretPassage)
 								{
-									//TODO handle secret passages so they can appear on the MapViewer3D
+									//handle secret passages so they can appear on the MapViewer3D
+									if(ADD_EXTRA_INFO){
+										this.Entrances ??= [];
+										this.Entrances.push({
+												"LevelName": this.LevelName,
+												"VolumeId": value,
+												"FromOrientation": value2.Orientations[0],
+												"TargetLevelName":targetlevelname,
+												"TargetVolumeId": Number.parseInt(action.Arguments[1]),
+												"IsShortcut": true
+										});
+									}
 									flag = false;
 								}
 								else
@@ -624,17 +635,20 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		if(HIDE_INVALID_NODES){
 			maptree = Object.fromEntries(Object.entries(maptree)
 				.filter(a=>a[1].Valid)
-				.map(node=>{
+				.map((node,i)=>{
 					node[1].Connections = node[1].Connections.filter(c=>c.Node.Valid);
+					node[0] = i;
 					return node;
 				})
 			);
 		}
-		maptree[0] = maptree[Hub];
+		Object.values(maptree).forEach(nv=>{
+			delete nv.Valid;
+			nv.Connections.forEach(c=>delete c.Node.Valid);
+		});
+		//Note: treeFillContext.LoadedNodes[Hub] should be at maptree[0]
+		//maptree[0] = maptree[Hub];
 	}
-	
-	//TODO generate node Conditions from fezlvl files
-	
 	RebuildMap(maptree);
 }
 function RebuildMap(maptree){

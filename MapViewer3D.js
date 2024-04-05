@@ -833,7 +833,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			if(savedval==null){
 				savedval = settingdata.initValue;
 			}
-			console.log(i.id, savedval);
 			let newval = null;
 			if(i.type=="checkbox"){
 				i.checked = newval=(savedval!=="false" && savedval!==false);
