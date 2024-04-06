@@ -682,9 +682,42 @@ document.addEventListener("DOMContentLoaded",()=>{
 })
 fpsconttopleftelemname = "mapdebuginfo";
 
-//TODO turn ".primitive.tabledata" into input elements
-// var datasrc = document.querySelectorAll(".primitive.tabledata")
-// var datafieldname = document.querySelectorAll(".primitive.tabledata").previousElementSibling
+document.addEventListener("readystatechange", function(event){
+	//before DOMContentLoaded
+	if(document.readyState === "interactive"){
+		function mapviewerboxchildrenmodified(records, observer){
+			let rlist = records.filter(r=>r.target.id==="nodeinfobox" && Array.from(r.addedNodes).some(n=>n.classList.contains("tablemain")));
+			if(rlist && rlist.length>0){
+				rlist.forEach(function(mutrec){
+					var selectednodedata = Object.values(maptree).find(n=>n.LevelName===document.querySelector(".nodebox.selected").dataset.Name);
+					var nodedatanodemap = Array.from(mutrec.target.querySelectorAll(".tabledata"))
+							.map(elem=>[
+									elem.previousElementSibling.textContent.replaceAll(/[\s:]/g,""),
+									elem]
+							);
+					nodedatanodemap.forEach(([fieldname, fieldnode])=>{
+						if(fieldname === "Name"){
+							fieldname = "LevelName";
+						}
+						let currentnodeval = selectednodedata[fieldname] ?? selectednodedata.Conditions[fieldname];
+						//ignore entries that are not undefined or are an object, but keep arrays 
+						//basically only keep primatives or arrays of primatives 
+						if((typeof currentnodeval)!==(typeof undefined) && ((typeof currentnodeval)!==(typeof ({})) || Array.isArray(currentnodeval))){
+							console.log(fieldname, fieldnode, currentnodeval)
+							//TODO turn these into input elements with listeners that change the assosiated value in selectednodedata
+							debugger
+						}
+					});
+				});
+			}
+		}
+		const observer = new MutationObserver(mapviewerboxchildrenmodified);
+		observer.observe(document.getElementById("mapviewerbox"), {
+			childList: true,
+			subtree: true,
+		});
+	}
+});
 </script>
 <script src="fpscounterscript.js" id="fpscounterscript"></script>
 <!--Generates that lovely menubar-->
