@@ -18,10 +18,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	function nextFrame(time){
 		var timediff = time - lastfpstime;
 		lastfpstime = time;
-		if(timediff < mindiff){
+		/*if(timediff < mindiff){
 			mindiff = timediff;
 			maxfps = 1000/mindiff;//Math.min(...lasttimedifflog);
-		}
+		}*/
+		maxfps = 1000/Math.min(...lasttimedifflog);
 		lasttimedifflog.push(timediff);
 		var maxframes = Number(fpschartelem.dataset["maxlasttimediffloglen"]);
 		while(lasttimedifflog.length > maxframes){
@@ -30,7 +31,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 		const fpschartwidth = Number(fpscont.getAttribute("width"));
 		const fpschartheight = Number(fpscont.getAttribute("height"));
 		var fpschartwidthmulti = fpschartwidth/maxframes;
-		var fpschartheightmulti = Math.floor(fpschartheight/maxfps);
+		var fpschartheightmulti = fpschartheight/maxfps;
 		var fpsavg = (1000/(lasttimedifflog.reduce((a,b)=>a+b)/lasttimedifflog.length)).toFixed(5);
 		var chartavg = fpsavg*fpschartheightmulti;
 		var xoffset = maxframes-lasttimedifflog.length;
