@@ -313,7 +313,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	}
 	resolveMapTreeReferences(maptree);
 	
-	{
+	if(document.getElementById("fezlvlfileinput").files[0] && document.getElementById("feztsfileinput").files[0]){
 		let treeFillContext = {};
 		// string LevelName -> MapNode
 		treeFillContext.LoadedNodes = {};
