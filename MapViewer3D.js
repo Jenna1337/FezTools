@@ -232,6 +232,8 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		nodeinfobox.appendChild(MakeCollapsible(nodedata));
 		//nodeinfobox.textContent = JSON.stringify(nodedata,null," ");
 		mapdebuginfo.textContent = JSON.stringify(getDebugInfo(),null," ");
+		
+		saveYawPitchFocus(yaw,pitch,node.dataset.Name);
 	}
 	
 	var ShowRawLevelNameInsteadOfNodeImage = true;
@@ -590,12 +592,46 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		//TODO add keyboard controls
 	}
 	
+	var firstRebuild = true;
+	function saveYawPitchFocus(prevYaw,prevPitch,prevFocus){
+		window.localStorage.setItem("map_prevYaw",prevYaw);
+		window.localStorage.setItem("map_prevPitch",prevPitch);
+		if(prevFocus){
+			window.localStorage.setItem("map_prevFocus",prevFocus);
+		}
+	}
 	function RebuildWorldMap(){
+		//preserve CurrentNode/LastFocusedNode, pitch, yaw, and zoom between rebuilds & page loads
+		//Note: does not save pan nor zoom; this is in case the user gets the camera really far away they can just rebuild the map to get the view back to normal.
+		let prevYaw = yaw;
+		let prevPitch = pitch;
+		let prevFocus = LastFocusedNode?.dataset?.Name;
+		debugger
+		if(firstRebuild){
+			
+			prevYaw = Number(window.localStorage.getItem("map_prevYaw") ?? prevYaw);
+			prevPitch = Number(window.localStorage.getItem("map_prevPitch") ?? prevPitch);
+			prevFocus = window.localStorage.getItem("map_prevFocus") ?? prevFocus;
+		}
+		
+		saveYawPitchFocus(prevYaw, prevPitch, prevFocus);
+		
 		let a=GetAllWorldData(maptree,LinkThickness,fullcube);
 		worldmap = a.worldmap;
 		allworlddata = a.allworlddata;
 		Rebuild3DMap();
 		settings.showIcons = settings.showIcons;
+		
+		yaw = prevYaw;
+		pitch = prevPitch;debugger
+		let prevSelNode = mapnodepanbox.querySelector("[data--name=\""+prevFocus+"\"]");
+		if(prevFocus && prevSelNode){
+			focusOnNode(prevSelNode)
+		}else{
+			focusOnNode(CurrentNode);
+		}
+		
+		firstRebuild = false;
 	}
 	
 	var showIcons = true;
