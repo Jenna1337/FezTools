@@ -234,6 +234,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		mapdebuginfo.textContent = JSON.stringify(getDebugInfo(),null," ");
 	}
 	
+	var ShowRawLevelNameInsteadOfNodeImage = true;
 	var LinksMesh;
 	function Rebuild3DMap(){
 		LinksMesh = worldmap.LinksMesh;
@@ -312,7 +313,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			}
 			var nodebox = document.createElement("div");
 			nodebox.classList.add("nodebox");
-			var mapnode = document.createElement("img");
+			var mapnode = document.createElement(ShowRawLevelNameInsteadOfNodeImage ? "span" : "img");
+			if(ShowRawLevelNameInsteadOfNodeImage){
+				mapnode.textContent = levelinfo.Name;
+			}
 			mapnode.classList.add("mapnode");
 			
 			//Note: error event does not bubble, so we can't just use a single event listener
@@ -654,6 +658,15 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		},
 		set LinkThickness(value){
 			LinkThickness = value;
+			if(initialized){
+				RebuildWorldMap();
+			}
+		},
+		get ShowMapScreenImage(){
+			return ShowRawLevelNameInsteadOfNodeImage;
+		},
+		set ShowMapScreenImage(value){
+			ShowRawLevelNameInsteadOfNodeImage = !value;
 			if(initialized){
 				RebuildWorldMap();
 			}
