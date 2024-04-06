@@ -771,7 +771,24 @@ var menubarbars = {
 							return nodeentry;
 						}));
 						debugger
-						//TODO save newmaptreefile to a JSON file
+						//save newmaptreefile to a JSON file
+						let blob = new Blob([JSON.stringify(newmaptreefile)], {
+							type: "application/json",
+						});
+						let objurl = URL.createObjectURL(blob);
+						let dlbutton = document.createElement("a");
+						//<a href="path_to_file" download="proposed_file_name">Download</a>
+						dlbutton.setAttribute("download", "maptree.fezmap.json");
+						dlbutton.setAttribute("href", objurl);
+						dlbutton.textContent = "Download ("+blob.size+" bytes)";
+						document.body.appendChild(dlbutton);
+						window.requestAnimationFrame(()=>{
+							dlbutton.click();
+							window.requestAnimationFrame(()=>{
+								dlbutton.remove();
+								URL.revokeObjectURL(objurl);
+							});
+						});
 					},
 					accessKey: 'S',
 					shortcutkey: "F6",
