@@ -203,7 +203,7 @@
 	background-color: #000E;
 	padding: 1ex;
 	border: 1px solid white;
-	max-height: calc(100vh - 3lh - 2ex - 2px);
+	max-height: calc(100% - 3lh - 2ex - 2px);
 	overflow: scroll;
 	overflow: auto;
 }
