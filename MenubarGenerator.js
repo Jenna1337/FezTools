@@ -389,6 +389,9 @@ function initMenubars(menubarlist){
 			}
 //TODO add arrow key support (arrow keys really buggy, pls fix)
 			if(e.key=="ArrowDown" || e.key=="ArrowUp"){
+				if(!selectedmenubaritem){
+					return;
+				}
 				if(selectednode){
 					newnode = selectednode;
 					do{
