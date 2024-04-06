@@ -660,6 +660,7 @@ async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 		//Note: treeFillContext.LoadedNodes[Hub] should be at maptree[0]
 		//maptree[0] = maptree[Hub];
 	}
+	window.maptree = maptree;
 	RebuildMap(maptree);
 }
 function RebuildMap(maptree){
@@ -741,7 +742,36 @@ var menubarbars = {
 				{
 					text: 'Save as...',
 					fun: (e)=>{
-						//TODO sterilize allworlddata and save it to a JSON file
+						let treeentries;
+						let newmaptreefile = Object.fromEntries((treeentries = Object.entries(window.maptree)).map(nodeentry=>{
+							let node = nodeentry[1];
+							nodeentry[1] = {
+								"LevelName": node.LevelName,
+								"NodeType": node.NodeType,
+								"Conditions": {
+								  "ChestCount": node.Conditions.ChestCount,
+								  "LockedDoorCount": node.Conditions.LockedDoorCount,
+								  "UnlockedDoorCount": node.Conditions.UnlockedDoorCount,
+								  "ScriptIds": node.Conditions.ScriptIds,
+								  "CubeShardCount": node.Conditions.CubeShardCount,
+								  "OtherCollectibleCount": node.Conditions.OtherCollectibleCount,
+								  "SplitUpCount": node.Conditions.SplitUpCount,
+								  "SecretCount": node.Conditions.SecretCount
+								},
+								"HasLesserGate": node.HasLesserGate,
+								"HasWarpGate": node.HasWarpGate,
+								"Connections": node.Connections.map(connection=>{
+									return {
+										"Face": connection.Face,
+										"Node": Number(treeentries.find(a=>a[1].LevelName===connection.Node.LevelName)[0]),
+										"BranchOversize": connection.BranchOversize
+									};
+								})
+							};
+							return nodeentry;
+						}));
+						debugger
+						//TODO save newmaptreefile to a JSON file
 					},
 					accessKey: 'S',
 					shortcutkey: "F6",
