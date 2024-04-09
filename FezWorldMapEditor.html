@@ -282,7 +282,7 @@ const MapGenSettings = {
 	"Oversize Links": {"Value": OversizeLinks, "Description": "The links to these levels will be extended by their assosiated value."},
 	
 	"USE_FEZMAP_INFO": {"Description": "If set, will use the OversizeLinks and link directions from the supplied fezmap file.", get Value(){ return USE_FEZMAP_INFO; }, set Value(v){ USE_FEZMAP_INFO = v; }},
-	"ADD_EXTRA_INFO": {"Description": "If set, will add the individual items that make up Conditions SecretCount for each node.", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
+	"ADD_EXTRA_INFO": {"Description": "If set, will use data from the fezlvl files to show the individual items that make up Conditions SecretCount for each node.", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
 }
 
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
