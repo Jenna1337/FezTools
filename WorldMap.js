@@ -168,73 +168,73 @@ function WorldMap(maptree, LinkThickness, fullcube)
 			c.MultiBranchCount = node.Connections.filter((x) => x.Face == c.Face).length;
 		}
 		var num = 0;
-		for (var item of node.Connections.sort((x,y) => y.Node.NodeType.GetSizeFactor()-x.Node.NodeType.GetSizeFactor()))
+		for (var c of node.Connections.sort((x,y) => y.Node.NodeType.GetSizeFactor()-x.Node.NodeType.GetSizeFactor()))
 		{
-			if (parentConnection != null && item.Face == parentConnection.Face.GetOpposite())
+			if (parentConnection != null && c.Face == parentConnection.Face.GetOpposite())
 			{
-				item.Face = item.Face.GetOpposite();
+				c.Face = c.Face.GetOpposite();
 			}
-			var num3 = 3 + (node.NodeType.GetSizeFactor() + item.Node.NodeType.GetSizeFactor()) / 2;
-			if ((node.NodeType == LevelNodeType.Hub || item.Node.NodeType == LevelNodeType.Hub) && node.NodeType != LevelNodeType.Lesser && item.Node.NodeType != LevelNodeType.Lesser)
+			var num3 = 3 + (node.NodeType.GetSizeFactor() + c.Node.NodeType.GetSizeFactor()) / 2;
+			if ((node.NodeType == LevelNodeType.Hub || c.Node.NodeType == LevelNodeType.Hub) && node.NodeType != LevelNodeType.Lesser && c.Node.NodeType != LevelNodeType.Lesser)
 			{
 				num3 += 1;
 			}
-			if ((node.NodeType == LevelNodeType.Lesser || item.Node.NodeType == LevelNodeType.Lesser) && item.MultiBranchCount == 1)
+			if ((node.NodeType == LevelNodeType.Lesser || c.Node.NodeType == LevelNodeType.Lesser) && c.MultiBranchCount == 1)
 			{
-				num3 -= (item.Face.IsSide() ? 1 : 2);
+				num3 -= (c.Face.IsSide() ? 1 : 2);
 			}
-			num3 *= 1.25 + item.BranchOversize;
+			num3 *= 1.25 + c.BranchOversize;
 			var num4 = num3 * 0.375;
-			if (item.Node.NodeType == LevelNodeType.Node && node.NodeType == LevelNodeType.Node)
+			if (c.Node.NodeType == LevelNodeType.Node && node.NodeType == LevelNodeType.Node)
 			{
 				num4 *= 1.5;
 			}
-			var vector = item.Face.AsVector();
+			var vector = c.Face.AsVector();
 			var vector2 = Vector3.Zero;
-			if (item.MultiBranchCount > 1)
+			if (c.MultiBranchCount > 1)
 			{
-				vector2 = MultiplyVectors(new Vector3((item.MultiBranchId - 1) - (item.MultiBranchCount - 1) / 2), SubtractVectors(Vector3.XZMask, item.Face.AsVector().Abs()), num4);
+				vector2 = MultiplyVectors(new Vector3((c.MultiBranchId - 1) - (c.MultiBranchCount - 1) / 2), SubtractVectors(Vector3.XZMask, c.Face.AsVector().Abs()), num4);
 			}
-			BuildNodes(item.Node, item, node, AddVectors(offset, MultiplyVectors(vector, num3), vector2), instances);
+			BuildNodes(c.Node, c, node, AddVectors(offset, MultiplyVectors(vector, num3), vector2), instances);
 			
-			if (item.LinkInstances == null)
+			if (c.LinkInstances == null)
 			{
-				item.LinkInstances = [];
+				c.LinkInstances = [];
 			}
-			if (item.MultiBranchCount > 1)
+			if (c.MultiBranchCount > 1)
 			{
 				num = Math.max(num, num3 / 2);
-				var vectora = MultiplyVectors(vector, num);
-				var vector3 = AddVectors(vectora, new Vector3(LinkThickness));
-				var vector4 = AddVectors(DivideVectors(vectora, new Vector3(2)), offset);
-				item.LinkInstances.push(instances.length);
-				instances.push(new Matrix(vector4.X, vector4.Y, vector4.Z, 0, 1, 1, 1, 1, vector3.X, vector3.Y, vector3.Z, 0, 0, 0, 0, 0));
-				vector3 = AddVectors(vector2, new Vector3(LinkThickness));
-				vector4 = AddVectors(DivideVectors(vector2, new Vector3(2)), offset, vectora);
-				item.LinkInstances.push(instances.length);
-				instances.push(new Matrix(vector4.X, vector4.Y, vector4.Z, 0, 1, 1, 1, 1, vector3.X, vector3.Y, vector3.Z, 0, 0, 0, 0, 0));
+				var vectorA = MultiplyVectors(vector, num);
+				var translateVector = AddVectors(vectorA, new Vector3(LinkThickness));
+				var scaleVector = AddVectors(DivideVectors(vectorA, new Vector3(2)), offset);
+				c.LinkInstances.push(instances.length);
+				instances.push(new Matrix(scaleVector.X, scaleVector.Y, scaleVector.Z, 0, 1, 1, 1, 1, translateVector.X, translateVector.Y, translateVector.Z, 0, 0, 0, 0, 0));
+				translateVector = AddVectors(vector2, new Vector3(LinkThickness));
+				scaleVector = AddVectors(DivideVectors(vector2, new Vector3(2)), offset, vectorA);
+				c.LinkInstances.push(instances.length);
+				instances.push(new Matrix(scaleVector.X, scaleVector.Y, scaleVector.Z, 0, 1, 1, 1, 1, translateVector.X, translateVector.Y, translateVector.Z, 0, 0, 0, 0, 0));
 				var num5 = num3 - num;
-				var vectorb = MultiplyVectors(vector, num5);
-				vector3 = AddVectors(vectorb, new Vector3(LinkThickness));
-				vector4 = AddVectors(DivideVectors(vectorb, new Vector3(2)), offset, vectora, vector2);
-				item.LinkInstances.push(instances.length);
-				instances.push(new Matrix(vector4.X, vector4.Y, vector4.Z, 0, 1, 1, 1, 1, vector3.X, vector3.Y, vector3.Z, 0, 0, 0, 0, 0));
+				var vectorB = MultiplyVectors(vector, num5);
+				translateVector = AddVectors(vectorB, new Vector3(LinkThickness));
+				scaleVector = AddVectors(DivideVectors(vectorB, new Vector3(2)), offset, vectorA, vector2);
+				c.LinkInstances.push(instances.length);
+				instances.push(new Matrix(scaleVector.X, scaleVector.Y, scaleVector.Z, 0, 1, 1, 1, 1, translateVector.X, translateVector.Y, translateVector.Z, 0, 0, 0, 0, 0));
 			}
 			else
 			{
-				var vector5 = AddVectors(MultiplyVectors(vector, num3), new Vector3(LinkThickness));
-				var vector6 = AddVectors(DivideVectors(MultiplyVectors(vector, num3), 2), offset);
-				item.LinkInstances.push(instances.length);
-				instances.push(new Matrix(vector6.X, vector6.Y, vector6.Z, 0, 1, 1, 1, 1, vector5.X, vector5.Y, vector5.Z, 0, 0, 0, 0, 0));
+				var translateVector2 = AddVectors(MultiplyVectors(vector, num3), new Vector3(LinkThickness));
+				var scaleVector2 = AddVectors(DivideVectors(MultiplyVectors(vector, num3), 2), offset);
+				c.LinkInstances.push(instances.length);
+				instances.push(new Matrix(scaleVector2.X, scaleVector2.Y, scaleVector2.Z, 0, 1, 1, 1, 1, translateVector2.X, translateVector2.Y, translateVector2.Z, 0, 0, 0, 0, 0));
 			}
-			DoSpecial(item, offset, vector, num3, instances);
+			DoSpecial(c, offset, vector, num3, instances);
 			
-			item.Node.Connections.push(
+			c.Node.Connections.push(
 			{
 				Node: node,
-				Face: item.Face.GetOpposite(),
-				BranchOversize: item.BranchOversize,
-				LinkInstances: item.LinkInstances
+				Face: c.Face.GetOpposite(),
+				BranchOversize: c.BranchOversize,
+				LinkInstances: c.LinkInstances
 			});
 		}
 		NodesMesh.push(group);
@@ -245,19 +245,19 @@ function WorldMap(maptree, LinkThickness, fullcube)
 		{
 			let num = 3.425;
 			let backward = MultiplyVectors(Vector3.Backward, num);
-			let vector = AddVectors(backward, new Vector3(LinkThickness));
-			let vector2 = AddVectors(DivideVectors(backward, 2) , offset , MultiplyVectors(faceVector, sizeFactor));
+			let translateVector = AddVectors(backward, new Vector3(LinkThickness));
+			let scaleVector = AddVectors(DivideVectors(backward, 2) , offset , MultiplyVectors(faceVector, sizeFactor));
 			c.LinkInstances.push(instances.length);
-			instances.push(new Matrix(vector2.X, vector2.Y, vector2.Z, 0, 1, 1, 1, 1, vector.X, vector.Y, vector.Z, 0, 0, 0, 0, 0));
+			instances.push(new Matrix(scaleVector.X, scaleVector.Y, scaleVector.Z, 0, 1, 1, 1, 1, translateVector.X, translateVector.Y, translateVector.Z, 0, 0, 0, 0, 0));
 		}
 		if (c.Node.LevelName == "LIGHTHOUSE_HOUSE_A")
 		{
 			let num2 = 5;
 			let right = MultiplyVectors(Vector3.Right, num2);
-			let vector3 = AddVectors(right, new Vector3(LinkThickness));
-			let vector4 = AddVectors(DivideVectors(right, 2) , offset , MultiplyVectors(faceVector, sizeFactor));
+			let translateVector2 = AddVectors(right, new Vector3(LinkThickness));
+			let scaleVector2 = AddVectors(DivideVectors(right, 2) , offset , MultiplyVectors(faceVector, sizeFactor));
 			c.LinkInstances.push(instances.length);
-			instances.push(new Matrix(vector4.X, vector4.Y, vector4.Z, 0, 1, 1, 1, 1, vector3.X, vector3.Y, vector3.Z, 0, 0, 0, 0, 0));
+			instances.push(new Matrix(scaleVector2.X, scaleVector2.Y, scaleVector2.Z, 0, 1, 1, 1, 1, translateVector2.X, translateVector2.Y, translateVector2.Z, 0, 0, 0, 0, 0));
 		}
 	}
 	return ({
