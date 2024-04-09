@@ -1,3 +1,6 @@
+///
+/// takes a maptree, world data, the output from `WorldMap`, and generates an interactive 3D map in the provided mapcontainer
+///
 const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	
 	function yawPitchToRotVec(yaw, pitch, rads=false, anglefix=false){

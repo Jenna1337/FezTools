@@ -6,6 +6,9 @@ class QualifiedNode {
 		this.Transparency = 0.0;
 	}
 }
+///
+/// maptree and some settings to generate the data needed to render the world map
+///
 function WorldMap(maptree, LinkThickness, fullcube)
 {
 	String.prototype.GetSizeFactor = function()
