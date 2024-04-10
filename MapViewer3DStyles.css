@@ -38,6 +38,7 @@
 	transition-timing-function: linear;*/
 	-webkit-user-select: none;
 	user-select: none;
+	backface-visibility: visible;
 }
 
 #mapnodes, #maplinks {
