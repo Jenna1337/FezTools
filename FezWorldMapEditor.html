@@ -228,12 +228,17 @@ function NotifyUser(noticelevel, text){
 		case "warn":
 		case "error":
 			console[noticelevel](text);
-			//TODO display these in a box the user can see
+			//TODO display these in mapgennoticebox
 			break;
 		default:
 			throw "Unknown Notice Level: \""+noticelevel+"\"";
 			break;
 	}
+}
+function initNoticeBox(){
+	let notbox = document.getElementById("mapgennoticebox");
+	makeWindow(notbox, "Map Tree Generation Notices");
+	//TODO
 }
 
 const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
@@ -268,7 +273,6 @@ var ADD_EXTRA_INFO = true;
 var HIDE_INVALID_NODES = true;
 var USE_FEZMAP_INFO = true;
 
-//TODO make these customizable
 const MapGenSettings = {
 	"Up Levels": {"Value": UpLevels, "Description": "The links to these levels will go up."},
 	"Down Levels": {"Value": DownLevels, "Description": "The links to these levels will go down."},
@@ -678,6 +682,8 @@ function RebuildMap(maptree){
 }
 document.addEventListener("DOMContentLoaded",()=>{
 	initMenubars(menubarbars);
+	initMapGenSettingsBox();
+	initNoticeBox();
 	ReloadFileInfoAndRebuildMap();
 })
 fpsconttopleftelemname = "mapdebuginfo";
@@ -718,6 +724,112 @@ document.addEventListener("readystatechange", function(event){
 		});
 	}
 });
+function makeWindow(elem, elemtitle){
+	elem.style = "background-color: white; border: 3px groove gray; color: black; z-index: 99999999; position: absolute; "
+	            +"overflow: auto; resize: both; width: 40em; text-align: center; max-height: calc(-2.2rlh + 100% - 2em - 6px); "
+	            +"min-height: 6lh; min-width: 6lh; ";
+	var windowhandle = document.createElement("div");
+	{
+		windowhandle.style = "background-color: #333; cursor: grab; height: 2lh; position: sticky; top: 0; left: 0; right: 0; ";
+		let windowtitletextspan = document.createElement("span");
+		windowtitletextspan.textContent = elemtitle;
+		windowtitletextspan.style = "color: white; line-height: 2lh; ";
+		windowhandle.appendChild(windowtitletextspan);
+		let closebutton = document.createElement("a");
+		closebutton.href = "#";
+		closebutton.textContent = "X";
+		closebutton.style = "position: absolute; right: 0; top: 0; bottom: 0; line-height: 2lh; aspect-ratio: 1; "
+		                   +"background-color: red; color: white; font-weight: bold; cursor: pointer; text-decoration: none;";
+		closebutton.addEventListener("click", function(event){
+			elem.style.display = "none";
+		});
+		windowhandle.appendChild(closebutton);
+		let mousepos = {"X":0,"Y":0};
+		let activePointerId = null;
+		document.body.addEventListener("pointerup",function(event){
+			if(event.pointerId === activePointerId)
+			{
+				activePointerId = null;
+			}
+		});
+		windowhandle.addEventListener("pointerdown",function(event){
+			if(event.pointerId !== activePointerId)
+			{
+				activePointerId = event.pointerId;
+				mousepos.X = event.pageX;
+				mousepos.Y = event.pageY;
+			}
+		});
+		document.body.addEventListener("pointermove",function(event){
+			if(event.pointerId === activePointerId){
+				var dx = event.pageX - mousepos.X;
+				var dy = event.pageY - mousepos.Y;
+				mousepos.X = event.pageX;
+				mousepos.Y = event.pageY;
+				event.preventDefault();//disables touch scrolling
+				var b = event.buttons;
+				if((b&1)>0){//mouse1
+					let x = elem.dataset.tx = Number(elem.dataset.tx ?? 0) + dx;//TODO save the position and visibility of each window to preserve between page loads?
+					let y = elem.dataset.ty = Number(elem.dataset.ty ?? 0) + dy;
+					elem.style.translate = x+"px "+y+"px";
+				}
+				if((b&2)>0){//mouse2
+				}
+			}
+		});
+	}
+	elem.appendChild(windowhandle);
+}
+
+function initMapGenSettingsBox(){
+	var sbox = document.getElementById("mapgensettingsbox");
+	makeWindow(sbox, "Map Tree Generation Settings");
+	sbox.style.width = "40em";
+	sbox.style.textAlign = "center";
+	var windowcontents = document.createElement("div");
+	windowcontents.style = "padding: 1em; ";
+	Object.entries(MapGenSettings).forEach(a=>{
+		var fname = a[0];
+		var fval = a[1].Value;
+		var fdesc = a[1].Description;
+		
+		
+		let ielemid = "mapgensettings__"+fname;
+		
+		let ilbl = document.createElement("label");
+		ilbl.textContent = fname+": ";
+		ilbl.setAttribute("for", ielemid);
+		windowcontents.appendChild(ilbl);
+		
+		let ielem = null;
+		switch(typeof fval){
+			case "boolean":
+				ielem = document.createElement("input");
+				ielem.setAttribute("type", "checkbox");
+				ielem.checked = fval;
+				//TODO add event listener 
+				break;
+			case "undefined":
+				ielem = document.createElement("span");
+				ielem.textContent = fdesc;
+				break;
+			case "array":
+			case "object":
+				ielem = document.createElement("textarea");
+				ielem.value = Object.values(fval).join(", ");
+				ielem.style = "resize: both; overflow: auto; width: 100%; max-width: 100%;";
+				//TODO add event listener 
+				break;
+			default:
+				throw 23;
+		}
+		ielem.title = fdesc;
+		ielem.id = ielemid;
+		windowcontents.appendChild(ielem);
+		windowcontents.appendChild(document.createElement("br"));
+	});
+	sbox.appendChild(windowcontents);
+}
 </script>
 <script src="fpscounterscript.js" id="fpscounterscript"></script>
 <!--Generates that lovely menubar-->
@@ -868,15 +980,26 @@ var menubarbars = {
 					checked: true,
 				},
 				{
-					text: 'Add extra info',
+					text: 'Show Map Tree Generation Settings',
 					fun: (e)=>{
-						ADD_EXTRA_INFO = e.isChecked();
-						ReloadFileInfoAndRebuildMap();
+						let sbox = document.getElementById("mapgensettingsbox");
+						sbox.style.display = "";
+						sbox.style.translate = "";
+						sbox.dataset.tx = sbox.dataset.ty = 0;
 					},
-					accessKey: 'e',
+					accessKey: 'G',
 					shortcutkey: "F8",
-					toggleable: true,
-					checked: true,
+				},
+				{
+					text: 'Show Map Tree Generation Notices',
+					fun: (e)=>{
+						let sbox = document.getElementById("mapgennoticebox");
+						sbox.style.display = "";
+						sbox.style.translate = "";
+						sbox.dataset.tx = sbox.dataset.ty = 0;
+					},
+					accessKey: 'G',
+					shortcutkey: "F8",
 				},
 			],
 		},
@@ -913,6 +1036,8 @@ var menubarbars = {
 <input type="file" accept=".fezts.json" oninput="ReloadFileInfoAndRebuildMap()" id="feztsfileinput"  title="feztsfileinput"  multiple />
 <input type="file" accept=".fezao.json" oninput="ReloadFileInfoAndRebuildMap()" id="fezaofileinput"  title="fezaofileinput"  multiple />
 </div>
+<div id="mapgensettingsbox"></div>
+<div id="mapgennoticebox"></div>
 <div id="mapviewerbox">
 <div id="mapcontainer" style="height: calc(100vh - 2.2rlh); translate: 0 2.2rlh; height: calc(-2.2rlh + 100vh)"></div>
 <svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none; translate: 0 2.2rlh;">
