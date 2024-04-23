@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SaveFile>
+	<Field name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
+	<SaveData notes="">
+		<primitive name="Version" type="long" notes="const value (6)" />
+		<primitive name="CreationTime" type="long" notes="DateTime.Now.ToFileTimeUtc()" />
+		<primitive name="Finished32" type="bool" notes="" />
+		<primitive name="Finished64" type="bool" notes="" />
+		<primitive name="HasFPView" type="bool" notes="" />
+		<primitive name="HasStereo3D" type="bool" notes="" />
+		<primitive name="CanNewGamePlus" type="bool" notes="" />
+		<primitive name="IsNewGamePlus" type="bool" notes="" />
+		<!--TODO-->
+		<primitive name="Level" type="string" nullable="true" notes="current level name" />
+		<View type="Viewpoint" notes="Note: Viewpoint is saved as int">
+			<primitive name="undefined" type="int" notes="" />
+		</View type="Viewpoint">
+		<Ground type="Vector3" notes="">
+			<primitive name="X" type="float" notes="" />
+			<primitive name="Y" type="float" notes="" />
+			<primitive name="Z" type="float" notes="" />
+		</Ground type="Vector3">
+		<TimeOfDay type="TimeSpan" notes="">
+			<primitive name="undefined" type="long" notes="stored as ticks" />
+		</TimeOfDay type="TimeSpan">
+		<!--TODO-->
+		<primitive name="Keys" type="int" notes="" />
+		<primitive name="CubeShards" type="int" notes="" />
+		<primitive name="SecretCubes" type="int" notes="" />
+		<primitive name="CollectedParts" type="int" notes="" />
+		<primitive name="CollectedOwls" type="int" notes="" />
+		<primitive name="PiecesOfHeart" type="int" notes="" />
+		<!--TODO-->
+		<!--TODO-->
+		<!--TODO-->
+		<!--TODO-->
+		<primitive name="ScriptingState" type="string" nullable="true" notes="" />
+		<primitive name="FezHidden" type="bool" notes="" />
+		<primitive name="GlobalWaterLevelModifier" type="float?" nullable="true" notes="" />
+		<primitive name="HasHadMapHelp" type="bool" notes="" />
+		<primitive name="CanOpenMap" type="bool" notes="" />
+		<primitive name="AchievementCheatCodeDone" type="bool" notes="" />
+		<primitive name="AnyCodeDeciphered" type="bool" notes="" />
+		<primitive name="MapCheatCodeDone" type="bool" notes="" />
+		<!--TODO-->
+		<primitive name="ScoreDirty" type="bool" notes="" />
+		<primitive name="HasDoneHeartReboot" type="bool" notes="" />
+		<primitive name="PlayTime" type="long" notes="play time, in ticks (for reference, there are 10000000 (ten million) ticks in a second)" />
+		<primitive name="IsNew" type="bool" notes="Should only be true if the save file exists, but the save data is clear" />
+	</SaveData>
+<SaveFile>

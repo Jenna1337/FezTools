@@ -472,6 +472,7 @@ spreadsheetdata.replaceAll("\"","").split("\n").slice(2).map(a=>a.split("\t")).f
 	o[tp].push({"fieldname":tv[1],"fieldtype":a[1],"notes":a[2],"csharptype":a[3],"jseqv":a[4],"bytesize":a[5],"inputtype":a[6],"inputattr":a[7],"dataviewrwtype":a[8]});
 });
 
+o["ogstring"] = o["string"];
 o["string"] = ([{"fieldname":undefined,"fieldtype":"string","notes":"","jseqv":"string","inputtype":"text","inputattr":"","dataviewrwtype":"String"}]);//so the user doesn't have a length field for text. Note: this removes the null checkbox
 
 return o;
@@ -539,7 +540,7 @@ var MakeInputs = (function(){
 			}
 		}
 		else{
-			//primative type
+			//primitive type
 			elem = document.createElement("input");
 			elem.type = el.inputtype;
 			if(el.inputattr?.length>0){
@@ -1253,6 +1254,54 @@ function LoadPrefabSave(savename){
 
 document.title = document.title.replace("version whatever", "v"+new Date(document.lastModified).toISOString().replaceAll(/[-:]|\..*/g,'').replace('t','-'));
 
+function generateFezSaveFileStructureXML(nl = "\n", ind = "\t"){
+	const primitiveentryname = "primitive";
+	const primitivetypes = ["bool","byte","short","int","long","float","double","StringLiteral","7BitEncodedInt"];
+	const aliastypes = {"Viewpoint":"int","ActorType":"int","TimeSpan":"long"};
+	
+	function TableEntryToXML(entryname, doindent = true, currentindent = 1, notes="", fieldname = null){
+		if(doindent){
+		}else{
+			currentindent = 0;
+		}
+		if(!o[entryname]){
+			throw "entry not found: "+entryname;
+		}
+		let typename = null;
+		return ind.repeat(currentindent)+"<"+(typename=(fieldname!=null ? fieldname+" type=\""+entryname+"\"" : entryname))+" notes=\""+notes+"\">"+nl
+			+o[entryname]//.filter(b=>b.fieldname!=null)
+					.map(b=>{
+						if(primitivetypes.includes(b.fieldtype)){
+							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" notes=\""+b.notes+"\" />"+nl;
+						}
+						else if(b.fieldtype==="string"){
+							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" nullable=\"true\" notes=\""+b.notes+"\" />"+nl;
+							//return TableEntryToXML("ogstring", doindent, currentindent, b.notes, b.fieldname).replaceAll("ogstring","string")+nl;
+							
+						}
+						else if(b.fieldtype.includes("?")){
+							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" nullable=\"true\" notes=\""+b.notes+"\" />"+nl;
+						}
+						if(b.fieldtype.includes("<")){
+							let containerTypes = b.fieldtype.split("<")[1].slice(0,-1).split(",").map(a=>a.trim());
+							debugger
+							//TODO
+							return ind.repeat(currentindent+1)+'<!--TODO-->'+nl;
+						}
+						else{
+							return TableEntryToXML(b.fieldtype, doindent, currentindent+1, b.notes, b.fieldname)+nl;
+						}
+					}).join("")
+			+ind.repeat(currentindent)+"</"+typename+">";
+	}
+	return `<?xml version="1.0" encoding="UTF-8"?>
+<SaveFile>
+	<Field name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
+`
+	+ TableEntryToXML("SaveData", true, 1) + `
+<SaveFile>`;
+}
+console.log(generateFezSaveFileStructureXML());
 </script>
 </head>
 <body lang="en-US" data-color-scheme="light">
