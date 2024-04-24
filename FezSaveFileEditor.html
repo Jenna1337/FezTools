@@ -1256,50 +1256,126 @@ document.title = document.title.replace("version whatever", "v"+new Date(documen
 
 function generateFezSaveFileStructureXML(nl = "\n", ind = "\t"){
 	const primitiveentryname = "primitive";
+	const collectionentryname = "collection";
+	const collectionentrylengthname = primitiveentryname;//"collection.length";
+	const collectionentryentryname = "repeating-group";//"collection.entry";
+	const containerentryname = "container";
+	const nullablecontainerentryname = "object";
+	
 	const primitivetypes = ["bool","byte","short","int","long","float","double","StringLiteral","7BitEncodedInt"];
 	const aliastypes = {"Viewpoint":"int","ActorType":"int","TimeSpan":"long"};
+	const containertypes = ["SaveData","Vector3","TrileEmplacement"];
 	
-	function TableEntryToXML(entryname, doindent = true, currentindent = 1, notes="", fieldname = null){
-		if(doindent){
-		}else{
-			currentindent = 0;
-		}
-		if(!o[entryname]){
+	function encodeXmlEntities(str) {
+		return str.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&apos;');
+	}
+	function TableEntryToXML(entryname, currentindent = 1, notes="", fieldname = null){
+		let tentry=o[entryname];
+		if(!tentry){
 			throw "entry not found: "+entryname;
 		}
-		let typename = null;
-		return ind.repeat(currentindent)+"<"+(typename=(fieldname!=null ? fieldname+" type=\""+entryname+"\"" : entryname))+" notes=\""+notes+"\">"+nl
-			+o[entryname]//.filter(b=>b.fieldname!=null)
-					.map(b=>{
-						if(primitivetypes.includes(b.fieldtype)){
-							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" notes=\""+b.notes+"\" />"+nl;
-						}
-						else if(b.fieldtype==="string"){
-							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" nullable=\"true\" notes=\""+b.notes+"\" />"+nl;
-							//return TableEntryToXML("ogstring", doindent, currentindent, b.notes, b.fieldname).replaceAll("ogstring","string")+nl;
-							
-						}
-						else if(b.fieldtype.includes("?")){
-							return ind.repeat(doindent ? currentindent+1 : 0)+"<"+primitiveentryname+" name=\""+b.fieldname+"\" type=\""+b.fieldtype+"\" nullable=\"true\" notes=\""+b.notes+"\" />"+nl;
-						}
-						if(b.fieldtype.includes("<")){
-							let containerTypes = b.fieldtype.split("<")[1].slice(0,-1).split(",").map(a=>a.trim());
-							debugger
-							//TODO
-							return ind.repeat(currentindent+1)+'<!--TODO-->'+nl;
-						}
-						else{
-							return TableEntryToXML(b.fieldtype, doindent, currentindent+1, b.notes, b.fieldname)+nl;
-						}
-					}).join("")
-			+ind.repeat(currentindent)+"</"+typename+">";
+		function GenXMLTag(indentlvl, tagname, name, type, notes, nullable, aliasedfrom){
+			name = (name ?? type);
+			let attrs = [];
+			if(name){
+				attrs.push("name=\""+name+"\"");
+			}
+			if(type){
+				attrs.push("type=\""+encodeXmlEntities(type)+"\"");
+			}
+			if(nullable){
+				attrs.push("nullable=\"true\"");
+			}
+			if(aliasedfrom){
+				attrs.push("aliased-from=\""+encodeXmlEntities(aliasedfrom)+"\"");
+			}
+			if(notes){if(notes.match("\"")){debugger}
+				attrs.push("notes=\""+encodeXmlEntities(notes)+"\"");
+			}
+			let str = ind.repeat(indentlvl)+"<"+tagname;
+			if(attrs.length>0){
+				str += " "+attrs.join(" ");
+			}
+			return str;
+		}
+		function handlePrimitiveTypes(b, currentindent){
+			if(primitivetypes.includes(b.fieldtype)){
+				return GenXMLTag(currentindent+1, primitiveentryname, b.fieldname, b.fieldtype, b.notes) +" />"+nl;
+			}
+			if(b.fieldtype==="string"){
+				return GenXMLTag(currentindent+1, primitiveentryname, b.fieldname, b.fieldtype, b.notes) +" />"+nl;
+			}
+			return false;
+		}
+		if(tentry.length===1){
+			let primitiveResult = handlePrimitiveTypes(tentry[0], currentindent-1);
+			if(primitiveResult!==false){
+				return primitiveResult
+			}
+		}
+		else{
+			let iscontainer = containertypes.includes(entryname);
+			let xmlentryname = iscontainer ? containerentryname : nullablecontainerentryname;
+			return GenXMLTag(currentindent, xmlentryname, fieldname, entryname, notes, !iscontainer)+">"+nl
+				+tentry//.filter(b=>b.fieldname!=null)
+						.map(b=>{
+							{
+								let primitiveResult = handlePrimitiveTypes(b, currentindent);
+								if(primitiveResult!==false){
+									return primitiveResult
+								}
+							}
+							if(b.fieldtype.includes("?")){
+								return GenXMLTag(currentindent+1, primitiveentryname, b.fieldname, b.fieldtype, b.notes, true)+" />"+nl;
+							}
+							if(b.fieldtype.includes("<")){
+								let containerTypes = b.fieldtype.split("<")[1].slice(0,-1).split(",").map(a=>a.trim());
+								return GenXMLTag(currentindent+1, collectionentryname, b.fieldname, b.fieldtype, b.notes, false) +">"+nl
+												+ GenXMLTag(currentindent+2, collectionentrylengthname, b.fieldname+".Count", "int")+" />"+nl
+												+ ind.repeat(currentindent+2)+"<"+collectionentryentryname+" name=\""+b.fieldname+".Entry\" occurs=\""+b.fieldname+".Count\">"+nl
+													+ containerTypes.map(t=>TableEntryToXML(t, currentindent+3)).join("")
+												+ ind.repeat(currentindent+2)+"</"+collectionentryentryname+">"+nl
+										+ ind.repeat(currentindent+1)+"</"+collectionentryname+">"+nl;
+							}
+							if(aliastypes.hasOwnProperty(b.fieldtype)){
+								let aliastype = aliastypes[b.fieldtype];
+								return GenXMLTag(currentindent+1, primitiveentryname, b.fieldname, aliastype, notes, false, b.fieldtype) +" />"+nl;
+							}
+							else{
+								return TableEntryToXML(b.fieldtype, currentindent+1, b.notes, b.fieldname);
+							}
+						}).join("")
+				+ind.repeat(currentindent)+"</"+xmlentryname+">"+nl;
+		}
 	}
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<SaveFile>
-	<Field name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
+	return `<?xml version="1.0" encoding="UTF-8"?>`+"\n"+
+	//TODO include dtd?
+""/*`<!DOCTYPE SaveFile [
+<!ELEMENT SaveFile (primitive, container)>
+<!ELEMENT container (primitive | collection | container)*>
+<!ELEMENT collection (primitive, repeating-group)>
+<!ELEMENT primitive EMPTY>
+<!ATTLIST primitive name NMTOKEN #REQUIRED
+                    type CDATA #REQUIRED
+                    notes CDATA #IMPLIED
+                    aliased-from CDATA #IMPLIED>
+<!ATTLIST collection name NMTOKEN #REQUIRED
+                     type CDATA #REQUIRED
+                     notes CDATA #IMPLIED>
+<!ATTLIST container name NMTOKEN #REQUIRED
+                     type CDATA #REQUIRED
+                     notes CDATA #IMPLIED>
+<!ATTLIST repeating-group name NMTOKEN #REQUIRED
+                     occurs CDATA #REQUIRED>
+]>`+"\n"/* */
++`<SaveFile>
+	<${primitiveentryname} name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
 `
-	+ TableEntryToXML("SaveData", true, 1) + `
-<SaveFile>`;
+	+ TableEntryToXML("SaveData", 1) + "<SaveFile>";
 }
 console.log(generateFezSaveFileStructureXML());
 </script>

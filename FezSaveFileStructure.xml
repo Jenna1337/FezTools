@@ -1,51 +1,160 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SaveFile>
-	<Field name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
-	<SaveData notes="">
+	<primitive name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
+	<container name="SaveData" type="SaveData">
 		<primitive name="Version" type="long" notes="const value (6)" />
 		<primitive name="CreationTime" type="long" notes="DateTime.Now.ToFileTimeUtc()" />
-		<primitive name="Finished32" type="bool" notes="" />
-		<primitive name="Finished64" type="bool" notes="" />
-		<primitive name="HasFPView" type="bool" notes="" />
-		<primitive name="HasStereo3D" type="bool" notes="" />
-		<primitive name="CanNewGamePlus" type="bool" notes="" />
-		<primitive name="IsNewGamePlus" type="bool" notes="" />
-		<!--TODO-->
-		<primitive name="Level" type="string" nullable="true" notes="current level name" />
-		<View type="Viewpoint" notes="Note: Viewpoint is saved as int">
-			<primitive name="undefined" type="int" notes="" />
-		</View type="Viewpoint">
-		<Ground type="Vector3" notes="">
-			<primitive name="X" type="float" notes="" />
-			<primitive name="Y" type="float" notes="" />
-			<primitive name="Z" type="float" notes="" />
-		</Ground type="Vector3">
-		<TimeOfDay type="TimeSpan" notes="">
-			<primitive name="undefined" type="long" notes="stored as ticks" />
-		</TimeOfDay type="TimeSpan">
-		<!--TODO-->
-		<primitive name="Keys" type="int" notes="" />
-		<primitive name="CubeShards" type="int" notes="" />
-		<primitive name="SecretCubes" type="int" notes="" />
-		<primitive name="CollectedParts" type="int" notes="" />
-		<primitive name="CollectedOwls" type="int" notes="" />
-		<primitive name="PiecesOfHeart" type="int" notes="" />
-		<!--TODO-->
-		<!--TODO-->
-		<!--TODO-->
-		<!--TODO-->
-		<primitive name="ScriptingState" type="string" nullable="true" notes="" />
-		<primitive name="FezHidden" type="bool" notes="" />
-		<primitive name="GlobalWaterLevelModifier" type="float?" nullable="true" notes="" />
-		<primitive name="HasHadMapHelp" type="bool" notes="" />
-		<primitive name="CanOpenMap" type="bool" notes="" />
-		<primitive name="AchievementCheatCodeDone" type="bool" notes="" />
-		<primitive name="AnyCodeDeciphered" type="bool" notes="" />
-		<primitive name="MapCheatCodeDone" type="bool" notes="" />
-		<!--TODO-->
-		<primitive name="ScoreDirty" type="bool" notes="" />
-		<primitive name="HasDoneHeartReboot" type="bool" notes="" />
+		<primitive name="Finished32" type="bool" />
+		<primitive name="Finished64" type="bool" />
+		<primitive name="HasFPView" type="bool" />
+		<primitive name="HasStereo3D" type="bool" />
+		<primitive name="CanNewGamePlus" type="bool" />
+		<primitive name="IsNewGamePlus" type="bool" />
+		<collection name="OneTimeTutorials" type="Dictionary&lt;string, bool&gt;" notes="used to keep track of some of Dot&apos;s tutorial text; key is GameText key, and value should only ever really be true">
+			<primitive name="OneTimeTutorials.Count" type="int" />
+			<repeating-group name="OneTimeTutorials.Entry" occurs="OneTimeTutorials.Count">
+				<primitive name="string" type="string" />
+				<primitive name="bool" type="bool" />
+			</repeating-group>
+		</collection>
+		<primitive name="Level" type="string" notes="current level name" />
+		<primitive name="View" type="int" aliased-from="Viewpoint" />
+		<container name="Ground" type="Vector3">
+			<primitive name="X" type="float" />
+			<primitive name="Y" type="float" />
+			<primitive name="Z" type="float" />
+		</container>
+		<primitive name="TimeOfDay" type="long" aliased-from="TimeSpan" />
+		<collection name="UnlockedWarpDestinations" type="List&lt;string&gt;" notes="used for big hub warp gates; includes NATURE_HUB by default">
+			<primitive name="UnlockedWarpDestinations.Count" type="int" />
+			<repeating-group name="UnlockedWarpDestinations.Entry" occurs="UnlockedWarpDestinations.Count">
+				<primitive name="string" type="string" />
+			</repeating-group>
+		</collection>
+		<primitive name="Keys" type="int" />
+		<primitive name="CubeShards" type="int" />
+		<primitive name="SecretCubes" type="int" />
+		<primitive name="CollectedParts" type="int" />
+		<primitive name="CollectedOwls" type="int" />
+		<primitive name="PiecesOfHeart" type="int" />
+		<collection name="Maps" type="List&lt;string&gt;">
+			<primitive name="Maps.Count" type="int" />
+			<repeating-group name="Maps.Entry" occurs="Maps.Count">
+				<primitive name="string" type="string" />
+			</repeating-group>
+		</collection>
+		<collection name="Artifacts" type="List&lt;ActorType&gt;" notes="Note: ActorType is saved as int">
+			<primitive name="Artifacts.Count" type="int" />
+			<repeating-group name="Artifacts.Entry" occurs="Artifacts.Count">
+				<primitive name="int" type="int" />
+			</repeating-group>
+		</collection>
+		<collection name="EarnedAchievements" type="List&lt;string&gt;">
+			<primitive name="EarnedAchievements.Count" type="int" />
+			<repeating-group name="EarnedAchievements.Entry" occurs="EarnedAchievements.Count">
+				<primitive name="string" type="string" />
+			</repeating-group>
+		</collection>
+		<collection name="EarnedGamerPictures" type="List&lt;string&gt;">
+			<primitive name="EarnedGamerPictures.Count" type="int" />
+			<repeating-group name="EarnedGamerPictures.Entry" occurs="EarnedGamerPictures.Count">
+				<primitive name="string" type="string" />
+			</repeating-group>
+		</collection>
+		<primitive name="ScriptingState" type="string" />
+		<primitive name="FezHidden" type="bool" />
+		<primitive name="GlobalWaterLevelModifier" type="float?" nullable="true" />
+		<primitive name="HasHadMapHelp" type="bool" />
+		<primitive name="CanOpenMap" type="bool" />
+		<primitive name="AchievementCheatCodeDone" type="bool" />
+		<primitive name="AnyCodeDeciphered" type="bool" />
+		<primitive name="MapCheatCodeDone" type="bool" />
+		<collection name="World" type="Dictionary&lt;string, LevelSaveData&gt;" notes="level name -&gt; LevelSaveData">
+			<primitive name="World.Count" type="int" />
+			<repeating-group name="World.Entry" occurs="World.Count">
+				<primitive name="string" type="string" />
+				<object name="LevelSaveData" type="LevelSaveData" nullable="true">
+					<collection name="DestroyedTriles" type="List&lt;TrileEmplacement&gt;" notes="bell cube, bombable walls, permanent despawning groups (dunno what that means), NameOfGodPuzzle treasure, treasure chest treasures, tuning fork treasures, cube bits, TetrisPuzzle treasure, and UnfoldPuzzle treasure">
+						<primitive name="DestroyedTriles.Count" type="int" />
+						<repeating-group name="DestroyedTriles.Entry" occurs="DestroyedTriles.Count">
+							<container name="TrileEmplacement" type="TrileEmplacement">
+								<primitive name="X" type="int" />
+								<primitive name="Y" type="int" />
+								<primitive name="Z" type="int" />
+							</container>
+						</repeating-group>
+					</collection>
+					<collection name="InactiveTriles" type="List&lt;TrileEmplacement&gt;" notes="doors">
+						<primitive name="InactiveTriles.Count" type="int" />
+						<repeating-group name="InactiveTriles.Entry" occurs="InactiveTriles.Count">
+							<container name="TrileEmplacement" type="TrileEmplacement">
+								<primitive name="X" type="int" />
+								<primitive name="Y" type="int" />
+								<primitive name="Z" type="int" />
+							</container>
+						</repeating-group>
+					</collection>
+					<collection name="InactiveArtObjects" type="List&lt;int&gt;" notes="clock tower cubes, bell, bit doors, the mailbox, NameOfGodPuzzle (hardcoded to 0), treasure chests, that one openable bookcase, turing forks, the spinning rings animation in STARGATE (hardcoded to 0), TetrisPuzzle (hardcoded to 0), and UnfoldPuzzle (hardcoded to 0). All the ones that are not hardcoded to 0 use the Id of the associated ArtObject ">
+						<primitive name="InactiveArtObjects.Count" type="int" />
+						<repeating-group name="InactiveArtObjects.Entry" occurs="InactiveArtObjects.Count">
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<collection name="InactiveEvents" type="List&lt;int&gt;" notes="keeps track of Level Scripts that have OneTime set to true and that have already been activated">
+						<primitive name="InactiveEvents.Count" type="int" />
+						<repeating-group name="InactiveEvents.Entry" occurs="InactiveEvents.Count">
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<collection name="InactiveGroups" type="List&lt;int&gt;" notes="Permanent PushSwitches (which I think is all the ones used in-game) and the glowing on the door in Waterfall">
+						<primitive name="InactiveGroups.Count" type="int" />
+						<repeating-group name="InactiveGroups.Entry" occurs="InactiveGroups.Count">
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<collection name="InactiveVolumes " type="List&lt;int&gt;" notes="typically used for Volumes that have codes that should only be activated once (e.g., the waterfall and the moria door in Waterfall)">
+						<primitive name="InactiveVolumes .Count" type="int" />
+						<repeating-group name="InactiveVolumes .Entry" occurs="InactiveVolumes .Count">
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<collection name="InactiveNPCs" type="List&lt;int&gt;" notes="Owls ">
+						<primitive name="InactiveNPCs.Count" type="int" />
+						<repeating-group name="InactiveNPCs.Entry" occurs="InactiveNPCs.Count">
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<collection name="PivotRotations" type="Dictionary&lt;int, int&gt;" notes="keeps track of the rotations of all the things you can spin around (time switches, tombstones, those big platforms you can push to rotate, that one bookcase, etc.)">
+						<primitive name="PivotRotations.Count" type="int" />
+						<repeating-group name="PivotRotations.Entry" occurs="PivotRotations.Count">
+							<primitive name="int" type="int" />
+							<primitive name="int" type="int" />
+						</repeating-group>
+					</collection>
+					<primitive name="LastStableLiquidHeight" type="float?" nullable="true" notes="null if no liquid" />
+					<primitive name="ScriptingState" type="string" />
+					<primitive name="FirstVisit" type="bool" />
+					<object name="FilledConditions" type="WinConditions" nullable="true" notes="could be dynamically recalculated">
+						<primitive name="LockedDoorCount" type="int" notes="doors that have locks" />
+						<primitive name="UnlockedDoorCount" type="int" notes="doors that don&apos;t have locks" />
+						<primitive name="ChestCount" type="int" notes="number of treasure chests" />
+						<primitive name="CubeShardCount" type="int" notes="number of larger golden cubes" />
+						<primitive name="OtherCollectibleCount" type="int" notes="used for maps, artifacts, anticubes, or any other collectible that isn&apos;t a golden cube" />
+						<primitive name="SplitUpCount" type="int" notes="number of cube bits" />
+						<collection name="ScriptIds" type="List&lt;int&gt;" notes="script IDs that count towards win conditions">
+							<primitive name="ScriptIds.Count" type="int" />
+							<repeating-group name="ScriptIds.Entry" occurs="ScriptIds.Count">
+								<primitive name="int" type="int" />
+							</repeating-group>
+						</collection>
+						<primitive name="SecretCount" type="int" notes="used for puzzles" />
+					</object>
+				</object>
+			</repeating-group>
+		</collection>
+		<primitive name="ScoreDirty" type="bool" />
+		<primitive name="HasDoneHeartReboot" type="bool" />
 		<primitive name="PlayTime" type="long" notes="play time, in ticks (for reference, there are 10000000 (ten million) ticks in a second)" />
 		<primitive name="IsNew" type="bool" notes="Should only be true if the save file exists, but the save data is clear" />
-	</SaveData>
+	</container>
 <SaveFile>
