@@ -1,25 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE SaveFile [
-<!ELEMENT SaveFile (primitive, container)>
-<!ELEMENT container (primitive | collection | container)*>
-<!ELEMENT repeating-group (primitive | collection | container)*>
-<!ELEMENT collection (primitive, repeating-group)>
-<!ELEMENT primitive EMPTY>
-<!ATTLIST primitive name NMTOKEN #REQUIRED
-                    type CDATA #REQUIRED
-                    notes CDATA #IMPLIED
-                    aliased-from CDATA #IMPLIED
-                    nullable (false|true) "false">
-<!ATTLIST collection name NMTOKEN #REQUIRED
-                     type CDATA #REQUIRED
-                     notes CDATA #IMPLIED>
-<!ATTLIST container name NMTOKEN #REQUIRED
-                     type CDATA #REQUIRED
-                     notes CDATA #IMPLIED
-                     nullable (false|true) "false">
-<!ATTLIST repeating-group name NMTOKEN #REQUIRED
-                     occurs CDATA #REQUIRED>
-]>
 <SaveFile>
 	<primitive name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
 	<container name="SaveData" type="SaveData">
