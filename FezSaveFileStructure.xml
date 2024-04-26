@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE SaveFile [
+<!ELEMENT SaveFile (primitive, container)>
+<!ELEMENT container (primitive | collection | container)*>
+<!ELEMENT repeating-group (primitive | collection | container)*>
+<!ELEMENT collection (primitive, repeating-group)>
+<!ELEMENT primitive EMPTY>
+<!ATTLIST primitive name NMTOKEN #REQUIRED
+                    type CDATA #REQUIRED
+                    notes CDATA #IMPLIED
+                    aliased-from CDATA #IMPLIED
+                    nullable (false|true) "false">
+<!ATTLIST collection name NMTOKEN #REQUIRED
+                     type CDATA #REQUIRED
+                     notes CDATA #IMPLIED>
+<!ATTLIST container name NMTOKEN #REQUIRED
+                     type CDATA #REQUIRED
+                     notes CDATA #IMPLIED
+                     nullable (false|true) "false">
+<!ATTLIST repeating-group name NMTOKEN #REQUIRED
+                     occurs CDATA #REQUIRED>
+]>
 <SaveFile>
 	<primitive name="BinaryWriter" type="long" notes="value written in EasyStorage.dll as (long)Date.now()" />
 	<container name="SaveData" type="SaveData">
@@ -73,7 +94,7 @@
 			<primitive name="World.Count" type="int" />
 			<repeating-group name="World.Entry" occurs="World.Count">
 				<primitive name="string" type="string" />
-				<object name="LevelSaveData" type="LevelSaveData" nullable="true">
+				<container name="LevelSaveData" type="LevelSaveData" nullable="true">
 					<collection name="DestroyedTriles" type="List&lt;TrileEmplacement&gt;" notes="bell cube, bombable walls, permanent despawning groups (dunno what that means), NameOfGodPuzzle treasure, treasure chest treasures, tuning fork treasures, cube bits, TetrisPuzzle treasure, and UnfoldPuzzle treasure">
 						<primitive name="DestroyedTriles.Count" type="int" />
 						<repeating-group name="DestroyedTriles.Entry" occurs="DestroyedTriles.Count">
@@ -134,7 +155,7 @@
 					<primitive name="LastStableLiquidHeight" type="float?" nullable="true" notes="null if no liquid" />
 					<primitive name="ScriptingState" type="string" />
 					<primitive name="FirstVisit" type="bool" />
-					<object name="FilledConditions" type="WinConditions" nullable="true" notes="could be dynamically recalculated">
+					<container name="FilledConditions" type="WinConditions" nullable="true" notes="could be dynamically recalculated">
 						<primitive name="LockedDoorCount" type="int" notes="doors that have locks" />
 						<primitive name="UnlockedDoorCount" type="int" notes="doors that don&apos;t have locks" />
 						<primitive name="ChestCount" type="int" notes="number of treasure chests" />
@@ -148,8 +169,8 @@
 							</repeating-group>
 						</collection>
 						<primitive name="SecretCount" type="int" notes="used for puzzles" />
-					</object>
-				</object>
+					</container>
+				</container>
 			</repeating-group>
 		</collection>
 		<primitive name="ScoreDirty" type="bool" />
@@ -157,4 +178,4 @@
 		<primitive name="PlayTime" type="long" notes="play time, in ticks (for reference, there are 10000000 (ten million) ticks in a second)" />
 		<primitive name="IsNew" type="bool" notes="Should only be true if the save file exists, but the save data is clear" />
 	</container>
-<SaveFile>
+</SaveFile>
