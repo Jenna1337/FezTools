@@ -6,7 +6,11 @@
 	background-color: black;
 	color: white;
 	height: 100vh;
+	height: -webkit-fill-available;
+	height: stretch;
 	width: 100vw;
+	width: -webkit-fill-available;
+	width: stretch;
 	position: absolute;
 	top: 0;
 	left: 0;
