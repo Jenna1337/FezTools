@@ -24,6 +24,27 @@ noscript {
 	line-height: 100vh;
 	text-align: center;
 }
+.mywindow{
+	margin: 0;
+	padding: 0;
+	
+	z-index: 99999998;
+	background-color: white;
+	border: 3px groove gray;
+	color: black;
+	position: absolute;
+	overflow: auto;
+	resize: both;
+	width: 40em;
+	text-align: center;
+	max-height: calc(-2.2rlh + 100% - 2em - 6px);
+	min-height: 6lh;
+	min-width: 6lh;
+}
+.mywindow:focus-within,
+.mywindow:hover{
+	z-index: 99999999;
+}
 </style>
 <link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
 <link rel='stylesheet' href='MapViewer3DStyles.css' id="MapViewer3DStyles" />
@@ -238,21 +259,25 @@ function NotifyUser(noticelevel, text){
 function initNoticeBox(){
 	let notbox = document.getElementById("mapgennoticebox");
 	makeWindow(notbox, "Map Tree Generation Notices");
+	var windowcontents = document.createElement("div");
+	windowcontents.style = "padding: 1em; ";
+	windowcontents.textContent = "To do: display map generation notices here";
 	//TODO
+	notbox.appendChild(windowcontents);
 }
 
-const UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
-const DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
-const OppositeLevels = [
+var UpLevels = [ "TREE_ROOTS", "TREE", "TREE_SKY", "FOX", "WATER_TOWER", "PIVOT_WATERTOWER", "VILLAGEVILLE_3D" ];
+var DownLevels = [ "SEWER_START", "MEMORY_CORE", "ZU_FORK", "STARGATE", "QUANTUM" ];
+var OppositeLevels = [
 	"NUZU_SCHOOL", "NUZU_ABANDONED_A", "ZU_HOUSE_EMPTY_B", "PURPLE_LODGE", "ZU_HOUSE_SCAFFOLDING", "MINE_BOMB_PILLAR", "CMY_B", "INDUSTRIAL_HUB", "SUPERSPIN_CAVE", "GRAVE_LESSER_GATE",
 	"THRONE", "VISITOR", "ORRERY", "LAVA_SKULL", "LAVA_FORK"
 ];
-const BackLevels = [ "ABANDONED_B", "LAVA" ];
-const LeftLevels = [];
-const FrontLevels = [ "VILLAGEVILLE_3D", "ZU_LIBRARY" ];
-const RightLevels = [ "WALL_SCHOOL", "WALL_KITCHEN", "WALL_INTERIOR_HOLE", "WALL_INTERIOR_B", "WALL_INTERIOR_A" ];
-const PuzzleLevels = [ "ZU_ZUISH", "ZU_UNFOLD", "BELL_TOWER", "CLOCK", "ZU_TETRIS" ];
-const OversizeLinks = {
+var BackLevels = [ "ABANDONED_B", "LAVA" ];
+var LeftLevels = [];
+var FrontLevels = [ "VILLAGEVILLE_3D", "ZU_LIBRARY" ];
+var RightLevels = [ "WALL_SCHOOL", "WALL_KITCHEN", "WALL_INTERIOR_HOLE", "WALL_INTERIOR_B", "WALL_INTERIOR_A" ];
+var PuzzleLevels = [ "ZU_ZUISH", "ZU_UNFOLD", "BELL_TOWER", "CLOCK", "ZU_TETRIS" ];
+var OversizeLinks = {
 	"SEWER_START": 5.5,
 	"TREE": 1.25,
 	"TREE_SKY": 1,
@@ -274,20 +299,32 @@ var HIDE_INVALID_NODES = true;
 var USE_FEZMAP_INFO = true;
 
 const MapGenSettings = {
-	"Up Levels": {"Value": UpLevels, "Description": "The links to these levels will go up."},
-	"Down Levels": {"Value": DownLevels, "Description": "The links to these levels will go down."},
-	"Back Levels": {"Value": BackLevels, "Description": "The links to these levels will go towards the back."},
-	"Left Levels": {"Value": LeftLevels, "Description": "The links to these levels will go left."},
-	"Front Levels": {"Value": FrontLevels, "Description": "The links to these levels will go towards the front."},
-	"Right Levels": {"Value": RightLevels, "Description": "The links to these levels will go right."},
-	"Opposite Levels": {"Value": OppositeLevels, "Description": "The links to these levels will go the direction the origin door is facing."},
-	"Note": {"Value": undefined, "Description": "Any levels not in any of the above categories will go the opposite direction the origin door is facing."},
-	"Puzzle Levels": {"Value": PuzzleLevels, "Description": "These levels will have 1 added to their SecretCount, except the level \"CLOCK\", which will have 4 added instead."},
-	"Oversize Links": {"Value": OversizeLinks, "Description": "The links to these levels will be extended by their assosiated value."},
+	"Usage Note": {get Value(){ return undefined; }, set Value(v){}, 
+			"Description": "These directions are only used if fezlvl and fezts files are provided. Additionally, to make your changes take effect, you must click \"Reload Files And Rebuild Map\" under the \"File\" menu."},
+	"Up Levels": {get Value(){ return UpLevels; }, set Value(v){ UpLevels = v; }, 
+			"Description": "The links to these levels will go up."},
+	"Down Levels": {get Value(){ return DownLevels; }, set Value(v){ DownLevels = v; }, 
+			"Description": "The links to these levels will go down."},
+	"Back Levels": {get Value(){ return BackLevels; }, set Value(v){ BackLevels = v; }, 
+			"Description": "The links to these levels will go towards the back."},
+	"Left Levels": {get Value(){ return LeftLevels; }, set Value(v){ LeftLevels = v; }, 
+			"Description": "The links to these levels will go left."},
+	"Front Levels": {get Value(){ return FrontLevels; }, set Value(v){ FrontLevels = v; }, 
+			"Description": "The links to these levels will go towards the front."},
+	"Right Levels": {get Value(){ return RightLevels; }, set Value(v){ RightLevels = v; }, 
+			"Description": "The links to these levels will go right."},
+	"Opposite Levels": {get Value(){ return OppositeLevels; }, set Value(v){ OppositeLevels = v; }, 
+			"Description": "The links to these levels will go the direction the origin door is facing."},
+	"Note": {get Value(){ return undefined; }, set Value(v){}, 
+			"Description": "Any levels not in any of the above categories will go the opposite direction the origin door is facing."},
+	"Puzzle Levels": {get Value(){ return PuzzleLevels; }, set Value(v){ PuzzleLevels = v; }, 
+			"Description": "These levels will have 1 added to their SecretCount, except the level \"CLOCK\", which will have 4 added instead."},
+	"Oversize Links": {get Value(){ return OversizeLinks; }, set Value(v){ OversizeLinks = v; }, 
+			"Description": "The links to these levels will be extended by their assosiated value."},
 	
 	"USE_FEZMAP_INFO": {"Description": "If set, will use the OversizeLinks and link directions from the supplied fezmap file.", get Value(){ return USE_FEZMAP_INFO; }, set Value(v){ USE_FEZMAP_INFO = v; }},
 	"ADD_EXTRA_INFO": {"Description": "If set, will use data from the fezlvl files to show the individual items that make up Conditions SecretCount for each node.", get Value(){ return ADD_EXTRA_INFO; }, set Value(v){ ADD_EXTRA_INFO = v; }},
-}
+};
 
 async function ReloadFileInfoAndRebuildMap(defaultmap=false){
 	let maptree = null;
@@ -725,9 +762,7 @@ document.addEventListener("readystatechange", function(event){
 	}
 });
 function makeWindow(elem, elemtitle){
-	elem.style = "background-color: white; border: 3px groove gray; color: black; z-index: 99999999; position: absolute; "
-	            +"overflow: auto; resize: both; width: 40em; text-align: center; max-height: calc(-2.2rlh + 100% - 2em - 6px); "
-	            +"min-height: 6lh; min-width: 6lh; ";
+	elem.className = "mywindow";
 	var windowhandle = document.createElement("div");
 	{
 		windowhandle.style = "background-color: #333; cursor: grab; height: 2lh; position: sticky; top: 0; left: 0; right: 0; ";
@@ -789,6 +824,7 @@ function initMapGenSettingsBox(){
 	var windowcontents = document.createElement("div");
 	windowcontents.style = "padding: 1em; ";
 	Object.entries(MapGenSettings).forEach(a=>{
+		windowcontents.appendChild(document.createElement("br"));
 		var fname = a[0];
 		var fval = a[1].Value;
 		var fdesc = a[1].Description;
@@ -802,22 +838,38 @@ function initMapGenSettingsBox(){
 		windowcontents.appendChild(ilbl);
 		
 		let ielem = null;
+		let noinputelem = false;
 		switch(typeof fval){
 			case "boolean":
 				ielem = document.createElement("input");
 				ielem.setAttribute("type", "checkbox");
 				ielem.checked = fval;
-				//TODO add event listener 
+				let cf=(evt=>{
+					console.log(fname, fval, evt);
+					a[1].Value = evt.target.checked;
+				});
+				ielem.addEventListener("change", cf);
 				break;
 			case "undefined":
 				ielem = document.createElement("span");
 				ielem.textContent = fdesc;
+				noinputelem = true;
 				break;
 			case "array":
 			case "object":
 				ielem = document.createElement("textarea");
-				ielem.value = Object.values(fval).join(", ");
+				if(Array.isArray(fval)){
+					ielem.value = Object.values(fval).join(", ");
+				}else{
+					ielem.value = Object.entries(fval).map(a=>a[0]+": "+a[1]).join(", ");
+				}
 				ielem.style = "resize: both; overflow: auto; width: 100%; max-width: 100%;";
+				let f=(evt=>{
+					console.log(fname, fval, evt);
+					a[1].Value = evt.target.value.split(",").map(a=>a.trim());
+				});
+				ielem.addEventListener("change", f);
+				debugger
 				//TODO add event listener 
 				break;
 			default:
@@ -826,6 +878,9 @@ function initMapGenSettingsBox(){
 		ielem.title = fdesc;
 		ielem.id = ielemid;
 		windowcontents.appendChild(ielem);
+		if(noinputelem){
+			//windowcontents.appendChild(document.createElement("br"));
+		}
 		windowcontents.appendChild(document.createElement("br"));
 	});
 	sbox.appendChild(windowcontents);
