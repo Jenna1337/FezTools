@@ -609,7 +609,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		let prevYaw = yaw;
 		let prevPitch = pitch;
 		let prevFocus = LastFocusedNode?.dataset?.Name;
-		debugger
+		
 		if(firstRebuild){
 			
 			prevYaw = Number(window.localStorage.getItem("map_prevYaw") ?? prevYaw);
@@ -626,7 +626,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		settings.showIcons = settings.showIcons;
 		
 		yaw = prevYaw;
-		pitch = prevPitch;debugger
+		pitch = prevPitch;
 		let prevSelNode = mapnodepanbox.querySelector("[data--name=\""+prevFocus+"\"]");
 		if(prevFocus && prevSelNode){
 			focusOnNode(prevSelNode)
