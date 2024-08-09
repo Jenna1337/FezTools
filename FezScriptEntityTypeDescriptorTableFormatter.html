@@ -149,6 +149,31 @@ Object.values(ScriptEntityTypeDescriptors.ScriptEntityTypeDescriptors).forEach(d
 	});
 });
 
+const columnnames = [
+//Shared 1
+"EntityIdentifier",
+
+//Events
+"TriggerName",
+
+//Properties
+"PropertyName", "Type",
+
+//Operations
+"ActionName", "Parameters",
+
+//Shared 2
+"RestrictedToActorTypes",
+"Description",
+
+//Extra junk
+"InterfaceName",
+"InterfaceClassName",
+"InterfaceClassFullName",
+"ApplicableEntityTypeName",
+"ApplicableEntityTypeFullName",
+
+"/"];
 function sortingfunc(arr, dosort, innerindex){
 	if(!dosort){
 		return arr;
@@ -160,17 +185,20 @@ function sortingfunc(arr, dosort, innerindex){
 		if(innerindex != null){
 			s = a[innerindex];
 			t = b[innerindex];
-			//return a[innerindex].localeCompare(b[innerindex]);
 		}
-		switch(s){
-			case "EntityIdentifier": return -1;
-			case "Parameters": return t!=="RestrictedToActorTypes" ? 1 : -1;
-			case "Type": return t!=="RestrictedToActorTypes" ? 1 : -1;
-			case "Description": return 1;
-			case "RestrictedToActorTypes": return t!=="Description" ? 1 : -1;
-			default: return 0;
+		var returnfallback = false, tmp;
+		var check = function(colname){
+			if(tmp = !columnnames.includes(colname)){
+				console.warn("Position not found for column name \""+colname+"\"");
+			}
+			returnfallback |= tmp;
 		}
-		//return a.localeCompare(b)
+		check(s);
+		check(t);
+		if(!returnfallback){
+			return columnnames.indexOf(s) - columnnames.indexOf(t);
+		}
+		return s.localeCompare(t);
 	});
 }
 
@@ -286,6 +314,8 @@ function WriteScriptData(target, options = optHtml, showFullNames = false, showI
 document.addEventListener("DOMContentLoaded",()=>{
 	WriteScriptData(document.getElementById("t_md"), optMarkdown) 
 	WriteScriptData(document.getElementById("t_htm"), optHtml) 
+	//WriteScriptData(document.getElementById("t_md"), optMarkdown, true, true, false, true) 
+	//WriteScriptData(document.getElementById("t_htm"), optHtml, true, true, false, true) 
 });
 </script>
 </head>
