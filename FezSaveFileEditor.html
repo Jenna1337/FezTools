@@ -1131,8 +1131,9 @@ window.addEventListener("DOMContentLoaded", ()=>{
 			document.getElementById("saveslotinput").value = event.target.files[0].name;
 			event.target.files[0].arrayBuffer()
 				.then(a=>saveloadfuncs.loadFromDataView(new DataView(a)))
-				.err(e=>{
-					console.log("a");
+				.catch(e=>{
+					console.log(e);
+					alert("Failed to read save file. Please make sure you have the correct format selected, and that the file is not corrupted.");
 				});
 		});
 		
