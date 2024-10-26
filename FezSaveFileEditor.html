@@ -792,7 +792,14 @@ var MakeInputs = (function(){
 	}
 	return MakeInputs;
 })();
-
+// Ticks from 12:00 midnight January 1, 1601 C.E. UTC to 00:00:00 UTC on 1 January 1970
+const DotNetFileTimeUtc_UnixTime_Diff_Ticks = 116444080000000000n ;
+function iosTimestampToTicks(iosTimestamp) {
+    return iosTimestamp + DotNetFileTimeUtc_UnixTime_Diff_Ticks;
+}
+function TicksToIosTimestamp(cTicks) {
+    return cTicks - DotNetFileTimeUtc_UnixTime_Diff_Ticks;
+}
 
 
 var settings = {
@@ -948,6 +955,11 @@ var saveloadfuncs = (function(){
 					fieldfield.checked = Boolean(retval);
 					//document.querySelector("label[for="+fieldfield.id+"].truthlabel").textContent = String(fieldfield.checked);
 				}else{
+					if(window.saveFormatSelect.value=="iOS"){
+						if(fieldfield.dataset.fieldname=="CreationTime"){
+							retval = iosTimestampToTicks(retval);
+						}
+					}
 					fieldfield.value = retval;
 				}
 				break;
@@ -970,6 +982,11 @@ var saveloadfuncs = (function(){
 			case "Float32":
 			case "Float64":
 			case "BigInt64":
+				if(window.saveFormatSelect.value=="iOS"){
+					if(fieldfield.dataset.fieldname=="CreationTime"){
+						value = TicksToIosTimestamp(value);
+					}
+				}
 				return dataview["set"+dataviewrwtype](byteOffset, value, settings.littleEndian);
 			case "String":
 			case "string":
