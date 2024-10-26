@@ -1054,7 +1054,7 @@ var saveloadfuncs = (function(){
 		
 		Array.prototype.map.call(inputs,a=>{
 			if(a.dataset["gentype"]){
-				dataview.setInt32(byteOffset, a.children.length-1, settings.littleEndian);
+				dataview.setInt32(byteOffset, (a.children.length-1)/2, settings.littleEndian);
 				byteOffset += 4;
 				return;
 			}
