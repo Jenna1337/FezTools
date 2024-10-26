@@ -190,7 +190,7 @@ input[type=text][pattern="\\d\*"]{
 	min-width: 21ch;
 	min-width: calc(20ch + 4px);
 }
-#menubar input, #menubar button, #settingsbox button {
+#menubar input, #menubar select, #menubar button, #settingsbox button {
 	margin: 2px;
 }
 #settingsbox {
@@ -870,9 +870,11 @@ var saveloadfuncs = (function(){
 	}
 	function readString(dataview, fieldfield){
 		var value;
-		var hasValue = Boolean(dataview.getInt8(byteOffset, settings.littleEndian));
-		byteOffset += 1;
-		
+		var hasValue = true;
+		if(window.saveFormatSelect.value!="iOS"){
+			hasValue = Boolean(dataview.getInt8(byteOffset, settings.littleEndian));
+			byteOffset += 1;
+		}
 		if(!hasValue){
 			value = NULLVAL;//because there is currently no other way for users to read the value as null
 		}else{
@@ -896,8 +898,10 @@ var saveloadfuncs = (function(){
 	}
 	function writeString(dataview, value){
 		var hasValue = (value != NULLVAL);//because there is currently no other way for users to write the value as null
-		dataview.setInt8(byteOffset, Number(hasValue), settings.littleEndian);
-		byteOffset+=1;
+		if(window.saveFormatSelect.value!="iOS"){
+			dataview.setInt8(byteOffset, Number(hasValue), settings.littleEndian);
+			byteOffset+=1;
+		}
 		if(!hasValue){
 			value = null;
 		}else{
@@ -1098,6 +1102,7 @@ var saveloadfuncs = (function(){
 
 //initializing section
 window.addEventListener("DOMContentLoaded", ()=>{
+	window.saveFormatSelect = document.getElementById("save-format-select");
 	window.loadnewsave = (function(){
 		const windowsFileTimeEpoch = 11644473600000n;
 		function formatTimeSpan(timespanstr, format){
@@ -1124,7 +1129,11 @@ window.addEventListener("DOMContentLoaded", ()=>{
 		//add event listeners
 		document.getElementById("savefileinput").addEventListener("change", function(event){
 			document.getElementById("saveslotinput").value = event.target.files[0].name;
-			event.target.files[0].arrayBuffer().then(a=>saveloadfuncs.loadFromDataView(new DataView(a)));
+			event.target.files[0].arrayBuffer()
+				.then(a=>saveloadfuncs.loadFromDataView(new DataView(a)))
+				.err(e=>{
+					console.log("a");
+				});
 		});
 		
 		
@@ -1398,6 +1407,10 @@ console.log(generateFezSaveFileStructureXML());
 	<button id="savefiledownloadbutton" onclick="saveloadfuncs.saveAsDataView()">Download Save File</button><label for="saveslotinput">Save as: </label><input id="saveslotinput" type="text" value="SaveSlot2" /><br />
 	<button id="collapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', true))">Collapse All</button>
 	<button id="uncollapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', false))">Uncollapse All</button><br />
+	<label for="save-format-select">File Format: </label><select id="save-format-select">
+		<option value="PC" selected="">PC (default)</option>
+		<option value="iOS">iOS</option>
+	</select>
 </div>
 <br />
 SaveData:<br />
