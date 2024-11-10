@@ -469,7 +469,17 @@ spreadsheetdata.replaceAll("\"","").split("\n").slice(2).map(a=>a.split("\t")).f
 	var tv=a[0].split("\.")
 	var tp=tv[0];
 	o[tp] ??= ([]);
-	o[tp].push({"fieldname":tv[1],"fieldtype":a[1],"notes":a[2],"csharptype":a[3],"jseqv":a[4],"bytesize":a[5],"inputtype":a[6],"inputattr":a[7],"dataviewrwtype":a[8]});
+	o[tp].push({
+		"fieldname":tv[1]?.trim(),
+		"fieldtype":a[1]?.trim(),
+		"notes":a[2]?.trim(),
+		"csharptype":a[3]?.trim(),
+		"jseqv":a[4]?.trim(),
+		"bytesize":a[5]?.trim(),
+		"inputtype":a[6]?.trim(),
+		"inputattr":a[7]?.trim(),
+		"dataviewrwtype":a[8]?.trim()
+	});
 });
 
 o["ogstring"] = o["string"];
@@ -1121,7 +1131,131 @@ var saveloadfuncs = (function(){
 			window.URL.revokeObjectURL(lnk.href);
 		}, 0);
 	}
-	return {"saveAsDataView": saveAsDataView, "loadFromDataView": loadFromDataView};
+	function exportAsJSON(){
+		var jdat = {};
+		function getActualValue(elem){
+			var jstype = elem.dataset.jseqv;
+			if(jstype=="string"){
+				return elem.value!=NULLVAL ? elem.value : null;
+			}
+			if(jstype=="BigInt"){
+				return elem.value;
+			}
+			else{
+				return globalThis[jstype](elem.type=="checkbox" ? elem.checked : elem.value);
+			}
+		}
+		function iterateFields(elem, action){
+			var containedfields = elem.querySelectorAll("#"+elem.id+">.field-outer>.field-inner, #"+elem.id+">.field-inner");
+			containedfields.forEach((innerelem, index, containedfields)=>{
+				var fieldvalelem = innerelem.querySelector(":not(label):not(span)[id]");
+				action(fieldvalelem, index, containedfields);
+			});
+		}
+		function JSONifyElement(elem){
+			var jstype = elem.dataset.jseqv;
+			if(jstype && jstype!="#N/A"){
+				return getActualValue(elem);
+			}
+			//nullable
+			if(elem.dataset.fieldtype.endsWith("?")){
+				let hasval = elem.querySelector("[data-fieldname=\"HasValue\"][data-containingtype=\""+elem.dataset.fieldtype+"\"]").checked;
+				let val = elem.querySelector("[data-fieldname=\"Value\"][data-containingtype=\""+elem.dataset.fieldtype+"\"]");
+				let valtype = val.dataset.jseqv;
+				let valval = getActualValue(val);
+				
+				return (hasval ? valval : null);
+			}
+			if(elem.classList.contains("object")){
+				let innerobj;
+				let gentype = elem.dataset.gentype;
+				if(gentype == "List"){
+					innerobj = [];
+				}
+				else{
+					innerobj = {};
+				}
+				let genpars = elem.dataset.genpars?.split(",");
+				
+				if(gentype == "Dictionary"){
+					let entries = elem.querySelectorAll("#"+elem.id+">.listitem");
+					entries.forEach(listitem=>{
+						var pars = listitem.children;
+						var savetargetkey = getActualValue(pars[0].querySelector("input"));
+						var innerpar1 = pars[1].querySelector("[id]");
+						iterateFields(innerpar1, (fieldvalelem, index, containedfields)=>{
+							if(containedfields.length == 1){
+								innerobj[savetargetkey] = JSONifyElement(fieldvalelem);
+							}else{
+								innerobj[savetargetkey] ??= {};
+								innerobj[savetargetkey][fieldvalelem.dataset.fieldname] = JSONifyElement(fieldvalelem);
+							}
+						})
+					});
+				}
+				else{
+					let listitems;
+					if(gentype == "List"){
+						listitems ??= Array.from(elem.children).filter(a=>a.matches(".listitem"));
+						let fellowinputs = listitems[0]?.querySelectorAll("input").length ?? 1;
+						if(fellowinputs == 1){
+							iterateInputs(elem, (innerelem)=>{
+								innerobj.push(JSONifyElement(innerelem));
+							});
+						}
+						else{
+							let idfix = 0;
+							listitems.forEach(li=>{
+								if(!li.id){
+									let uuid="etc___"+Date.now()+"_"+(idfix++);
+									li.id=uuid;
+								}
+								let newobj = {};
+								iterateInputs(li, (innerelem)=>{
+									saveElementAsJSON(innerelem, newobj);
+								});
+								innerobj.push(newobj);
+							})
+						}
+					}
+					else{//struct or basic container object
+						iterateInputs(elem, (innerelem)=>{
+							saveElementAsJSON(innerelem, innerobj);
+						});
+					}
+				}
+				return innerobj;
+			}
+			console.log(elem.dataset.fieldname, elem);
+			return elem;
+		}
+		function saveElementAsJSON(elem, jsobj){
+			jsobj[elem.dataset.fieldname] = JSONifyElement(elem);
+		}
+		iterateInputs(document.getElementById("savedataform"), (elem)=>saveElementAsJSON(elem,jdat));
+		
+		const doprettyjson = document.getElementById("prettyjsoncheckbox").checked;
+		const jsonindent = doprettyjson ? 2 : 0;
+		
+		var blob = new Blob([JSON.stringify(jdat, null, jsonindent)]);
+		
+		var lnk=document.createElement("a");
+		lnk.setAttribute("href", window.URL.createObjectURL(blob));
+		var fname = document.getElementById("saveslotinput").value;
+		if(fname == null || fname.length<=0){
+			fname = "SaveSlot2";
+		}
+		lnk.setAttribute("download", fname+".json");
+		document.body.appendChild(lnk);
+		lnk.click();
+		
+		//cleanup
+		window.setTimeout(function() {
+			lnk.remove();
+			window.URL.revokeObjectURL(lnk.href);
+		}, 0);
+	}
+	return {"saveAsDataView": saveAsDataView, "loadFromDataView": loadFromDataView, "exportAsJSON": exportAsJSON};
 })();
 
 
@@ -1297,12 +1431,14 @@ document.title = document.title.replace("version whatever", "v"+new Date(documen
 	<button id="themebutton">Toggle Dark Theme</button><br />
 </div>
 <div id="menubar" style="visibility: hidden;">
+	<!-- TODO make this prettier -->
 	<button id="loadnewsavebutton" onclick="loadnewsave()">New Save (will clear current data)</button><br />
 	<button id="load209savebutton" onclick="LoadPrefabSave('209.4%save')">Load 209.4% Save (will clear current data)</button><br />
 	<button id="loadfulsavebutton" onclick="LoadPrefabSave('full completion save')">Load Full Completion Save (will clear current data)</button><br />
 	<!--button id="loadfullcompletionsavebutton" onclick="LoadPrefabSave('209.4%save')">Load Full Completion Save (will clear current data)</button><br /-->
 	<button id="loadsavefilebutton" onclick="document.getElementById('savefileinput').click()">Load Save File...</button><input id="savefileinput" style="display: none;" type="file" /><br />
 	<button id="savefiledownloadbutton" onclick="saveloadfuncs.saveAsDataView()">Download Save File</button><label for="saveslotinput">Save as: </label><input id="saveslotinput" type="text" value="SaveSlot2" /><br />
+	<button id="exportjsonbutton" onclick="saveloadfuncs.exportAsJSON()">Export save data as JSON</button><label for="prettyjsoncheckbox">Pretty JSON: </label><input id="prettyjsoncheckbox" type="checkbox" checked="" /><br />
 	<button id="collapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', true))">Collapse All</button>
 	<button id="uncollapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', false))">Uncollapse All</button><br />
 	<label for="save-format-select">File Format: </label><select id="save-format-select">
