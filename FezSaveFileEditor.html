@@ -1106,14 +1106,20 @@ var saveloadfuncs = (function(){
 		var blob = new Blob([bytearr]);
 		
 		var lnk=document.createElement("a");
-		lnk.setAttribute("href",window.URL.createObjectURL(blob));
+		lnk.setAttribute("href", window.URL.createObjectURL(blob));
 		var fname = document.getElementById("saveslotinput").value;
 		if(fname == null || fname.length<=0){
 			fname = "SaveSlot2";
 		}
-		lnk.setAttribute("download",fname);
+		lnk.setAttribute("download", fname);
+		document.body.appendChild(lnk);
 		lnk.click();
-		lnk.remove();
+		
+		//cleanup
+		window.setTimeout(function() {
+			lnk.remove();
+			window.URL.revokeObjectURL(lnk.href);
+		}, 0);
 	}
 	return {"saveAsDataView": saveAsDataView, "loadFromDataView": loadFromDataView};
 })();
