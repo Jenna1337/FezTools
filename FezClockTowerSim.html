@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Jenna Sloan">
+<title>Fez Clock Tower Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+body {
+	font-family: monospace;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	overflow: clip;
+}
+noscript {
+	position: absolute;
+	z-index: 9999999;
+	color: white;
+	background-color: black;
+	height: 100vh;
+	width: 100vw;
+	font-size: min(100vh, calc(100vw / 30));
+	line-height: 100vh;
+	text-align: center;
+}
+#clockcontainer {
+	display: flex;
+}
+svg {
+	height: 256px;
+	width: 256px;
+	--color: attr(data-color);
+}
+.handinfo{
+	display: block;
+}
+[data-valid="true"]{
+	background-color: #DFD;
+}
+[data-valid="false"]{
+	background-color: #FDD;
+}
+</style>
+<link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
+<script id="clockscript">
+var starttime = Date.now();
+function resetStartTime(){
+	starttime = Date.now();
+}
+document.addEventListener("DOMContentLoaded",function(){
+	const handinfobox = document.getElementById("handinfobox");
+	const handstuff = [];
+	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockface")).fillOpacity;
+	document.querySelectorAll(".clock").forEach(clock=>{
+		const hand = clockhand.cloneNode();
+		hand.id = "";
+		clock.insertBefore(hand, clock.lastElementChild);
+		
+		const colorname = clock.dataset.name;//clock.getAttribute("style").split(":").at(-1);
+		const colorval = window.getComputedStyle(clock).getPropertyValue("--color");
+		const bgcolor = "color-mix(in srgb, transparent 100%, "+colorval+" "+(100*clockfacefillopacity)+"%)";
+		
+		const handinfoname = document.createElement("span");
+		handinfoname.textContent = colorname;
+		handinfoname.style.backgroundColor = bgcolor;
+		handinfoname.style.outline = "1px solid "+colorval;
+		
+		const handinfovalid = document.createElement("span");
+		handinfovalid.textContent = "false";
+		
+		const handinfonextvalid = document.createElement("span");
+		handinfonextvalid.textContent = "000";
+		
+		const handinfo = document.createElement("span");
+		handinfo.appendChild(handinfoname);
+		handinfo.append(" hand is valid? ");
+		handinfo.appendChild(handinfovalid);
+		handinfo.append(". Will next be valid at: ");
+		handinfo.appendChild(handinfonextvalid);
+		handinfo.classList.add("handinfo");
+		handinfobox.appendChild(handinfo);
+		handstuff.push([clock, hand, handinfovalid, handinfonextvalid]);
+	});
+	
+	const radius = 50;
+	const h = 50;
+	const k = 50;
+	function setHandLine(hand, radius, theta, val){
+		hand.setAttribute("x1", h+"px");
+		hand.setAttribute("y1", k+"px");
+		hand.setAttribute("x2", h + radius*Math.cos(theta) +"px");
+		hand.setAttribute("y2", k + radius*Math.sin(theta) +"px");
+		hand.setAttribute("data-angle", (theta+Math.PI)%(2*Math.PI));
+	}
+	function moveHands(timestamp){
+		var currtime = Date.now();
+		handstuff.forEach(([clock, hand, handinfovalid, handinfonextvalid])=>{
+			const val = currtime - starttime;
+			const valmod = Number(clock.dataset.scale);
+			const theta = ((val) / valmod) * (2 * Math.PI) - (Math.PI);
+			setHandLine(hand, radius, theta, val);
+			
+			var thetaAdjusted = (theta - Math.PI)%(2*Math.PI);
+			while(thetaAdjusted<0){
+				thetaAdjusted += (2*Math.PI);
+			}
+			const validThetaLeeway = Number(clock.dataset.validThetaLeeway);
+			const validThetaStart = Number(clock.dataset.validThetaStart ?? ((Math.PI/2)-validThetaLeeway));
+			const validThetaEnd = Number(clock.dataset.validThetaEnd ?? ((Math.PI/2)+validThetaLeeway));
+			const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
+			handinfovalid.dataset.valid = inTheZone;
+			handinfovalid.textContent = inTheZone;
+			
+			const curval = (val+.75*valmod)%valmod;
+			var nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod));
+			while(nextstamp<currtime){
+				nextstamp += valmod;
+			}
+			hand.setAttribute("data-value", curval);
+			hand.setAttribute("data-nextstamp", nextstamp);
+			handinfonextvalid.textContent = new Date(nextstamp);
+		});
+		window.requestAnimationFrame(moveHands);
+	}
+	window.requestAnimationFrame(moveHands);
+});
+</script>
+</head>
+<body>
+<div id="clockcontainer">
+<svg style="display: none !important;" hidden="hidden" aria-hidden="true" focusable="false">
+	<defs>
+		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4px" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
+		<line id="clockhand" x2="50" y2="50" stroke-width="6px" stroke-opacity="1" stroke="var(--color)" stroke-linecap="square" />
+		<rect id="clockcore" x="45" y="45" width="10" height="10" stroke-width="2px" fill-opacity="0" stroke-opacity="1" fill="none" stroke="black" />
+	</defs>
+</svg>
+<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637">
+	<use href="#clockface" />
+	<use href="#clockcore" />
+</svg>
+<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:green" data-name="Green" data-scale="3600000" data-valid-theta-leeway="0.125">
+	<use href="#clockface" />
+	<use href="#clockcore" />
+</svg>
+<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:blue" data-name="Blue" data-scale="86400000" data-valid-theta-leeway="0.125">
+	<use href="#clockface" />
+	<use href="#clockcore" />
+</svg>
+<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:gray" data-name="White" data-scale="604800000" data-valid-theta-leeway="0.125">
+	<use href="#clockface" />
+	<use href="#clockcore" />
+</svg>
+</div>
+<div id="interactive-area">
+<button onclick="resetStartTime()">Reset clocks to current time</button>
+<div id="handinfobox">
+</div>
+<br />
+<br />
+<noscript>
+This page requires JavaScript
+</noscript>
+<div id="viewsourcebox" style="max-width: 40ch">
+This web app created by <span id="createdbyspan">Jenna Sloan</span>
+Last Modified: <span id="lastmodifiedspan"></span>
+<a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezTools/blob/main/FezClockTowerSim.html">
+View Source
+<span> on GitHub</span><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0 0 48 48">
+<path d="M36 24c-1.2 0-2 0.8-2 2v12c0 1.2-0.8 2-2 2h-22c-1.2
+0-2-0.8-2-2v-22c0-1.2 0.8-2 2-2h12c1.2 0 2-0.8 2-2s-0.8-2-2-2h-12c-3.4
+0-6 2.6-6 6v22c0 3.4 2.6 6 6 6h22c3.4 0 6-2.6
+6-6v-12c0-1.2-0.8-2-2-2z"></path>
+<path d="M43.8 5.2c-0.2-0.4-0.6-0.8-1-1-0.2-0.2-0.6-0.2-0.8-0.2h-12c-1.2
+0-2 0.8-2 2s0.8 2 2 2h7.2l-18.6 18.6c-0.8 0.8-0.8 2 0 2.8 0.4 0.4 0.8
+0.6 1.4 0.6s1-0.2 1.4-0.6l18.6-18.6v7.2c0 1.2 0.8 2 2 2s2-0.8
+2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
+</svg></span>
+</a>
+</div>
+</body>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+	try{
+		var lm = document.getElementById("lastmodifiedspan");
+		lm.textContent = (new Date(document.lastModified)).toISOString();
+		lm.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+	try{
+		var cb = document.getElementById("createdbyspan");
+		cb.textContent = Array.from(document.getElementsByTagName("meta"))
+				.filter(function(a){var n=a.getAttribute("name"); return n && n.toLowerCase()==="author";})
+				.map(a=>a.getAttribute("content"))
+				.join(", ");
+		cb.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+});
+
+function GetGithubSourceHref(){
+	let h=window.location.hostname.split(".");
+	let p=window.location.pathname.split("/").filter(a=>a.length>0);
+	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+(p[1] ?? "index.html");
+}
+if(window.location.hostname){
+	let href = GetGithubSourceHref();
+	if(href){
+		document.getElementById("viewsource").href = href;
+	}
+}
+</script>
+</html>
