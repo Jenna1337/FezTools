@@ -10,8 +10,6 @@ body {
 	font-family: monospace;
 	padding: 0;
 	margin: 0;
-	overflow: hidden;
-	overflow: clip;
 }
 noscript {
 	position: absolute;
@@ -26,10 +24,16 @@ noscript {
 }
 #clockcontainer {
 	display: flex;
+	gap: 0px;
+	max-width: min(100em, 200vh);
+	/*max-height: 50vh;*/
 }
 svg {
-	height: 256px;
-	width: 256px;
+	height: auto;
+	width: min(100%, 50vh);
+	aspect-ratio: 1 / 1;
+	/*max-height: 256px;*/
+	/*max-width: 256px;*/
 	--color: attr(data-color);
 }
 .handinfo{
@@ -41,21 +45,74 @@ svg {
 [data-valid="false"]{
 	background-color: #FDD;
 }
+#interactive-area {
+	padding-inline: 1ex;
+}
+#interactive-area > * {
+	margin-block: 1ex;
+}
+/* Media Queries for responsiveness */
+@media (max-width: 60vh) {
+	#clockcontainer {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr); /* 2 squares per row */
+	}
+}
+
+@media (max-width: 13vh) {
+	#clockcontainer {
+		display: grid;
+		grid-template-columns: 1fr; /* 1 square per row */
+	}
+}
 </style>
 <link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
 <script id="clockscript">
-var starttime = Date.now();
+let actualstarttime = Date.now();
+Object.defineProperty(window, 'starttime', {
+	get: function() {
+		return actualstarttime;
+	},
+	set: function(value) {
+		actualstarttime = Number(value);
+		const elem = document.getElementById("starttimeinput");
+		elem.value = value;
+		elem.onchange();
+		document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
+	}
+});
+let actualoffsettime = 0;
+Object.defineProperty(window, 'offsettime', {
+	get: function() {
+		return actualoffsettime;
+	},
+	set: function(value) {
+		actualoffsettime = Number(value);
+		const elem = document.getElementById("offetfromsysteminput");
+		elem.value = value;
+		elem.onchange();
+		document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
+	}
+});
 function resetStartTime(){
 	starttime = Date.now();
 }
 document.addEventListener("DOMContentLoaded",function(){
+	starttime = Date.now();
+	offsettime = 0;
 	const handinfobox = document.getElementById("handinfobox");
+	const template_clockvalidarea = document.getElementById("clockvalidarea");
+	const template_clockhand = document.getElementById("clockhand");
 	const handstuff = [];
 	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockface")).fillOpacity;
 	document.querySelectorAll(".clock").forEach(clock=>{
-		const hand = clockhand.cloneNode();
+		const hand = template_clockhand.cloneNode();
 		hand.id = "";
 		clock.insertBefore(hand, clock.lastElementChild);
+		
+		const validarea = template_clockvalidarea.cloneNode();
+		validarea.id = "";
+		clock.appendChild(validarea);
 		
 		const colorname = clock.dataset.name;//clock.getAttribute("style").split(":").at(-1);
 		const colorval = window.getComputedStyle(clock).getPropertyValue("--color");
@@ -76,50 +133,85 @@ document.addEventListener("DOMContentLoaded",function(){
 		handinfo.appendChild(handinfoname);
 		handinfo.append(" hand is valid? ");
 		handinfo.appendChild(handinfovalid);
-		handinfo.append(". Will next be valid at: ");
+		handinfo.append(". Will next be valid at about: ");
 		handinfo.appendChild(handinfonextvalid);
 		handinfo.classList.add("handinfo");
 		handinfobox.appendChild(handinfo);
-		handstuff.push([clock, hand, handinfovalid, handinfonextvalid]);
+		handstuff.push([clock, hand, handinfovalid, handinfonextvalid, validarea]);
 	});
 	
-	const radius = 50;
-	const h = 50;
-	const k = 50;
-	function setHandLine(hand, radius, theta, val){
-		hand.setAttribute("x1", h+"px");
-		hand.setAttribute("y1", k+"px");
-		hand.setAttribute("x2", h + radius*Math.cos(theta) +"px");
-		hand.setAttribute("y2", k + radius*Math.sin(theta) +"px");
-		hand.setAttribute("data-angle", (theta+Math.PI)%(2*Math.PI));
+	function getXY(cx, cy, radius, theta){
+		return [cx + radius*Math.cos(theta),
+				cy + radius*Math.sin(theta)];
+	}
+	function createWedge(cx, cy, radius, validThetaStart, validThetaEnd) {
+		const [sx,sy] = getXY(cx, cy, radius, validThetaStart);
+		const [ex,ey] = getXY(cx, cy, radius, validThetaEnd);
+		const largeArcFlag = Math.abs(validThetaEnd - validThetaStart)>Math.PI ? 1 : 0;
+		
+		return `M${cx},${cy}L${sx},${sy}A${radius},${radius} 0 ${largeArcFlag} 1 ${ex},${ey}z`;
+	}
+	function setHandLine(cx, cy, hand, radius, theta){
+		hand.setAttribute("x1", cx+"px");
+		hand.setAttribute("y1", cy+"px");
+		const [x2,y2] = getXY(cx, cy, radius, theta);
+		hand.setAttribute("x2", x2 +"px");
+		hand.setAttribute("y2", y2 +"px");
+		//hand.setAttribute("data-angle", (theta+Math.PI)%(2*Math.PI));
 	}
 	function moveHands(timestamp){
-		var currtime = Date.now();
-		handstuff.forEach(([clock, hand, handinfovalid, handinfonextvalid])=>{
+		const currtime = Date.now() + offsettime;
+		formatTimeLabel(document.getElementById("currtime"), new Date(currtime));
+		handstuff.forEach(([clock, hand, handinfovalid, handinfonextvalid, validarea])=>{
+			const radius = 48;
+			const clockbox = clock.viewBox.animVal;
+			const cx = (clockbox.x + clockbox.width)/2;
+			const cy = (clockbox.y + clockbox.height)/2;
 			const val = currtime - starttime;
 			const valmod = Number(clock.dataset.scale);
 			const theta = ((val) / valmod) * (2 * Math.PI) - (Math.PI);
-			setHandLine(hand, radius, theta, val);
 			
-			var thetaAdjusted = (theta - Math.PI)%(2*Math.PI);
-			while(thetaAdjusted<0){
-				thetaAdjusted += (2*Math.PI);
+			//adjust the hands
+			{
+				const handstyle = window.getComputedStyle(hand);
+				const handstrokewidth = Number(handstyle.strokeWidth.replace("px",""));
+				const handlinecap = handstyle.strokeLinecap;
+				const radiusadjust = handlinecap=="butt" ? 0 : handstrokewidth;
+				setHandLine(cx, cy, hand, radius-radiusadjust, theta, val);
 			}
-			const validThetaLeeway = Number(clock.dataset.validThetaLeeway);
-			const validThetaStart = Number(clock.dataset.validThetaStart ?? ((Math.PI/2)-validThetaLeeway));
-			const validThetaEnd = Number(clock.dataset.validThetaEnd ?? ((Math.PI/2)+validThetaLeeway));
-			const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
-			handinfovalid.dataset.valid = inTheZone;
-			handinfovalid.textContent = inTheZone;
-			
-			const curval = (val+.75*valmod)%valmod;
-			var nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod));
-			while(nextstamp<currtime){
-				nextstamp += valmod;
+			//update validity information
+			{
+				let thetaAdjusted = (theta - Math.PI)%(2*Math.PI);
+				while(thetaAdjusted<0){
+					thetaAdjusted += (2*Math.PI);
+				}
+				const validThetaLeeway = Number(clock.dataset.validThetaLeeway);
+				const validThetaStart = Number(clock.dataset.validThetaStart ?? ((Math.PI/2)-validThetaLeeway));
+				const validThetaEnd = Number(clock.dataset.validThetaEnd ?? ((Math.PI/2)+validThetaLeeway));
+				
+				validarea.setAttribute("d", createWedge(cx, cy, radius, validThetaStart + Math.PI, validThetaEnd + Math.PI));
+				
+				const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
+				if(String(handinfovalid.dataset.valid) != String(inTheZone)){
+					handinfovalid.dataset.valid = inTheZone;
+					handinfovalid.textContent = inTheZone;
+				}
 			}
-			hand.setAttribute("data-value", curval);
-			hand.setAttribute("data-nextstamp", nextstamp);
-			handinfonextvalid.textContent = new Date(nextstamp);
+			//check the next valid timestamps
+			{
+				//const curval = (val+.75*valmod)%valmod;
+				//hand.setAttribute("data-value", curval);
+				let stampchanged = !hand.dataset.nextstamp;
+				let nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod));
+				while(nextstamp<currtime){
+					nextstamp += valmod;
+					stampchanged = true;
+				}
+				hand.setAttribute("data-nextstamp", nextstamp);
+				if(stampchanged){
+					formatTimeLabel(handinfonextvalid, new Date(nextstamp));
+				}
+			}
 		});
 		window.requestAnimationFrame(moveHands);
 	}
@@ -129,10 +221,11 @@ document.addEventListener("DOMContentLoaded",function(){
 </head>
 <body>
 <div id="clockcontainer">
-<svg style="display: none !important;" hidden="hidden" aria-hidden="true" focusable="false">
+<svg style="/*display: none !important;*/ height: 0; width: 0; overflow: hidden;" hidden="hidden" aria-hidden="true" focusable="false">
 	<defs>
 		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4px" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
 		<line id="clockhand" x2="50" y2="50" stroke-width="6px" stroke-opacity="1" stroke="var(--color)" stroke-linecap="square" />
+		<path id="clockvalidarea" stroke-width="6px" stroke-opacity="0" stroke="none" fill-opacity="0.05" fill="black" />
 		<rect id="clockcore" x="45" y="45" width="10" height="10" stroke-width="2px" fill-opacity="0" stroke-opacity="1" fill="none" stroke="black" />
 	</defs>
 </svg>
@@ -154,7 +247,81 @@ document.addEventListener("DOMContentLoaded",function(){
 </svg>
 </div>
 <div id="interactive-area">
+<script>
+var timeformat = window.localStorage?.timeformat ?? "local_time";
+
+window.setTimeout(()=>{
+	//set selected item on timeformatselector to whatever matched window.localStorage.timeformat
+	const timeformatselector = document.getElementById("timeformatselector");
+	timeformatselector.value = window.localStorage?.timeformat ?? "local_time";
+	timeformatselector.onchange();
+}, 1000);
+
+function formatTimeLabel(timelabel, dt){
+	var ofst = dt.getTimezoneOffset();
+	timelabel.dataset['local_time'] = dt.toString();
+	timelabel.dataset['Locale_time_string'] = dt.toLocaleString();//doesn't display fractions of seconds
+	timelabel.dataset['ISO_8601_-_UTC'] = dt.toISOString();
+	timelabel.dataset['ISO_8601_-_local_time_zone'] = (new Date(dt - ofst * 60 * 1000)).toISOString().replace('Z',(-Math.sign(ofst) < 0 ? '-' : '+')+String(Math.abs(ofst/60*100)).padStart(4,'0').split(/(?=..$)/).join(':'));
+	timelabel.dataset['Unix_timestamp_-_seconds_since_epoch'] = Math.floor(dt.getTime()/1000);
+	timelabel.dataset['Unix_timestamp_-_milliseconds_since_epoch'] = dt.getTime();
+	
+	timelabel.textContent = timelabel.dataset[timeformat];
+}
+function timeformatselectorchanged(formatselector){
+	timeformat = formatselector.value;
+	window.localStorage.timeformat = timeformat;
+	
+	//force refresh all timestamps
+	document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
+	document.querySelectorAll("input[type=\"number\"]").forEach(a=>a.onchange(a));
+}
+function timeinput_change(timeinput, valcallback, updatelabel=true){
+	if(timeinput.dataset.changing != "changing"){
+		timeinput.dataset.changing = "changing";
+		const t= Number(timeinput.value);
+		valcallback(t);
+		if(updatelabel){
+			const timelabel = document.querySelector(".timelabel[for=\""+timeinput.id+"\"]");
+			if(timelabel){
+				var dt = new Date(t);
+				formatTimeLabel(timelabel, dt);
+			}
+		}
+	}
+	timeinput.dataset.changing = "";
+}
+function creationtimeinput_change(timeinput){
+	timeinput_change(timeinput, dt=>starttime=dt);
+}
+function offetfromsysteminput_change(timeinput){
+	timeinput_change(timeinput, dt=>offsettime=dt, false);
+}
+</script>
+<label for="timeformatselector">Display times in the format:</label>
+<select id="timeformatselector" onchange="timeformatselectorchanged(this)">
+<option value="local_time">local time</option>
+<option value="Unix_timestamp_-_seconds_since_epoch">Unix timestamp - seconds since epoch</option>
+<option value="Unix_timestamp_-_milliseconds_since_epoch">Unix timestamp - milliseconds since epoch</option>
+<!--
+TODO use js to add choices from the keys mentioned for timelabel.dataset
+to affect the outcome of the content set by formatTimeLabel
+-->
+</select><br />
+
+<label for="currtime">Current time: </label>
+<span class="timelabel" id="currtime"></span><br />
+
+<label for="starttimeinput">File start time: </label>
+<input id="starttimeinput" type="number" min="0" step="1000" onchange="creationtimeinput_change(this)" />
+<label for="starttimeinput" class="timelabel"></label><br />
+
+<label for="offetfromsysteminput">Adjust current time: </label>
+<input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" />
+<br />
+
 <button onclick="resetStartTime()">Reset clocks to current time</button>
+<br />
 <div id="handinfobox">
 </div>
 <br />
