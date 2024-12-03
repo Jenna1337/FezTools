@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
 <meta charset="UTF-8">
 <meta name="author" content="Jenna Sloan">
@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded",function(){
 		<!-- use these with the <use> element -->
 		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
 		<!--rect id="clockcorebase" x="45" y="45" width="10" height="10" stroke-width="2" stroke-opacity="1" /-->
-		<rect id="clockcorebase" x="50" y="50" width="var(--core-size)" height="var(--core-size)" stroke-width="2" stroke-opacity="1" style="transform: translate(-50%, -50%); transform-box: fill-box;"/>
+		<rect id="clockcorebase" x="50" y="50" style="width: var(--core-size); height: var(--core-size); transform: translate(-50%, -50%); transform-box: fill-box;" stroke-width="2" stroke-opacity="1" />
 		<use id="clockcore" href="#clockcorebase" fill-opacity="0" fill="none" />
 		<mask id="clockcoremask" maskUnits="userSpaceOnUse">
 			<rect x="0" y="0" width="100" height="100" fill-opacity="1" fill="white" />
@@ -378,7 +378,7 @@ to affect the outcome of the content set by formatTimeLabel
 -->
 </select><br />
 
-<label for="currtime">Current time: </label>
+<span for="currtime">Current time: </span>
 <span class="timelabel" id="currtime"></span><br />
 
 <label for="starttimeinput">File start time: </label>
@@ -391,7 +391,7 @@ to affect the outcome of the content set by formatTimeLabel
 <label for="offetfromsysteminput" class="">milliseconds ahead</label>
 <br />
 
-<button onclick="resetStartTime()">Reset clocks to current time</button>
+<button onclick="resetStartTime()" type="button">Reset clocks to current time</button>
 <br />
 <div id="handinfobox">
 </div>
