@@ -39,10 +39,21 @@ svg {
 .handinfo{
 	display: block;
 }
-[data-valid="true"]{
+svg[data-valid="true"]{
+	use[href$="clockcore" i]{
+		stroke: #010;
+	}
+}
+svg[data-valid="false"]{
+	use[href$="clockcore" i]{
+		stroke: #100;
+	}
+	
+}
+span[data-valid="true"]{
 	background-color: #DFD;
 }
-[data-valid="false"]{
+span[data-valid="false"]{
 	background-color: #FDD;
 }
 #interactive-area {
@@ -107,11 +118,11 @@ document.addEventListener("DOMContentLoaded",function(){
 	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockface")).fillOpacity;
 	document.querySelectorAll(".clock").forEach(clock=>{
 		const hand = template_clockhand.cloneNode();
-		hand.id = "";
+		hand.removeAttribute("id");
 		clock.insertBefore(hand, clock.lastElementChild);
 		
 		const validarea = template_clockvalidarea.cloneNode();
-		validarea.id = "";
+		validarea.removeAttribute("id");
 		clock.appendChild(validarea);
 		
 		const colorname = clock.dataset.name;//clock.getAttribute("style").split(":").at(-1);
@@ -163,7 +174,8 @@ document.addEventListener("DOMContentLoaded",function(){
 		const currtime = Date.now() + offsettime;
 		formatTimeLabel(document.getElementById("currtime"), new Date(currtime));
 		handstuff.forEach(([clock, hand, handinfovalid, handinfonextvalid, validarea])=>{
-			const radius = 48;
+			const radius = Number(window.getComputedStyle(clock).getPropertyValue("--radius").replace("px",""));
+			//const radius = 48;
 			const clockbox = clock.viewBox.animVal;
 			const cx = (clockbox.x + clockbox.width)/2;
 			const cy = (clockbox.y + clockbox.height)/2;
@@ -176,7 +188,7 @@ document.addEventListener("DOMContentLoaded",function(){
 				const handstyle = window.getComputedStyle(hand);
 				const handstrokewidth = Number(handstyle.strokeWidth.replace("px",""));
 				const handlinecap = handstyle.strokeLinecap;
-				const radiusadjust = handlinecap=="butt" ? 0 : handstrokewidth;
+				const radiusadjust = (handlinecap=="butt" || handlinecap=="") ? 0 : handstrokewidth;
 				setHandLine(cx, cy, hand, radius-radiusadjust, theta, val);
 			}
 			//update validity information
@@ -192,7 +204,8 @@ document.addEventListener("DOMContentLoaded",function(){
 				validarea.setAttribute("d", createWedge(cx, cy, radius, validThetaStart + Math.PI, validThetaEnd + Math.PI));
 				
 				const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
-				if(String(handinfovalid.dataset.valid) != String(inTheZone)){
+				if(String(handinfovalid.dataset.valid) != String(inTheZone) || String(clock.dataset.valid) != String(inTheZone)){
+					clock.dataset.valid = inTheZone;
 					handinfovalid.dataset.valid = inTheZone;
 					handinfovalid.textContent = inTheZone;
 				}
@@ -220,13 +233,25 @@ document.addEventListener("DOMContentLoaded",function(){
 </script>
 </head>
 <body>
-<div id="clockcontainer">
+<div id="clockcontainer" style="--hand-width: 6px; --radius: 48px; --core-size: 10px;">
+<template id="example" xmlns="http://www.w3.org/2000/svg">
+<line />
+</template>
 <svg style="/*display: none !important;*/ height: 0; width: 0; overflow: hidden;" hidden="hidden" aria-hidden="true" focusable="false">
 	<defs>
-		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4px" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
-		<line id="clockhand" x2="50" y2="50" stroke-width="6px" stroke-opacity="1" stroke="var(--color)" stroke-linecap="square" />
-		<path id="clockvalidarea" stroke-width="6px" stroke-opacity="0" stroke="none" fill-opacity="0.05" fill="black" />
-		<rect id="clockcore" x="45" y="45" width="10" height="10" stroke-width="2px" fill-opacity="0" stroke-opacity="1" fill="none" stroke="black" />
+		<!-- use these with the <use> element -->
+		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
+		<!--rect id="clockcorebase" x="45" y="45" width="10" height="10" stroke-width="2" stroke-opacity="1" /-->
+		<rect id="clockcorebase" x="50" y="50" width="var(--core-size)" height="var(--core-size)" stroke-width="2" stroke-opacity="1" style="transform: translate(-50%, -50%); transform-box: fill-box;"/>
+		<use id="clockcore" href="#clockcorebase" fill-opacity="0" fill="none" />
+		<mask id="clockcoremask" maskUnits="userSpaceOnUse">
+			<rect x="0" y="0" width="100" height="100" fill-opacity="1" fill="white" />
+			<use href="#clockcorebase" fill-opacity="1" fill="black" stroke="black" />
+		</mask>
+		
+		<!-- Note: These elements are templates to be cloned and animated with JavaScript -->
+		<line id="clockhand" x2="50" y2="50" stroke-width="var(--hand-width)" stroke-opacity="1" stroke="var(--color)" stroke-linecap="square" />
+		<path id="clockvalidarea" stroke-width="1" stroke-opacity="0" stroke="none" fill-opacity="0.05" fill="black" mask="url(#clockcoremask)" />
 	</defs>
 </svg>
 <svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637">
@@ -268,6 +293,30 @@ function formatTimeLabel(timelabel, dt){
 	
 	timelabel.textContent = timelabel.dataset[timeformat];
 }
+var doneloading = false;
+var hashbrowns = ({});
+function updateHashbrowns(inputelem){
+	if(doneloading){
+		hashbrowns[inputelem.id] = inputelem.value;
+		setHashbrownsObject(hashbrowns);
+	}
+}
+function loadHashbrowns(){
+	var arrhashbrowns = getHashbrowns();
+	var elemmeta = [];
+	arrhashbrowns.forEach(a=>{
+		var elem = document.getElementById(a[0]);
+		if(elem){
+			elem.value = a[1];
+			hashbrowns[a[0]] = a[1];
+		}else{
+			delete arrhashbrowns[a[0]];
+		}
+	});
+	doneloading = true;
+}
+window.addEventListener("load", loadHashbrowns);
+document.addEventListener("load", loadHashbrowns);
 function timeformatselectorchanged(formatselector){
 	timeformat = formatselector.value;
 	window.localStorage.timeformat = timeformat;
@@ -275,6 +324,8 @@ function timeformatselectorchanged(formatselector){
 	//force refresh all timestamps
 	document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
 	document.querySelectorAll("input[type=\"number\"]").forEach(a=>a.onchange(a));
+	
+	updateHashbrowns(formatselector);
 }
 function timeinput_change(timeinput, valcallback, updatelabel=true){
 	if(timeinput.dataset.changing != "changing"){
@@ -288,6 +339,7 @@ function timeinput_change(timeinput, valcallback, updatelabel=true){
 				formatTimeLabel(timelabel, dt);
 			}
 		}
+		updateHashbrowns(timeinput);
 	}
 	timeinput.dataset.changing = "";
 }
@@ -297,6 +349,20 @@ function creationtimeinput_change(timeinput){
 function offetfromsysteminput_change(timeinput){
 	timeinput_change(timeinput, dt=>offsettime=dt, false);
 }
+const hash_sep_kv = "=";
+const hash_sep_entries = "&";
+function getHashbrowns(){
+	var h = window.location.hash;
+	if(h.startsWith("#")){
+		h = h.slice(1);
+	}
+	return h.split(hash_sep_entries).filter(c=>c.length>0).map(a=>a.split(hash_sep_kv));
+}
+function setHashbrownsObject(hashbrowns){
+	window.location.hash = Object.entries(hashbrowns).map(a=>a.join(hash_sep_kv)).join(hash_sep_entries)
+}window.addEventListener("hashchange", function() {
+    console.log("Hash changed to: " + window.location.hash);
+});
 </script>
 <label for="timeformatselector">Display times in the format:</label>
 <select id="timeformatselector" onchange="timeformatselectorchanged(this)">
@@ -317,10 +383,12 @@ to affect the outcome of the content set by formatTimeLabel
 
 <label for="starttimeinput">File start time: </label>
 <input id="starttimeinput" type="number" min="0" step="1000" onchange="creationtimeinput_change(this)" />
-<label for="starttimeinput" class="timelabel"></label><br />
+<label for="starttimeinput" class="timelabel"></label>
+<br />
 
 <label for="offetfromsysteminput">Adjust current time: </label>
 <input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" />
+<label for="offetfromsysteminput" class="">milliseconds ahead</label>
 <br />
 
 <button onclick="resetStartTime()">Reset clocks to current time</button>
