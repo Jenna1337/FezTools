@@ -39,17 +39,6 @@ svg {
 .handinfo{
 	display: block;
 }
-svg[data-valid="true"]{
-	use[href$="clockcore" i]{
-		stroke: #010;
-	}
-}
-svg[data-valid="false"]{
-	use[href$="clockcore" i]{
-		stroke: #100;
-	}
-	
-}
 span[data-valid="true"]{
 	background-color: #DFD;
 }
@@ -112,11 +101,15 @@ document.addEventListener("DOMContentLoaded",function(){
 	starttime = Date.now();
 	offsettime = 0;
 	const handinfobox = document.getElementById("handinfobox");
+	const clock_inner_template = document.getElementById("clock_inner_template");
+	const clock_inner_template_elems = Array.from(clock_inner_template.children);
 	const template_clockvalidarea = document.getElementById("clockvalidarea");
 	const template_clockhand = document.getElementById("clockhand");
 	const handstuff = [];
 	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockface")).fillOpacity;
 	document.querySelectorAll(".clock").forEach(clock=>{
+		clock_inner_template_elems.forEach(elem=>clock.appendChild(elem.cloneNode(true)));
+		
 		const hand = template_clockhand.cloneNode();
 		hand.removeAttribute("id");
 		clock.insertBefore(hand, clock.lastElementChild);
@@ -234,42 +227,59 @@ document.addEventListener("DOMContentLoaded",function(){
 </head>
 <body>
 <div id="clockcontainer" style="--hand-width: 6px; --radius: 48px; --core-size: 10px;">
-<template id="example" xmlns="http://www.w3.org/2000/svg">
-<line />
-</template>
 <svg style="/*display: none !important;*/ height: 0; width: 0; overflow: hidden;" hidden="hidden" aria-hidden="true" focusable="false">
+	<style><![CDATA[
+		svg[data-valid="true"]{
+			use[href$="clockcore" i]{
+				stroke: #010;
+			}
+		}
+		svg[data-valid="false"]{
+			use[href$="clockcore" i]{
+				stroke: #100;
+			}
+		}
+		#clockcorebase {
+			width: var(--core-size);
+			height: var(--core-size);
+			transform: translate(-50%, -50%);
+			transform-box: fill-box;
+		}
+		.clockhand{
+			stroke-width: var(--hand-width);
+			stroke: var(--color);
+			stroke-linecap: square;
+		}
+		.clockvalidarea{
+			stroke: none;
+			fill-opacity: 0.05;
+			fill: black;
+		}
+	]]></style>
 	<defs>
 		<!-- use these with the <use> element -->
-		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4" fill-opacity="0.05" stroke-opacity="1" fill="var(--color)" stroke="var(--color)" />
+		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4" fill-opacity="0.05" fill="var(--color)" stroke="var(--color)" />
 		<!--rect id="clockcorebase" x="45" y="45" width="10" height="10" stroke-width="2" stroke-opacity="1" /-->
-		<rect id="clockcorebase" x="50" y="50" style="width: var(--core-size); height: var(--core-size); transform: translate(-50%, -50%); transform-box: fill-box;" stroke-width="2" stroke-opacity="1" />
-		<use id="clockcore" href="#clockcorebase" fill-opacity="0" fill="none" />
+		<rect id="clockcorebase" x="50" y="50" stroke-width="2" />
+		<use id="clockcore" href="#clockcorebase" fill="none" />
 		<mask id="clockcoremask" maskUnits="userSpaceOnUse">
-			<rect x="0" y="0" width="100" height="100" fill-opacity="1" fill="white" />
-			<use href="#clockcorebase" fill-opacity="1" fill="black" stroke="black" />
+			<rect x="0" y="0" width="100" height="100" fill="white" />
+			<use href="#clockcorebase" fill="black" stroke="black" />
 		</mask>
 		
 		<!-- Note: These elements are templates to be cloned and animated with JavaScript -->
-		<line id="clockhand" x2="50" y2="50" stroke-width="var(--hand-width)" stroke-opacity="1" stroke="var(--color)" stroke-linecap="square" />
-		<path id="clockvalidarea" stroke-width="1" stroke-opacity="0" stroke="none" fill-opacity="0.05" fill="black" mask="url(#clockcoremask)" />
+		<line id="clockhand" class="clockhand" x2="50" y2="50" />
+		<path id="clockvalidarea" class="clockvalidarea" mask="url(#clockcoremask)" />
+		<g id="clock_inner_template" >
+			<use href="#clockface" ></use>
+			<use href="#clockcore" ></use>
+		</g>
 	</defs>
 </svg>
-<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637">
-	<use href="#clockface" />
-	<use href="#clockcore" />
-</svg>
-<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:green" data-name="Green" data-scale="3600000" data-valid-theta-leeway="0.125">
-	<use href="#clockface" />
-	<use href="#clockcore" />
-</svg>
-<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:blue" data-name="Blue" data-scale="86400000" data-valid-theta-leeway="0.125">
-	<use href="#clockface" />
-	<use href="#clockcore" />
-</svg>
-<svg class="clock" viewbox="0 0 100 100" height="100" width="100" style="--color:gray" data-name="White" data-scale="604800000" data-valid-theta-leeway="0.125">
-	<use href="#clockface" />
-	<use href="#clockcore" />
-</svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:green" data-name="Green" data-scale="3600000" data-valid-theta-leeway="0.125"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:blue" data-name="Blue" data-scale="86400000" data-valid-theta-leeway="0.125"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:gray" data-name="White" data-scale="604800000" data-valid-theta-leeway="0.125"></svg>
 </div>
 <div id="interactive-area">
 <script>
