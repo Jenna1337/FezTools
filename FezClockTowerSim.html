@@ -3,8 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="author" content="Jenna Sloan">
-<title>Fez Clock Tower Simulator</title>
+<title>FEZ Clock Tower Simulator</title>
+<link rel="manifest" href='data:application/javascript,{
+	"name": "FEZ Clock Tower Simulator",
+	"short_name": "FEZ Clock Tower Sim",
+	"start_url": "https://jenna1337.github.io/FezTools/FezClockTowerSim.html",
+	"display": "standalone",
+	"description": "FEZ Clock Tower Simulator",
+	"icons": [
+		{
+			"src": "data:image/png;base64,TODO/InsertClockIconHere",
+			"sizes": "64x64",
+			"type": "image/png",
+			"purpose": "any",
+			"orientation": "any"
+		}
+	]
+}' />
+
+<!--Note: some browsers (including Safari for iOS) don't like the following favicon for whatever reason-->
+<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,TODO/InsertClockIconHere" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
 <style>
 body {
 	font-family: monospace;
@@ -40,10 +60,10 @@ svg {
 	display: block;
 }
 span[data-valid="true"]{
-	background-color: #DFD;
+	background-color: #0F02;
 }
 span[data-valid="false"]{
-	background-color: #FDD;
+	background-color: #F002;
 }
 #interactive-area {
 	padding-inline: 1ex;
@@ -66,7 +86,6 @@ span[data-valid="false"]{
 	}
 }
 </style>
-<link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
 <script id="clockscript">
 let actualstarttime = Date.now();
 Object.defineProperty(window, 'starttime', {
@@ -105,10 +124,15 @@ document.addEventListener("DOMContentLoaded",function(){
 	const clock_inner_template_elems = Array.from(clock_inner_template.children);
 	const template_clockvalidarea = document.getElementById("clockvalidarea");
 	const template_clockhand = document.getElementById("clockhand");
+	const template_clockhandback = document.getElementById("clockhandback");
 	const handstuff = [];
 	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockface")).fillOpacity;
 	document.querySelectorAll(".clock").forEach(clock=>{
 		clock_inner_template_elems.forEach(elem=>clock.appendChild(elem.cloneNode(true)));
+		
+		const handback = template_clockhandback.cloneNode();
+		handback.removeAttribute("id");
+		clock.insertBefore(handback, clock.lastElementChild);
 		
 		const hand = template_clockhand.cloneNode();
 		hand.removeAttribute("id");
@@ -116,7 +140,7 @@ document.addEventListener("DOMContentLoaded",function(){
 		
 		const validarea = template_clockvalidarea.cloneNode();
 		validarea.removeAttribute("id");
-		clock.appendChild(validarea);
+		clock.insertBefore(validarea, clock.lastElementChild);
 		
 		const colorname = clock.dataset.name;//clock.getAttribute("style").split(":").at(-1);
 		const colorval = window.getComputedStyle(clock).getPropertyValue("--color");
@@ -133,15 +157,18 @@ document.addEventListener("DOMContentLoaded",function(){
 		const handinfonextvalid = document.createElement("span");
 		handinfonextvalid.textContent = "000";
 		
-		const handinfo = document.createElement("span");
+		const handinfo = document.createElement("p");
 		handinfo.appendChild(handinfoname);
 		handinfo.append(" hand is valid? ");
 		handinfo.appendChild(handinfovalid);
 		handinfo.append(". Will next be valid at about: ");
 		handinfo.appendChild(handinfonextvalid);
 		handinfo.classList.add("handinfo");
+		handinfo.ariaRelevant="text";
+		handinfo.ariaAtomic="true";
+		handinfo.ariaRole="status";
 		handinfobox.appendChild(handinfo);
-		handstuff.push([clock, hand, handinfovalid, handinfonextvalid, validarea]);
+		handstuff.push([clock, handback, hand, handinfovalid, handinfonextvalid, validarea]);
 	});
 	
 	function getXY(cx, cy, radius, theta){
@@ -166,7 +193,7 @@ document.addEventListener("DOMContentLoaded",function(){
 	function moveHands(timestamp){
 		const currtime = Date.now() + offsettime;
 		formatTimeLabel(document.getElementById("currtime"), new Date(currtime));
-		handstuff.forEach(([clock, hand, handinfovalid, handinfonextvalid, validarea])=>{
+		handstuff.forEach(([clock, handback, hand, handinfovalid, handinfonextvalid, validarea])=>{
 			const radius = Number(window.getComputedStyle(clock).getPropertyValue("--radius").replace("px",""));
 			//const radius = 48;
 			const clockbox = clock.viewBox.animVal;
@@ -183,6 +210,7 @@ document.addEventListener("DOMContentLoaded",function(){
 				const handlinecap = handstyle.strokeLinecap;
 				const radiusadjust = (handlinecap=="butt" || handlinecap=="") ? 0 : handstrokewidth;
 				setHandLine(cx, cy, hand, radius-radiusadjust, theta, val);
+				setHandLine(cx, cy, handback, radius-radiusadjust, theta, val);
 			}
 			//update validity information
 			{
@@ -226,60 +254,70 @@ document.addEventListener("DOMContentLoaded",function(){
 </script>
 </head>
 <body>
-<div id="clockcontainer" style="--hand-width: 6px; --radius: 48px; --core-size: 10px;">
+<div id="clockcontainer" style="--hand-width: 4px; --radius: 48px; --core-size: 8px;" aria-live="off">
 <svg style="/*display: none !important;*/ height: 0; width: 0; overflow: hidden;" hidden="hidden" aria-hidden="true" focusable="false">
 	<style><![CDATA[
-		svg[data-valid="true"]{
-			use[href$="clockcore" i]{
-				stroke: #010;
-			}
+		#clockfacebackgroundrect {
+			stroke-width: 4px;
+			fill-opacity: 0.05;
+			fill: var(--color);
+			stroke: var(--color);
 		}
-		svg[data-valid="false"]{
-			use[href$="clockcore" i]{
-				stroke: #100;
-			}
-		}
-		#clockcorebase {
+		.centered-in-clock {
 			width: var(--core-size);
 			height: var(--core-size);
 			transform: translate(-50%, -50%);
 			transform-box: fill-box;
+			stroke-linejoin: miter;
+			stroke-miterlimit: 1;
+			stroke-linejoin: bevel;
 		}
 		.clockhand{
 			stroke-width: var(--hand-width);
 			stroke: var(--color);
 			stroke-linecap: square;
 		}
+		.clockhandback{
+			stroke-width: calc(var(--hand-width) + 2px);
+			stroke: color-mix(in srgb, var(--color), white 20%);
+			stroke-linecap: square;
+		}
 		.clockvalidarea{
 			stroke: none;
 			fill-opacity: 0.05;
 			fill: black;
+			fill: currentColor;
 		}
 	]]></style>
 	<defs>
 		<!-- use these with the <use> element -->
-		<rect id="clockface" x="0" y="0" width="100" height="100" stroke-width="4" fill-opacity="0.05" fill="var(--color)" stroke="var(--color)" />
-		<!--rect id="clockcorebase" x="45" y="45" width="10" height="10" stroke-width="2" stroke-opacity="1" /-->
-		<rect id="clockcorebase" x="50" y="50" stroke-width="2" />
-		<use id="clockcore" href="#clockcorebase" fill="none" />
-		<mask id="clockcoremask" maskUnits="userSpaceOnUse">
-			<rect x="0" y="0" width="100" height="100" fill="white" />
-			<use href="#clockcorebase" fill="black" stroke="black" />
-		</mask>
+		<g id="clockface">
+			<rect id="clockfacebackgroundrect" x="0" y="0" width="100%" height="100%" />
+		</g>
+		<rect id="clockcorebase" class="centered-in-clock" x="50%" y="50%" stroke-width="2" />
+		<g id="clockcore">
+			<use href="#clockcorebase" fill="#525" />
+			<use href="#clockcorebase" fill="none" stroke="#101" />
+		</g>
 		
 		<!-- Note: These elements are templates to be cloned and animated with JavaScript -->
-		<line id="clockhand" class="clockhand" x2="50" y2="50" />
-		<path id="clockvalidarea" class="clockvalidarea" mask="url(#clockcoremask)" />
+		<line id="clockhandback" class="clockhand clockhandback" />
+		<line id="clockhand" class="clockhand" />
+		<path id="clockvalidarea" class="clockvalidarea" />
 		<g id="clock_inner_template" >
 			<use href="#clockface" ></use>
 			<use href="#clockcore" ></use>
 		</g>
 	</defs>
 </svg>
-<svg class="clock" viewbox="0 0 100 100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637"></svg>
-<svg class="clock" viewbox="0 0 100 100" style="--color:green" data-name="Green" data-scale="3600000" data-valid-theta-leeway="0.125"></svg>
-<svg class="clock" viewbox="0 0 100 100" style="--color:blue" data-name="Blue" data-scale="86400000" data-valid-theta-leeway="0.125"></svg>
-<svg class="clock" viewbox="0 0 100 100" style="--color:gray" data-name="White" data-scale="604800000" data-valid-theta-leeway="0.125"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:red" data-name="Red" data-scale="60000" data-valid-theta-start="1.19579637" data-valid-theta-end="1.69579637"
+		title="Minute clock (Red)" alt="Minute clock (Red)" aria-label="Minute clock (Red)" role="img"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:#0A0" data-name="Green" data-scale="3600000" data-valid-theta-leeway="0.125"
+		title="Hour clock (Green)" alt="Hour clock (Green)" aria-label="Hour clock (Green)" role="img"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:blue" data-name="Blue" data-scale="86400000" data-valid-theta-leeway="0.125"
+		title="Day clock (Blue)" alt="Day clock (Blue)" aria-label="Day clock (Blue)" role="img"></svg>
+<svg class="clock" viewbox="0 0 100 100" style="--color:#888" data-name="White" data-scale="604800000" data-valid-theta-leeway="0.125"
+		title="Week clock (White)" alt="Week clock (White)" aria-label="Week clock (White)" role="img"></svg>
 </div>
 <div id="interactive-area">
 <script>
@@ -389,7 +427,7 @@ to affect the outcome of the content set by formatTimeLabel
 </select><br />
 
 <span for="currtime">Current time: </span>
-<span class="timelabel" id="currtime"></span><br />
+<span class="timelabel" id="currtime" aria-live="off"></span><br />
 
 <label for="starttimeinput">File start time: </label>
 <input id="starttimeinput" type="number" min="0" step="1000" onchange="creationtimeinput_change(this)" />
@@ -403,7 +441,7 @@ to affect the outcome of the content set by formatTimeLabel
 
 <button onclick="resetStartTime()" type="button">Reset clocks to current time</button>
 <br />
-<div id="handinfobox">
+<div id="handinfobox" aria-live="polite">
 </div>
 <br />
 <br />
