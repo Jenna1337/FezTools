@@ -408,9 +408,7 @@ function getHashbrowns(){
 }
 function setHashbrownsObject(hashbrowns){
 	window.location.hash = Object.entries(hashbrowns).map(a=>a.join(hash_sep_kv)).join(hash_sep_entries)
-}window.addEventListener("hashchange", function() {
-    console.log("Hash changed to: " + window.location.hash);
-});
+}
 </script>
 <label for="timeformatselector">Display times in the format:</label>
 <select id="timeformatselector" onchange="timeformatselectorchanged(this)">
