@@ -253,73 +253,78 @@ document.addEventListener("DOMContentLoaded",function(){
 		hand.setAttribute("y2", y2 +"px");
 		//hand.setAttribute("data-angle", (theta+Math.PI)%(2*Math.PI));
 	}
+	function moveHand(handmeta, currtime){
+		const [clock, handback, hand, handinfovalid, handinfonextvalid, handinfonextinvalid, validarea] = handmeta;
+		const radius = Number(window.getComputedStyle(clock).getPropertyValue("--radius").replace("px",""));
+		//const radius = 48;
+		const clockbox = clock.viewBox.animVal;
+		const cx = (clockbox.x + clockbox.width)/2;
+		const cy = (clockbox.y + clockbox.height)/2;
+		const val = currtime - starttime;
+		const valmod = Number(clock.dataset.scale);
+		const theta = ((val) / valmod) * (2 * Math.PI) - (Math.PI);
+		
+		//adjust the hands
+		{
+			const handstyle = window.getComputedStyle(hand);
+			const handstrokewidth = Number(handstyle.strokeWidth.replace("px",""));
+			const handlinecap = handstyle.strokeLinecap;
+			const radiusadjust = (handlinecap=="butt" || handlinecap=="") ? 0 : handstrokewidth;
+			setHandLine(cx, cy, hand, radius-radiusadjust, theta, val);
+			setHandLine(cx, cy, handback, radius-radiusadjust, theta, val);
+		}
+		const validThetaLeeway = Number(clock.dataset.validThetaLeeway);
+		const validThetaStart = Number(clock.dataset.validThetaStart ?? ((Math.PI/2)-validThetaLeeway));
+		const validThetaEnd = Number(clock.dataset.validThetaEnd ?? ((Math.PI/2)+validThetaLeeway));
+		//update validity information
+		{
+			let thetaAdjusted = (theta - Math.PI)%(2*Math.PI);
+			while(thetaAdjusted<0){
+				thetaAdjusted += (2*Math.PI);
+			}
+			
+			validarea.setAttribute("d", createWedge(cx, cy, radius, validThetaStart + Math.PI, validThetaEnd + Math.PI));
+			
+			const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
+			if(String(handinfovalid.dataset.valid) != String(inTheZone) || String(clock.dataset.valid) != String(inTheZone)){
+				clock.dataset.valid = inTheZone;
+				handinfovalid.dataset.valid = inTheZone;
+				handinfovalid.textContent = inTheZone;
+			}
+		}
+		//check the next valid timestamps
+		{
+			const startOffset = valmod*(Math.PI/2-validThetaStart)/(Math.PI*2);
+			const endOffset = valmod*(Math.PI/2-validThetaEnd)/(Math.PI*2);
+			//const curval = (val+.75*valmod)%valmod;
+			//hand.setAttribute("data-value", curval);
+			let stampchanged = !hand.dataset.nextstamp;
+			let stampchangedend = !hand.dataset.nextstampend;
+			let nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod - startOffset));
+			let nextstampend = Number(hand.dataset.nextstampend ?? (starttime+.25*valmod - endOffset));
+			while(nextstamp<currtime){
+				nextstamp += valmod;
+				stampchanged = true;
+			}
+			while(nextstampend<currtime){
+				nextstampend += valmod;
+			}
+			hand.setAttribute("data-nextstamp", nextstamp);
+			hand.setAttribute("data-nextstampend", nextstampend);
+			if(stampchanged){
+				formatTimeLabel(handinfonextvalid, new Date(nextstamp));
+			}
+			if(stampchanged){
+				formatTimeLabel(handinfonextinvalid, new Date(nextstampend));
+			}
+		}
+	}
 	function moveHands(timestamp){
 		const currtime = Date.now() + offsettime;
 		formatTimeLabel(document.getElementById("currtime"), new Date(currtime));
-		handstuff.forEach(([clock, handback, hand, handinfovalid, handinfonextvalid, handinfonextinvalid, validarea])=>{
-			const radius = Number(window.getComputedStyle(clock).getPropertyValue("--radius").replace("px",""));
-			//const radius = 48;
-			const clockbox = clock.viewBox.animVal;
-			const cx = (clockbox.x + clockbox.width)/2;
-			const cy = (clockbox.y + clockbox.height)/2;
-			const val = currtime - starttime;
-			const valmod = Number(clock.dataset.scale);
-			const theta = ((val) / valmod) * (2 * Math.PI) - (Math.PI);
-			
-			//adjust the hands
-			{
-				const handstyle = window.getComputedStyle(hand);
-				const handstrokewidth = Number(handstyle.strokeWidth.replace("px",""));
-				const handlinecap = handstyle.strokeLinecap;
-				const radiusadjust = (handlinecap=="butt" || handlinecap=="") ? 0 : handstrokewidth;
-				setHandLine(cx, cy, hand, radius-radiusadjust, theta, val);
-				setHandLine(cx, cy, handback, radius-radiusadjust, theta, val);
-			}
-			const validThetaLeeway = Number(clock.dataset.validThetaLeeway);
-			const validThetaStart = Number(clock.dataset.validThetaStart ?? ((Math.PI/2)-validThetaLeeway));
-			const validThetaEnd = Number(clock.dataset.validThetaEnd ?? ((Math.PI/2)+validThetaLeeway));
-			//update validity information
-			{
-				let thetaAdjusted = (theta - Math.PI)%(2*Math.PI);
-				while(thetaAdjusted<0){
-					thetaAdjusted += (2*Math.PI);
-				}
-				
-				validarea.setAttribute("d", createWedge(cx, cy, radius, validThetaStart + Math.PI, validThetaEnd + Math.PI));
-				
-				const inTheZone = thetaAdjusted >= validThetaStart && thetaAdjusted <= validThetaEnd;
-				if(String(handinfovalid.dataset.valid) != String(inTheZone) || String(clock.dataset.valid) != String(inTheZone)){
-					clock.dataset.valid = inTheZone;
-					handinfovalid.dataset.valid = inTheZone;
-					handinfovalid.textContent = inTheZone;
-				}
-			}
-			//check the next valid timestamps
-			{
-				const startOffset = valmod*(Math.PI/2-validThetaStart)/(Math.PI*2);
-				const endOffset = valmod*(Math.PI/2-validThetaEnd)/(Math.PI*2);
-				//const curval = (val+.75*valmod)%valmod;
-				//hand.setAttribute("data-value", curval);
-				let stampchanged = !hand.dataset.nextstamp;
-				let stampchangedend = !hand.dataset.nextstampend;
-				let nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod - startOffset));
-				let nextstampend = Number(hand.dataset.nextstampend ?? (starttime+.25*valmod - endOffset));
-				while(nextstamp<currtime){
-					nextstamp += valmod;
-					stampchanged = true;
-				}
-				while(nextstampend<currtime){
-					nextstampend += valmod;
-				}
-				hand.setAttribute("data-nextstamp", nextstamp);
-				hand.setAttribute("data-nextstampend", nextstampend);
-				if(stampchanged){
-					formatTimeLabel(handinfonextvalid, new Date(nextstamp));
-				}
-				if(stampchanged){
-					formatTimeLabel(handinfonextinvalid, new Date(nextstampend));
-				}
-			}
+		//Note: using promises here is slower due to overhead
+		handstuff.forEach(handmeta=>{
+			moveHand(handmeta, currtime);
 		});
 		window.requestAnimationFrame(moveHands);
 	}
