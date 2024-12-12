@@ -26,6 +26,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark light" />
 <style>
+:root {
+	--clock-face-fill-opacity: 0.05;
+}
 body {
 	font-family: monospace;
 	padding: 0;
@@ -58,6 +61,12 @@ svg {
 }
 .handinfo{
 	display: block;
+	
+}
+.handinfoname{
+	outline: 1px solid var(--color);
+	background-color: color-mix(in srgb, transparent 100%, var(--color) var(--clock-face-fill-opacity)%);
+	padding-inline: 0.5ex;
 }
 span[data-valid="true"]{
 	background-color: #0F02;
@@ -146,7 +155,6 @@ document.addEventListener("DOMContentLoaded",function(){
 	const template_clockhand = document.getElementById("clockhand");
 	const template_clockhandback = document.getElementById("clockhandback");
 	const handstuff = [];
-	const clockfacefillopacity = window.getComputedStyle(document.getElementById("clockfacebackgroundrect")).fillOpacity;
 	document.querySelectorAll(".clock").forEach(clock=>{
 		const titletext = clock.getAttribute("title") || clock.getAttribute("alt") || clock.getAttribute("aria-label") || clock.dataset.name;
 		if(!clock.hasAttribute("title")){
@@ -179,29 +187,10 @@ document.addEventListener("DOMContentLoaded",function(){
 		validarea.removeAttribute("id");
 		clock.insertBefore(validarea, clock.lastElementChild);
 		
-		const colorname = clock.dataset.name;//clock.getAttribute("style").split(":").at(-1);
-		const colorval = window.getComputedStyle(clock).getPropertyValue("--color");
-		const bgcolor = "color-mix(in srgb, transparent 100%, "+colorval+" "+(100*clockfacefillopacity)+"%)";
 		
 		const handinfoname = document.createElement("span");
-		handinfoname.textContent = colorname;
-		handinfoname.style.backgroundColor = bgcolor;
-		handinfoname.style.outline = "1px solid "+colorval;
-		{
-			//if you don't like this, fix it yourself.
-			let ctx = document.createElement("canvas").getContext("2d");
-			ctx.font = window.getComputedStyle(document.body).font;
-			let text = colorname;
-			let metrics= ctx.measureText(text);
-			let descent = metrics.fontBoundingBoxDescent;
-			let ascent = (metrics.fontBoundingBoxAscent - metrics.actualBoundingBoxAscent);
-			handinfoname.style.paddingInline = descent+"px";
-			console.log(ascent, descent, metrics);
-			//handinfoname.style.paddingTop = Math.max(0, descent-ascent)+"px";
-			//handinfoname.style.paddingBottom = Math.max(0, ascent-descent)+"px";
-		}
-		//handinfoname.style.paddingInline = "clamp(0.25ex, calc(1em - 2ex), 0.5ex)";
-		//handinfoname.style.paddingBlock = "1px";
+		handinfoname.classList.add("handinfoname");
+		handinfoname.textContent = clock.dataset.name;
 		
 		const handinfovalid = document.createElement("span");
 		handinfovalid.textContent = "false";
@@ -214,7 +203,9 @@ document.addEventListener("DOMContentLoaded",function(){
 		handinfonextinvalid.classList.add("timestamp");
 		handinfonextinvalid.textContent = "000";
 		
+		const colorval = window.getComputedStyle(clock).getPropertyValue("--color");
 		const handinfo = document.createElement("p");
+		handinfo.style.setProperty("--color", colorval)
 		handinfo.appendStuff(
 			handinfoname,
 			" hand is valid? ",
@@ -340,7 +331,7 @@ document.addEventListener("DOMContentLoaded",function(){
 	<style><![CDATA[
 		#clockfacebackgroundrect {
 			stroke-width: 4px;
-			fill-opacity: 0.05;
+			fill-opacity: var(--clock-face-fill-opacity);
 			fill: var(--color);
 			stroke: var(--color);
 		}
