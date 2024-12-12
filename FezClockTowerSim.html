@@ -391,12 +391,12 @@ document.addEventListener("DOMContentLoaded",function(){
 </div>
 <div id="interactive-area">
 <script>
-var timeformat = window.localStorage?.timeformat ?? "local_time";
+var timeformat = window.localStorage?.timeformat ?? "Locale_time_string";
 
 window.setTimeout(()=>{
 	//set selected item on timeformatselector to whatever matched window.localStorage.timeformat
 	const timeformatselector = document.getElementById("timeformatselector");
-	timeformatselector.value = window.localStorage?.timeformat ?? "local_time";
+	timeformatselector.value = window.localStorage?.timeformat ?? "Locale_time_string";
 	timeformatselector.onchange();
 }, 1000);
 
@@ -486,7 +486,7 @@ function setHashbrownsObject(hashbrowns){
 <option value="local_time">local time</option>
 <option value="ISO_8601_-_UTC">ISO 8601 - UTC</option>
 <option value="ISO_8601_-_local_time_zone">ISO 8601 - local time zone</option>
-<option value="Locale_time_string">Locale time string</option>
+<option value="Locale_time_string" selected="">Locale time string</option>
 <option value="Unix_timestamp_-_seconds_since_epoch">Unix timestamp - seconds since epoch</option>
 <option value="Unix_timestamp_-_milliseconds_since_epoch">Unix timestamp - milliseconds since epoch</option>
 <!--
