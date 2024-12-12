@@ -70,9 +70,11 @@ svg {
 }
 span[data-valid="true"]{
 	background-color: #0F02;
+	text-decoration: underline #0F0D;
 }
 span[data-valid="false"]{
 	background-color: #F002;
+	text-decoration: underline #F00D;
 }
 #interactive-area {
 	padding-inline: 1ex;
@@ -210,19 +212,11 @@ document.addEventListener("DOMContentLoaded",function(){
 			handinfoname,
 			" hand is valid? ",
 			handinfovalid,
-			". Will next be <span data-valid='true'>valid</span> at about: ",
+			". Will next be <span data-valid=\"true\">valid</span> at about: ",
 			handinfonextvalid,
-			". Will next be <span data-valid='false'>invalid</span> at about: ",
+			". Will next be <span data-valid=\"false\">invalid</span> at about: ",
 			handinfonextinvalid,
 		);
-		
-		//handinfo.appendChild(handinfoname);
-		//handinfo.append(" hand is valid? ");
-		//handinfo.appendChild(handinfovalid);
-		//handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='true'>valid</span> at about: ");
-		//handinfo.appendChild(handinfonextvalid);
-		//handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='false'>invalid</span> at about: ");
-		//handinfo.appendChild(handinfonextinvalid);
 		
 		handinfo.classList.add("handinfo");
 		handinfo.ariaRelevant="text";
