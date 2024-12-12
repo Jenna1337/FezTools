@@ -68,13 +68,21 @@ svg {
 	background-color: color-mix(in srgb, transparent 100%, var(--color) var(--clock-face-fill-opacity)%);
 	padding-inline: 0.5ex;
 }
+span[data-valid]{
+	text-decoration: underline;
+	text-decoration-style: solid;
+	text-decoration-line: underline;
+}
 span[data-valid="true"]{
 	background-color: #0F02;
-	text-decoration: underline #0F0D;
+	text-decoration-color: #0F0D;
+	
+	/*doesn't work in Safari*/
+	/*text-decoration: underline #0F0D;*/
 }
 span[data-valid="false"]{
 	background-color: #F002;
-	text-decoration: underline #F00D;
+	text-decoration-color: #F00D;
 }
 #interactive-area {
 	padding-inline: 1ex;
