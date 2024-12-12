@@ -86,6 +86,24 @@ span[data-valid="false"]{
 	}
 }
 </style>
+<script>
+Element.prototype.appendStuff = function(...stuff){
+	stuff.forEach(c=>{
+		if(c instanceof Node){
+			this.appendChild(c);
+		}
+		else if((typeof c).toLowerCase()=="string")
+		{
+			this.insertAdjacentHTML("beforeend", c);
+		}
+		else
+		{
+			this.append(c);
+			debugger
+		}
+	})
+}
+</script>
 <script id="clockscript">
 let actualstarttime = Date.now();
 Object.defineProperty(window, 'starttime', {
@@ -178,10 +196,9 @@ document.addEventListener("DOMContentLoaded",function(){
 			let descent = metrics.fontBoundingBoxDescent;
 			let ascent = (metrics.fontBoundingBoxAscent - metrics.actualBoundingBoxAscent);
 			handinfoname.style.paddingInline = descent+"px";
-			console.log(ascent, descent);
-			handinfoname.style.paddingTop = Math.max(0, descent-ascent)+"px";
-			handinfoname.style.paddingBottom = Math.max(0, ascent-descent)+"px";
-			console.log(metrics);
+			console.log(ascent, descent, metrics);
+			//handinfoname.style.paddingTop = Math.max(0, descent-ascent)+"px";
+			//handinfoname.style.paddingBottom = Math.max(0, ascent-descent)+"px";
 		}
 		//handinfoname.style.paddingInline = "clamp(0.25ex, calc(1em - 2ex), 0.5ex)";
 		//handinfoname.style.paddingBlock = "1px";
@@ -194,17 +211,27 @@ document.addEventListener("DOMContentLoaded",function(){
 		handinfonextvalid.textContent = "000";
 		
 		const handinfonextinvalid = document.createElement("span");
-		handinfonextvalid.classList.add("timestamp");
+		handinfonextinvalid.classList.add("timestamp");
 		handinfonextinvalid.textContent = "000";
 		
 		const handinfo = document.createElement("p");
-		handinfo.appendChild(handinfoname);
-		handinfo.append(" hand is valid? ");
-		handinfo.appendChild(handinfovalid);
-		handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='true'>valid</span> at about: ");
-		handinfo.appendChild(handinfonextvalid);
-		handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='false'>invalid</span> at about: ");
-		handinfo.appendChild(handinfonextinvalid);
+		handinfo.appendStuff(
+			handinfoname,
+			" hand is valid? ",
+			handinfovalid,
+			". Will next be <span data-valid='true'>valid</span> at about: ",
+			handinfonextvalid,
+			". Will next be <span data-valid='false'>invalid</span> at about: ",
+			handinfonextinvalid,
+		);
+		
+		//handinfo.appendChild(handinfoname);
+		//handinfo.append(" hand is valid? ");
+		//handinfo.appendChild(handinfovalid);
+		//handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='true'>valid</span> at about: ");
+		//handinfo.appendChild(handinfonextvalid);
+		//handinfo.insertAdjacentHTML("beforeend", ". Will next be <span data-valid='false'>invalid</span> at about: ");
+		//handinfo.appendChild(handinfonextinvalid);
 		
 		handinfo.classList.add("handinfo");
 		handinfo.ariaRelevant="text";
@@ -284,7 +311,6 @@ document.addEventListener("DOMContentLoaded",function(){
 				let stampchangedend = !hand.dataset.nextstampend;
 				let nextstamp = Number(hand.dataset.nextstamp ?? (starttime+.25*valmod - startOffset));
 				let nextstampend = Number(hand.dataset.nextstampend ?? (starttime+.25*valmod - endOffset));
-				if(clock.dataset.validThetaEnd)console.log(valmod, nextstamp, nextstampend, endOffset-startOffset);
 				while(nextstamp<currtime){
 					nextstamp += valmod;
 					stampchanged = true;
