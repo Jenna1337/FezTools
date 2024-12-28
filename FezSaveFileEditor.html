@@ -1072,6 +1072,7 @@ var saveloadfuncs = (function(){
 		thisgeninputs.forEach(action);
 	}
 	function loadFromDataView(dataview){
+		try{
 		byteOffset = 0;
 		dataview.getBigInt64(0, settings.littleEndian);
 		byteOffset += 8;
@@ -1079,6 +1080,10 @@ var saveloadfuncs = (function(){
 		iterateInputs(document.getElementById("savedataform"), (tp)=>{
 			readType(dataview, tp);
 		})
+		}catch(e){
+			debugger
+			alert("An error occured while loading the save file. \nPlease verify the provided file is a valid FEZ save file.");
+		}
 	}
 	
 	function calcStringEncodedByteCount(s){
@@ -1315,6 +1320,7 @@ var saveloadfuncs = (function(){
 //initializing section
 window.addEventListener("DOMContentLoaded", ()=>{
 	window.saveFormatSelect = document.getElementById("save-format-select");
+	
 	window.loadnewsave = (function(){
 		const windowsFileTimeEpoch = 11644473600000n;
 		function formatTimeSpan(timespanstr, format){
@@ -1423,6 +1429,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
 		return loadnewsave;
 	})();
 	
+	saveFormatSelect.value = saveFormatSelect.querySelector("[selected]").value;
 	loadnewsave(true);
 });
 
@@ -1491,7 +1498,7 @@ document.title = document.title.replace("version whatever", "v"+new Date(documen
 	<button id="validatefullcompletionbutton" onclick="validatefullcompletion()">Validate is full completion save</button><br />
 	<button id="collapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', true))">Collapse All</button>
 	<button id="uncollapseall" onclick="Array.from(document.querySelectorAll('.collapsible')).forEach(a=>a.classList.toggle('collapsed', false))">Uncollapse All</button><br />
-	<label for="save-format-select">File Format: </label><select id="save-format-select">
+	<label for="save-format-select">File Format: </label><select id="save-format-select" autocomplete="off">
 		<option value="PC" selected="">PC (default)</option>
 		<option value="iOS">iOS</option>
 	</select>
