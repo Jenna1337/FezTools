@@ -513,8 +513,28 @@ function validatefullcompletion()
 			const otherCollectibleCount = wonditionsContainer.querySelector("[data-fieldname=\"OtherCollectibleCount\"]").value;
 			const splitUpCount = wonditionsContainer.querySelector("[data-fieldname=\"SplitUpCount\"]").value;
 			const secretCount = wonditionsContainer.querySelector("[data-fieldname=\"SecretCount\"]").value;
+			
+			const diff_lockedDoorCount = winditions.LockedDoorCount - lockedDoorCount;
+			const diff_unlockedDoorCount = winditions.UnlockedDoorCount - unlockedDoorCount;
+			const diff_chestCount = winditions.ChestCount - chestCount;
+			const diff_cubeShardCount = winditions.CubeShardCount - cubeShardCount;
+			const diff_otherCollectibleCount = winditions.OtherCollectibleCount - otherCollectibleCount;
+			const diff_splitUpCount = winditions.SplitUpCount - splitUpCount;
+			const diff_secretCount = winditions.SecretCount - secretCount;
+			
+			if(diff_lockedDoorCount > 0) faults.push(levelName+": Missing "+diff_lockedDoorCount+" locked doors");
+			if(diff_unlockedDoorCount > 0) faults.push(levelName+": Missing "+diff_lockedDoorCount+" unlocked doors");
+			if(diff_chestCount > 0) faults.push(levelName+": Missing "+diff_lockedDoorCount+" chests");
+			if(diff_cubeShardCount > 0) faults.push(levelName+": Missing "+diff_cubeShardCount+" cube shards");
+			if(diff_otherCollectibleCount >0) faults.push(levelName+": Missing "+diff_otherCollectibleCount+" other collectibles");
+			if(diff_splitUpCount > 0) faults.push(levelName+": Missing "+diff_splitUpCount+" cube bits");
+			if(diff_secretCount > 0) faults.push(levelName+": Missing "+diff_secretCount+" secrets");
+			if(diff_secretCount != 0) debugger;
 			//TODO make sure ScriptIds in save data contains all of the ScriptIds values in winditions
-			const scriptIds = wonditionsContainer.querySelector("[data-fieldname=\"ScriptIds\"]").querySelectorAll("input");
+			const scriptIds = Array.from(wonditionsContainer.querySelector("[data-fieldname=\"ScriptIds\"]").querySelectorAll("input")).map(a=>a.value);
+			const diff_scriptIds = winditions.ScriptIds.filter(item=>!scriptIds.some(a=>a==item));
+			if(diff_scriptIds.length > 0) faults.push(levelName+": Missing ["+diff_scriptIds.join(", ")+"] script IDs");
+			if(diff_scriptIds.length > 0)debugger;
 		}
 		else
 		{
@@ -523,10 +543,11 @@ function validatefullcompletion()
 	})
 	//TODO present the results nicer?
 	alert(""
-		+ "Notice: This button's functionality isn't complete yet.\n"
 		+ "Faults found:\n"
-		+ "Incomplete button functionality\n"
-		+ (faults.length<=0 ? "None" : faults.join("\n"))
+		+ (faults.length<=0 
+			? "None. This is a valid Full Completion save file!"
+			: faults.join("\n")
+		)
 	);
 }
 
