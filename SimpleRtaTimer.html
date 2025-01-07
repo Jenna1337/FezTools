@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Jenna Sloan">
+<title>Simple RTA Timer</title>
+<link rel="manifest" href='data:application/javascript,{
+	"name": "Simple RTA Timer",
+	"short_name": "Simple RTA Timer",
+	"start_url": "https://jenna1337.github.io/FezTools/SimpleRtaTimer.html",
+	"display": "standalone",
+	"description": "Simple RTA Timer",
+	"icons": [
+		{
+			"src": "data:image/png;base64,TODO/InsertTimerIconHere",
+			"sizes": "64x64",
+			"type": "image/png",
+			"purpose": "any",
+			"orientation": "any"
+		}
+	]
+}' />
+
+<!--Note: some browsers (including Safari for iOS) don't like the following favicon for whatever reason-->
+<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,TODO/InsertTimerIconHere" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<style>
+:root {
+	--completeColor1: #00B3FF;
+	--completeColor2: #00A1E6;
+	--redColor1: #FF0000;
+	--redColor2: #E30000;
+	--pausedColor1: white;
+	--pausedColor2: gray;
+	--greenColor1: #00FF68;
+	--greenColor2: #00A541;
+	
+	--stop1: var(--greenColor1);
+	--stop2: var(--greenColor2);
+}
+body {
+	font-family: monospace;
+	padding: 0;
+	margin: 0;
+}
+noscript {
+	position: absolute;
+	z-index: 9999999;
+	color: white;
+	background-color: black;
+	height: 100vh;
+	width: 100vw;
+	font-size: min(100vh, calc(100vw / 30));
+	line-height: 100vh;
+	text-align: center;
+}
+#interactive-area {
+	padding: 1ex;
+	font-size: larger;
+}
+#interactive-area > * {
+	margin-block: 1ex;
+}
+button {
+	font-size: inherit;
+}
+button:has(input:checked) {
+	filter: contrast(150%);
+	filter: contrast(150%) brightness(140%);
+}
+*[data-state="complete"] {
+	--stop1: var(--completeColor1);
+	--stop2: var(--completeColor2);
+}
+*[data-state="behind"] {
+	--stop1: var(--redColor1);
+	--stop2: var(--redColor2);
+}
+*[data-state="paused"] {
+	--stop1: var(--pausedColor1);
+	--stop2: var(--pausedColor2);
+}
+.timestamp {
+	font-family: monospace;
+	font-weight: bold;
+	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums slashed-zero;
+	background: linear-gradient(to bottom, var(--stop1), var(--stop2));
+	background-clip: text;
+	color: transparent;
+	font-size: 200%;
+	white-space: pre;
+	/*will-change: content;*/
+}
+#splits {
+	width: fit-content;
+	border: 1px solid currentColor;
+	padding: 0.5ex;
+}
+#splits>div {
+	border: 1px solid currentColor;
+	padding: 0.5ex;
+}
+</style>
+<script id="clockscript">
+let starttime = performance.now();
+function resetStartTime(){
+	starttime = performance.now();
+}
+function formatTimeSpan(duration)
+{
+	const h = Math.floor(duration / 3600000);
+	const m = Math.floor((duration / 60000) % 60);
+	const s = Math.floor((duration / 1000) % 60);
+	const ms = Math.floor(duration % 1000);
+	const fs = duration.toString().split(".")[1] || "0";
+	const TINY_PARTS = 4;
+	return h.toString().padStart(2,0)
+		+ ":" + m.toString().padStart(2,0)
+		+ ":" + s.toString().padStart(2,0)
+		+ "." + ms.toString().padStart(3,0)
+		+ fs.slice(0,TINY_PARTS).padEnd(TINY_PARTS,0)
+		//+"\n"+duration
+		;
+}
+document.addEventListener("DOMContentLoaded",function(){
+	starttime = performance.now();
+	const FuncReturnNull = (function(){return null});
+	var highestResTimeGen = FuncReturnNull;
+	window.requestAnimationFrame(function(){
+		window.requestAnimationFrame(function(timestamp){
+			{
+				const now = performance.now();
+				const currtimePerf = (now%1).toFixed(5).replace(/0*$/,"").length;
+				const currtimeAnim = (timestamp%1).toFixed(5).replace(/0*$/,"").length;
+				
+				highestResTimeGen = currtimePerf >= currtimeAnim ? function(){return performance.now()} : FuncReturnNull;
+			}
+			function nextTime(timestamp){
+				const now = highestResTimeGen() || timestamp;
+				if(!document.getElementById("freeze")?.checked)
+				{
+					const currtime = now - starttime;
+					document.getElementById("currtime").textContent = formatTimeSpan(currtime);
+				}
+				window.requestAnimationFrame(nextTime);
+			}
+			window.requestAnimationFrame(nextTime);
+		});
+	});
+});
+</script>
+</head>
+<body>
+<div id="interactive-area">
+<span class="timestamp" id="currtime" aria-live="off"></span><br />
+
+<button onclick="resetStartTime()" type="button">Reset</button>
+<button onclick="split()" type="button" disabled="disabled" autocomplete="off" >Split</button><br />
+<button onclick="document.getElementById('freeze').checked=!document.getElementById('freeze').checked" autocomplete="off" ><input type="checkbox" id="freeze" style="display:none;" autocomplete="off" />Display Hold</button>
+<br />
+Splits:
+<div id="splits">
+<div>To do: add this feature</div>
+</div>
+<br />
+<noscript>
+This page requires JavaScript
+</noscript>
+<div id="viewsourcebox" style="max-width: 40ch">
+<!-- Note: both https://iotku.pw/websplit/ and https://one.livesplit.org/ use performance.now() to keep track of time -->
+<p style="padding-inline: 1ch; text-indent: 4ch hanging;">Using the same <code>performance.now()</code> that LiveSplit One uses.</p>
+This web app created by <span id="createdbyspan">Jenna Sloan</span>
+Last Modified: <span id="lastmodifiedspan"></span>
+<a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezTools/blob/main/SimpleRtaTimer.html">
+View Source
+<span> on GitHub</span><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0 0 48 48">
+<path d="M36 24c-1.2 0-2 0.8-2 2v12c0 1.2-0.8 2-2 2h-22c-1.2
+0-2-0.8-2-2v-22c0-1.2 0.8-2 2-2h12c1.2 0 2-0.8 2-2s-0.8-2-2-2h-12c-3.4
+0-6 2.6-6 6v22c0 3.4 2.6 6 6 6h22c3.4 0 6-2.6
+6-6v-12c0-1.2-0.8-2-2-2z"></path>
+<path d="M43.8 5.2c-0.2-0.4-0.6-0.8-1-1-0.2-0.2-0.6-0.2-0.8-0.2h-12c-1.2
+0-2 0.8-2 2s0.8 2 2 2h7.2l-18.6 18.6c-0.8 0.8-0.8 2 0 2.8 0.4 0.4 0.8
+0.6 1.4 0.6s1-0.2 1.4-0.6l18.6-18.6v7.2c0 1.2 0.8 2 2 2s2-0.8
+2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
+</svg></span>
+</a>
+</div>
+</body>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+	try{
+		var lm = document.getElementById("lastmodifiedspan");
+		lm.textContent = (new Date(document.lastModified)).toISOString();
+		lm.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+	try{
+		var cb = document.getElementById("createdbyspan");
+		cb.textContent = Array.from(document.getElementsByTagName("meta"))
+				.filter(function(a){var n=a.getAttribute("name"); return n && n.toLowerCase()==="author";})
+				.map(a=>a.getAttribute("content"))
+				.join(", ");
+		cb.after(document.createElement("br"));
+	}
+	catch(error){
+		console.error(error);
+	}
+});
+
+function GetGithubSourceHref(){
+	let h=window.location.hostname.split(".");
+	let p=window.location.pathname.split("/").filter(a=>a.length>0);
+	return "https://"+h[1]+".com/"+h[0]+"/"+p[0]+"/blob/main/"+(p[1] ?? "index.html");
+}
+if(window.location.hostname){
+	let href = GetGithubSourceHref();
+	if(href){
+		document.getElementById("viewsource").href = href;
+	}
+}
+</script>
+</html>
