@@ -31,14 +31,27 @@
 	--completeColor2: #00A1E6;
 	--redColor1: #FF0000;
 	--redColor2: #E30000;
-	--pausedColor1: white;
-	--pausedColor2: gray;
 	--greenColor1: #00FF68;
 	--greenColor2: #00A541;
 	
-	--stop1: var(--greenColor1);
-	--stop2: var(--greenColor2);
+	--pausedColor1: light-dark(gray, white);
+	--pausedColor2: light-dark(black, gray);
+	
+	--stop1: var(--pausedColor1);
+	--stop2: var(--pausedColor2);
 }
+/* @media (prefers-color-scheme: dark) {
+	:root {
+		--pausedColor1: white;
+		--pausedColor2: gray;
+	}
+}
+@media (prefers-color-scheme: light) {
+	:root {
+		--pausedColor1: gray;
+		--pausedColor2: black;
+	}
+} */
 body {
 	font-family: monospace;
 	padding: 0;
@@ -58,6 +71,7 @@ noscript {
 #interactive-area {
 	padding: 1ex;
 	font-size: larger;
+	width: fit-content;
 }
 #interactive-area > * {
 	margin-block: 1ex;
@@ -65,7 +79,7 @@ noscript {
 button {
 	font-size: inherit;
 }
-button:has(input:checked) {
+button[aria-checked="true"] {
 	filter: contrast(150%);
 	filter: contrast(150%) brightness(140%);
 }
@@ -86,9 +100,17 @@ button:has(input:checked) {
 	font-weight: bold;
 	font-variant-numeric: tabular-nums;
 	font-variant-numeric: tabular-nums slashed-zero;
-	background: linear-gradient(to bottom, var(--stop1), var(--stop2));
-	background-clip: text;
-	color: transparent;
+	color: currentColor;
+}
+@supports (background-clip: text) and (background: linear-gradient(to bottom, var(--stop1), var(--stop2))) {
+	.timestamp {
+		background: linear-gradient(to bottom, var(--stop1), var(--stop2));
+		background-clip: text;
+		color: transparent;
+	}
+}
+#currtime
+{
 	font-size: 200%;
 	white-space: pre;
 	/*will-change: content;*/
@@ -98,14 +120,43 @@ button:has(input:checked) {
 	border: 1px solid currentColor;
 	padding: 0.5ex;
 }
+#splits::before {
+	content: "Splits: ";
+}
+#splits:empty::after {
+	content: "None";
+}
 #splits>div {
 	border: 1px solid currentColor;
 	padding: 0.5ex;
+}
+@supports (display: grid) {
+	br {
+		display: none;
+	}
+	#interactive-area {
+		display: grid;
+		grid-auto-columns: auto;
+		grid-auto-rows: auto;
+		grid-template-columns: 1fr 1fr;
+		grid-gap: 2ex;
+	}
+	#currtime {
+		text-align: right;
+	}
+	#currtime, #freeze, #splits, #interactive-area>div {
+		grid-column: span 2;
+		width: auto;
+	}
+	#interactive-area > * {
+		margin: 0 !important;
+	}
 }
 </style>
 <script id="clockscript">
 let starttime = performance.now();
 function resetStartTime(){
+	document.getElementById("splits").innerHTML = "";
 	starttime = performance.now();
 }
 function formatTimeSpan(duration)
@@ -124,6 +175,40 @@ function formatTimeSpan(duration)
 		//+"\n"+duration
 		;
 }
+function split_Internal()
+{
+	var splits = document.getElementById("splits");
+	var num = splits.children.length + 1;
+	var t = document.getElementById("currtime").cloneNode(true);
+	t.id = "";
+	t.removeAttribute("id");
+	t.ariaLive = null;
+	t.removeAttribute("aria-live");
+	var d = document.createElement("div");
+	d.textContent = "Split "+num+": ";
+	d.appendChild(t);
+	splits.appendChild(d);
+}
+function split()
+{
+	var freeze = document.getElementById("freeze");
+	var fval = freeze.ariaChecked?.toString()=="true";
+	if(freeze && fval)
+	{
+		freeze.ariaChecked = !fval;
+		window.requestAnimationFrame(function(){
+			window.requestAnimationFrame(function(){
+				var fval = freeze.ariaChecked?.toString()=="true";
+				freeze.ariaChecked = !fval;
+				split_Internal();
+			});
+		});
+	}
+	else
+	{
+		split_Internal();
+	}
+}
 document.addEventListener("DOMContentLoaded",function(){
 	starttime = performance.now();
 	const FuncReturnNull = (function(){return null});
@@ -139,7 +224,7 @@ document.addEventListener("DOMContentLoaded",function(){
 			}
 			function nextTime(timestamp){
 				const now = highestResTimeGen() || timestamp;
-				if(!document.getElementById("freeze")?.checked)
+				if(document.getElementById("freeze")?.ariaChecked?.toString()!="true")
 				{
 					const currtime = now - starttime;
 					document.getElementById("currtime").textContent = formatTimeSpan(currtime);
@@ -153,21 +238,18 @@ document.addEventListener("DOMContentLoaded",function(){
 </script>
 </head>
 <body>
+<noscript>
+This page requires JavaScript
+</noscript>
 <div id="interactive-area">
 <span class="timestamp" id="currtime" aria-live="off"></span><br />
 
 <button onclick="resetStartTime()" type="button">Reset</button>
-<button onclick="split()" type="button" disabled="disabled" autocomplete="off" >Split</button><br />
-<button onclick="document.getElementById('freeze').checked=!document.getElementById('freeze').checked" autocomplete="off" ><input type="checkbox" id="freeze" style="display:none;" autocomplete="off" />Display Hold</button>
+<button onclick="split()" type="button" autocomplete="off" >Split</button><br />
+<button type="button" id="freeze" aria-labelledby="freeze" role="checkbox" aria-checked="false" onclick="this.ariaChecked=!(this.ariaChecked?.toString()=='true')" autocomplete="off">Display Hold</button>
 <br />
-Splits:
-<div id="splits">
-<div>To do: add this feature</div>
-</div>
+<div id="splits"></div>
 <br />
-<noscript>
-This page requires JavaScript
-</noscript>
 <div id="viewsourcebox" style="max-width: 40ch">
 <!-- Note: both https://iotku.pw/websplit/ and https://one.livesplit.org/ use performance.now() to keep track of time -->
 <p style="padding-inline: 1ch; text-indent: 4ch hanging;">Using the same <code>performance.now()</code> that LiveSplit One uses.</p>
