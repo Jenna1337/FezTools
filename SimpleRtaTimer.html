@@ -68,7 +68,7 @@ noscript {
 	line-height: 100vh;
 	text-align: center;
 }
-#interactive-area {
+body {
 	padding: 1ex;
 	font-size: larger;
 	width: fit-content;
@@ -78,10 +78,23 @@ noscript {
 }
 button {
 	font-size: inherit;
+	padding-block: 1.25px;
+	padding-inline: 5px;
+	border: 1.75px outset ButtonBorder;
+	border-radius: 4px;
+	background: Field;
+    color: FieldText;
 }
-button[aria-checked="true"] {
-	filter: contrast(150%);
-	filter: contrast(150%) brightness(140%);
+button:hover {
+	background: color-mix(in srgb, Field, FieldText 12%);
+}
+button:active {
+	border-style: inset;
+	background: color-mix(in srgb, Field, FieldText 7%) !important;
+}
+button[aria-pressed="true"] {
+	border-style: inset;
+	background: color-mix(in srgb, Field, FieldText 5%);
 }
 *[data-state="complete"] {
 	--stop1: var(--completeColor1);
@@ -130,6 +143,11 @@ button[aria-checked="true"] {
 	border: 1px solid currentColor;
 	padding: 0.5ex;
 }
+#splits {
+	min-height: 3lh;
+	overflow: auto;
+	max-height: calc(100vh - 4lh - 9ex - 14px);
+}
 @supports (display: grid) {
 	br {
 		display: none;
@@ -151,6 +169,21 @@ button[aria-checked="true"] {
 	#interactive-area > * {
 		margin: 0 !important;
 	}
+	body {
+		padding: 1ex;
+		font-size: larger;
+		width: fit-content;
+		min-height: calc(100vh - 2ex);
+		display: grid;
+		grid-template-rows: auto 1fr;
+	}
+	#viewsourcebox {
+		max-width: 40ch;
+		justify-content: flex-end;
+		display: flex;
+		flex-direction: column;
+	}
+
 }
 </style>
 <script id="clockscript">
@@ -188,18 +221,19 @@ function split_Internal()
 	d.textContent = "Split "+num+": ";
 	d.appendChild(t);
 	splits.appendChild(d);
+	splits.scrollTop = splits.scrollHeight;
 }
 function split()
 {
 	var freeze = document.getElementById("freeze");
-	var fval = freeze.ariaChecked?.toString()=="true";
+	var fval = freeze.ariaPressed?.toString()=="true";
 	if(freeze && fval)
 	{
-		freeze.ariaChecked = !fval;
+		freeze.ariaPressed = !fval;
 		window.requestAnimationFrame(function(){
 			window.requestAnimationFrame(function(){
-				var fval = freeze.ariaChecked?.toString()=="true";
-				freeze.ariaChecked = !fval;
+				var fval = freeze.ariaPressed?.toString()=="true";
+				freeze.ariaPressed = !fval;
 				split_Internal();
 			});
 		});
@@ -224,7 +258,7 @@ document.addEventListener("DOMContentLoaded",function(){
 			}
 			function nextTime(timestamp){
 				const now = highestResTimeGen() || timestamp;
-				if(document.getElementById("freeze")?.ariaChecked?.toString()!="true")
+				if(document.getElementById("freeze")?.ariaPressed?.toString()!="true")
 				{
 					const currtime = now - starttime;
 					document.getElementById("currtime").textContent = formatTimeSpan(currtime);
@@ -246,14 +280,14 @@ This page requires JavaScript
 
 <button onclick="resetStartTime()" type="button">Reset</button>
 <button onclick="split()" type="button" autocomplete="off" >Split</button><br />
-<button type="button" id="freeze" aria-labelledby="freeze" role="checkbox" aria-checked="false" onclick="this.ariaChecked=!(this.ariaChecked?.toString()=='true')" autocomplete="off">Display Hold</button>
+<button type="button" id="freeze" aria-labelledby="freeze" role="button" aria-pressed="false" onclick="this.ariaPressed=!(this.ariaPressed?.toString()=='true')" autocomplete="off">Display Hold</button>
 <br />
 <div id="splits"></div>
-<br />
-<div id="viewsourcebox" style="max-width: 40ch">
+</div>
+<div id="viewsourcebox">
 <!-- Note: both https://iotku.pw/websplit/ and https://one.livesplit.org/ use performance.now() to keep track of time -->
 <p style="padding-inline: 1ch; text-indent: 4ch hanging;">Using the same <code>performance.now()</code> that LiveSplit One uses.</p>
-This web app created by <span id="createdbyspan">Jenna Sloan</span>
+<p>This web app created by <span id="createdbyspan">Jenna Sloan</span>
 Last Modified: <span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezTools/blob/main/SimpleRtaTimer.html">
 View Source
@@ -267,7 +301,8 @@ View Source
 0.6 1.4 0.6s1-0.2 1.4-0.6l18.6-18.6v7.2c0 1.2 0.8 2 2 2s2-0.8
 2-2v-12c0-0.2 0-0.6-0.2-0.8z"></path>
 </svg></span>
-</a>
+</a></p>
+</div>
 </div>
 </body>
 <script>
