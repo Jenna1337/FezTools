@@ -264,12 +264,13 @@ document.addEventListener("DOMContentLoaded",function(){
 		return `M${cx},${cy}L${sx},${sy}A${radius},${radius} 0 ${largeArcFlag} 1 ${ex},${ey}z`;
 	}
 	function setHandLine(cx, cy, hand, radius, theta){
-		hand.setAttribute("transform", "rotate("+(theta+Math.PI)/(Math.PI/180)+" "+cx+" "+cy+")");
+		//hand.setAttribute("transform", "rotate("+(theta+Math.PI)/(Math.PI/180)+" "+cx+" "+cy+")");
 		//hand.style.transform = "rotate("+(theta+Math.PI)+"rad, "+cx+"px, "+cy+"px)";
 		//hand.style.transformOrigin = cx+"px "+cy+"px";
 		hand.setAttribute("x1", cx+"px");
 		hand.setAttribute("y1", cy+"px");
-		const [x2,y2] = [cx-radius,cy];//getXY(cx, cy, radius, theta);
+		//const [x2,y2] = [cx-radius,cy];
+		const [x2,y2] = getXY(cx, cy, radius, theta);
 		hand.setAttribute("x2", x2 +"px");
 		hand.setAttribute("y2", y2 +"px");
 		//hand.setAttribute("data-angle", (theta+Math.PI)%(2*Math.PI));
