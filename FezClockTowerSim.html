@@ -37,13 +37,31 @@ body {
 noscript {
 	position: absolute;
 	z-index: 9999999;
+	
 	color: white;
 	background-color: black;
+	color: CanvasText;
+	background-color: Canvas;
+	
+	font-weight: bold;
+	
+	height: 100%;
+	width: 100%;
 	height: 100vh;
 	width: 100vw;
+	
 	font-size: min(100vh, calc(100vw / 30));
 	line-height: 100vh;
 	text-align: center;
+	
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	
+	inset: 0;
+	
+	margin: 0 !important;
 }
 #clockcontainer {
 	display: flex;
@@ -465,7 +483,7 @@ function timeinput_change(timeinput, valcallback, updatelabel=true){
 		}
 		updateHashbrowns(timeinput);
 	}
-	timeinput.dataset.changing = "";
+	timeinput.dataset.changing = "no";
 }
 function creationtimeinput_change(timeinput){
 	timeinput_change(timeinput, dt=>starttime=dt);
@@ -486,6 +504,7 @@ function setHashbrownsObject(hashbrowns){
 	window.location.hash = Object.entries(hashbrowns).map(a=>a.join(hash_sep_kv)).join(hash_sep_entries)
 }
 </script>
+<p>
 <label for="timeformatselector">Display times in the format:</label>
 <select id="timeformatselector" onchange="timeformatselectorchanged(this)">
 <option value="local_time">local time</option>
@@ -498,20 +517,18 @@ function setHashbrownsObject(hashbrowns){
 TODO use js to add choices from the keys mentioned for timelabel.dataset
 to affect the outcome of the content set by formatTimeLabel
 -->
-</select><br />
+</select></p>
 
 <span for="currtime">Current time: </span>
 <span class="timestamp" id="currtime" aria-live="off"></span><br />
-
+<p>
 <label for="starttimeinput">File start time: </label>
 <input id="starttimeinput" type="number" min="0" step="1000" onchange="creationtimeinput_change(this)" />
 <label for="starttimeinput" class="timestamp timelabel"></label>
-<br />
-
-<label for="offetfromsysteminput">Adjust current time: </label>
-<input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" />
-<label for="offetfromsysteminput" class="">milliseconds ahead</label>
-<br />
+</p>
+<p>
+<label for="offetfromsysteminput">Adjust current time: <input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" /> milliseconds ahead</label>
+</p>
 
 <button onclick="resetStartTime()" type="button">Reset clocks to current time</button>
 <br />
