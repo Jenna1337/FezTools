@@ -189,7 +189,7 @@ var allworlddata = null;
 var worldloot = null;
 var mapViewer;
 function GetAllWorldData(maptree,LinkThickness,fullcube){
-	maptree = JSON.parse(JSON.stringify(maptree));
+	maptree = window.structuredClone(maptree);
 	worldmap = null;
 	allworlddata = null;
 	worldloot = null;
