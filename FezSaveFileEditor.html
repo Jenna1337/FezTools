@@ -1334,7 +1334,7 @@ var saveloadfuncs = (function(){
 			}
 		});
 		var bytearr = new Uint8Array(dataview.buffer);
-		var blob = new Blob([bytearr]);
+		var blob = new Blob([bytearr], { type: "application/octet-stream" });
 		
 		var lnk=document.createElement("a");
 		lnk.setAttribute("href", window.URL.createObjectURL(blob));
