@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>Gamepad Tester</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+	--bgcolor: #222;
+}
+body {
+	background-color: #444;
+	color: white;
+	font-family: monospace;
+}
+#gamepads>* {
+	background-color: #333;
+	padding: 1em;
+	margin: 10px 5px 0 0;
+}
+#gamepads pre {
+	white-space: pre-wrap;
+}
+
+.heading * {
+	display: inline-block;
+	background-color: var(--bgcolor);
+}
+.info {
+	background-color: var(--bgcolor);
+	margin: 1px;
+	padding: 1ex;
+}
+
+.inputs {
+	display: flex;
+	flex-wrap: wrap;
+}
+.inputs > * {
+	margin: 1px;
+}
+.axes, .buttons {
+	display: contents;
+}
+
+.svg text {
+	fill: #CCC;
+	font-family: monospace;
+}
+.axes>*, .buttons>* {
+	display: inline-block;
+	background-color: var(--bgcolor);
+	margin: inherit;
+}
+#gamepads:empty::before {
+	content: "Connect your gamepad and press any button to to start";
+}
+#running
+{
+	width: 3em;
+	width: 3ch;
+	display: inline-block;
+	height: 1lh;
+}
+</style>
+</head>
+<body>
+<main role="application" aria-labelledby="title">
+<h1 id="title">HTML5 Gamepad Test</h1>
+<div>running: <span id="running"></span></div>
+<div id="gamepads"></div>
+<template id="controllerTemplate">
+	<div class="gamepad">
+		<div class="heading info"><div data-field="index"></div> <div data-field="id"></div></div>
+		<div class="info">connected:<span data-field="connected"></span></div>
+		<div class="info">mapping:<span data-field="mapping"></span></div>
+		<div class="inputs">
+			<div class="axes"></div>
+			<div class="buttons"></div>
+		</div>
+	</div>
+</template>
+<template id="axisTemplate">
+	<svg viewBox="0 0 120 120" width="128" height="128">
+		<g transform="translate(10, 10)">
+		<circle cx="50" cy="50" r="50" fill="none" stroke="#888" stroke-width="1" />
+		<path d="M0,50H100M50,0V100" stroke="#888" stroke-width="1" />
+		</g>
+		<circle cx="0" cy="0" r="7" fill="red" class="axis" />
+		<text text-anchor="middle" fill="#CCC" x="60" y="115" font-size="16">0</text>
+	</svg>
+</template>
+<template id="buttonTemplate">
+	<svg viewBox="0 0 120 120" width="64" height="64">
+		<circle cx="60" cy="60" r="0" fill="none" fill="red" class="button" />
+		<circle cx="60" cy="60" r="50" fill="none" stroke="#888" stroke-width="3" />
+		<text class="value" font-size="32" dominant-baseline="middle" text-anchor="middle" fill="#CCC" x="60" y="60">0.00</text>
+		<text class="index" font-size="32" alignment-baseline="hanging" dominant-baseline="hanging" text-anchor="start" fill="#CCC" x="0" y="0">0</text>
+	</svg>
+</template>
+</main>
+<template id="controller-template-standard">
+	<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" height="300" viewBox="0 0 1012 530">
+		<style>
+		/* <![CDATA[ */
+			.controller text {
+				font-size: 12px;
+				font-weight: bold;
+				font-family: sans-serif;
+				text-anchor: middle;
+			}
+			.controller-button-text {
+				fill: #f22;
+			}
+			.controller-axis-text {
+				fill: #22f;
+			}
+			.controller .pressed {
+				filter: brightness(200%) contrast(200%);
+			}
+			.controller .pressed {
+			}
+			.controller .pressed text{
+				fill: #0c0;
+				stroke: none;
+			}
+		/* ]]> */
+		</style>
+		<defs>
+			<path id="controller-trigger-2" d="M292.181 487.334h33.15l-2.598-4.272c-1.703-2.8-6.13-4.879-13.977-4.879-7.846 0-12.273 2.079-13.977 4.88l-2.598 4.27z" fill="gray" stroke="#000" />
+			<path id="controller-trigger-1" d="M292.181 495.519h33.15l-2.598-4.272c-1.703-2.8-6.13-4.879-13.977-4.879-7.846 0-12.273 2.079-13.977 4.88l-2.598 4.27z" fill="gray" stroke="#000" />
+			<g id="controller-stick-base">
+				<circle class="controller-stick-back" cx="0" cy="0" r="108.396" fill="#c8c8c8" stroke="#000" stroke-width="4.5060611495" />
+				<circle class="controller-stick-front" cx="0" cy="0" r="83.05" fill="#808080" fill-opacity=".519" stroke="#000" stroke-width="4.5" />
+			</g>
+			<g id="controller-stick-top">
+				<circle class="controller-stick-stick" cx="0" cy="0" r="16" fill="#111" stroke="#000" stroke-width="0" />
+				<circle class="controller-stick-head" cx="0" cy="0" r="73" fill="#404040" fill-opacity=".519" stroke="#000" stroke-width="4.5" />
+			</g>
+			<g id="controller-pad-base">
+				<circle class="controller-pad-back" cx="0" cy="0" r="168" fill="#c8c8c8" stroke="#000" stroke-width="4.5062171189999995" />
+				<rect fill="#404040" x="-48" y="-126" height="252" width="96" rx="12.535" ry="12.535" />
+				<rect fill="#404040" x="-126" y="-48" height="96" width="252" rx="12.535" ry="12.535" />
+			</g>
+			<g id="controller-button-button">
+				<circle class="controller-button-button" cx="0" cy="0" r="37.114" fill="#c8c8c8" stroke="#454545" stroke-width="4.5066863" />
+			</g>
+			<g id="controller-dpad-button">
+				<path fill="#404040" d="M0 0l48 -48v-65.465q0 -12.535 -12.535 -12.535h-70.93q-12.535 0 -12.535 12.535v65.465z" />
+				<path fill="#c8c8c8" d="M0 -113.465l-17.049 16.196h34.098l-17.05 -16.192z" />
+			</g>
+		</defs>
+		<g class="controller" transform="translate(-280.342 20)">
+			<rect class="controller-main-plate" fill="#c8c8c8" stroke="#000" stroke-width="4.507"  x="500.59" y="72.495" height="354.62" width="573.758" rx="12.464" ry="12.464" />
+			<g class="middle-buttons">
+					<g data-buttons="8">
+					<rect class="controller-button-select" width="60.431" height="34.045" x="681.432" y="239.14" fill="#595959" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.507" rx="7.069" ry="7.069" />
+					<text class="controller-button-text" x="711.6475"  y="252.817"><tspan x="711.6475" y="252.817">buttons[8]</tspan><tspan x="711.6475" y="266.817">(select)</tspan></text>
+				</g>
+				<g data-buttons="16">
+					<circle class="controller-button-home" cx="783.8" cy="170.056" fill="#595959" stroke="#000" stroke-width="6.2172" r="35.759" />
+					<text class="controller-button-text" x="783.8"  y="172"><tspan x="783.8" y="172">buttons[9]</tspan><tspan x="783.8" y="184">(home)</tspan></text>
+				</g>
+				<g data-buttons="9">
+					<rect class="controller-button-start" width="60.431" height="34.045" x="825.041" y="239.14" fill="#595959" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.507" rx="7.069" ry="7.069" />
+					<text class="controller-button-text" x="855.2565"  y="252.817"><tspan x="855.2565" y="252.817">buttons[9]</tspan><tspan x="855.2565" y="266.817">(start)</tspan></text>
+				</g>
+			</g>
+			
+			<g class="controller-triggers triggers-left">
+				<g data-buttons="6">
+					<use class="controller-button-l2" href="#controller-trigger-2" transform="translate(-929.576 -2168.135) scale(4.5066863)" />
+					<text class="controller-button-text" x="463.173"  y="11.317"><tspan x="463.173" y="5">buttons[6]</tspan><tspan x="463.173" y="17">(L2,LT)</tspan></text>
+				</g>
+				<g data-buttons="4">
+					<use class="controller-button-l1" href="#controller-trigger-1" transform="translate(-929.576 -2168.135) scale(4.5066863)" />
+					<text class="controller-button-text" x="463.173"  y="50.317"><tspan x="463.173" y="44">buttons[4]</tspan><tspan x="463.173" y="56">(L1,LB)</tspan></text>
+				</g>
+			</g>
+			<g class="controller-triggers triggers-right">
+				<g data-buttons="7">
+					<use class="controller-button-r2" href="#controller-trigger-2" transform="translate(-277.2 -2168.135) scale(4.5066863)" />
+					<text class="controller-button-text" x="1114.174"  y="11.317"><tspan x="1114.174" y="5">buttons[7]</tspan><tspan x="1114.174" y="17">(R2,RT)</tspan></text>
+				</g>
+				<g data-buttons="5">
+					<use class="controller-button-r1" href="#controller-trigger-1" transform="translate(-277.2 -2168.135) scale(4.5066863)" />
+					<text class="controller-button-text" x="1113.174"  y="50.317"><tspan x="1113.174" y="44">buttons[5]</tspan><tspan x="1113.174" y="56">(R1,RB)</tspan></text>
+				</g>
+			</g>
+			<g class="controller-pad controller-dpad">
+				<use href="#controller-pad-base" x="462.223" y="234.255" />
+				<!-- TODO add each button shape and corresponding label to their own group, with the data-buttons attribute set to the buttons key -->
+				<g class="dpad-up">
+				</g>
+				<g data-buttons="12">
+					<use href="#controller-dpad-button" x="462.223" y="234.255" />
+					<text class="controller-button-text" x="464.31" y="162.825">buttons[12]</text>
+				</g>
+				<g data-buttons="13">
+					<use href="#controller-dpad-button" x="462.223" y="234.255" transform="rotate(180 462.223 234.255)" />
+					<text class="controller-button-text" x="463.81" y="314.317">buttons[13]</text>
+				</g>
+				<g data-buttons="14">
+					<use href="#controller-dpad-button" x="462.223" y="234.255" transform="rotate(270 462.223 234.255)" />
+					<text class="controller-button-text" x="402.11" y="237.804">buttons[14]</text>
+				</g>
+				<g data-buttons="15">
+					<use href="#controller-dpad-button" x="462.223" y="234.255" transform="rotate(90 462.223 234.255)" />
+					<text class="controller-button-text" x="523.31" y="238.317">buttons[15]</text>
+				</g>
+			</g>
+			
+			<g class="controller-pad controller-bpad">
+				<use href="#controller-pad-base" x="1112.527" y="234.255" />
+				<g data-buttons="0">
+					<use href="#controller-button-button" x="1110.528" y="316.374" />
+					<text class="controller-button-text" x="1111.862" y="320.404">buttons[0]</text>
+				</g>
+				<g data-buttons="1">
+					<use href="#controller-button-button" x="1190.352" y="236.55" />
+					<text class="controller-button-text" x="1192.415" y="239.152">buttons[1]</text>
+				</g>
+				<g data-buttons="2">
+					<use href="#controller-button-button" x="1030.703" y="236.55" />
+					<text class="controller-button-text" x="1030.177" y="239.152">buttons[2]</text>
+				</g>
+				<g data-buttons="3">
+					<use href="#controller-button-button" x="1110.528" y="156.725" />
+					<text class="controller-button-text" x="1108.796" y="159.826">buttons[3]</text>
+				</g>
+			</g>
+			
+			<g class="controller-stick-group" transform="translate(0 10)">
+				<g class="controller-stick stick-left">
+					<use href="#controller-stick-base" x="627.995" y="382.384" />
+					<text class="controller-axis-text" x="531.134"  y="382.384" style="writing-mode: sideways-rl;">←axes[1]→</text>
+					<text class="controller-axis-text" x="627.995"  y="480"><tspan>←</tspan>axes[0]<tspan>→</tspan></text>
+					<g data-buttons="10">
+						<use href="#controller-stick-top" x="627.995" y="382.384" data-axes="Y:1,X:0" />
+						<text class="controller-button-text" x="626.501"  y="377.569">buttons[10]<tspan x="626.501" y="392.569">(L3,LS,press)</tspan></text>
+					</g>
+				</g>
+				<g class="controller-stick stick-right">
+					<use href="#controller-stick-base" x="943.758" y="382.384" />
+					<text class="controller-axis-text" x="1034.629" y="382.384" style="writing-mode: sideways-rl;">←axes[3]→</text>
+					<text class="controller-axis-text" x="943.758"  y="480">←axes[2]→</text>
+						<g data-buttons="11">
+						<use href="#controller-stick-top" x="943.758" y="382.384" data-axes="Y:3,X:2" />
+						<text class="controller-button-text" x="945.31"   y="378.825">buttons[11]<tspan x="945.501" y="392.569">(R3,RS,press)</tspan></text>
+					</g>
+				</g>
+			</g>
+			<text x="784.342"  y="31.708" fill="currentColor" font-family="Arial" font-size="32" font-weight="700" style="text-align:center;line-height:125%;" text-anchor="middle"><tspan x="784.342" y="31.708">STANDARD GAMEPAD</tspan></text>
+		</g>
+	</svg>
+</template>
+</body>
+<script>
+
+const runningElem = document.querySelector('#running');
+const gamepadsElem = document.querySelector('#gamepads');
+const gamepadsByIndex = {};
+
+function addGamepad(gamepad) {
+	console.log('add:', gamepad.index);
+	const elem = document.getElementById('controllerTemplate').content.cloneNode(true).querySelector(".gamepad");
+	const visualizerElem = document.getElementById('controller-template-standard').content.cloneNode(true).querySelector("svg");
+
+	const axesElem = elem.querySelector('.axes');
+	const buttonsElem = elem.querySelector('.buttons');
+	
+	const axes = [];
+	for (let ndx = 0; ndx < gamepad.axes.length; ndx += 2) {
+		const div = document.getElementById('axisTemplate').content.cloneNode(true);
+		
+		axes.push({
+			axis: div.querySelector('.axis'),
+			value: div.querySelector('text'),
+		});
+		axesElem.appendChild(div);
+	}
+
+	const buttons = [];
+	for (let ndx = 0; ndx < gamepad.buttons.length; ++ndx) {
+		const div = document.getElementById('buttonTemplate').content.cloneNode(true);
+		div.querySelector('.index').textContent = ndx;
+		const circle = div.querySelector('.button');
+		const value = div.querySelector('.value');
+		buttons.push({
+			circle: circle,
+			value: value,
+		});
+		buttonsElem.appendChild(div);
+	}
+
+	gamepadsByIndex[gamepad.index] = {
+		gamepad,
+		elem,
+		axes,
+		buttons,
+		otherKeys: elem.querySelectorAll(".info>*"),
+		visualizerElem,
+		visualizerElemButtons: visualizerElem.querySelectorAll("[data-buttons]"),
+		visualizerElemAxes: visualizerElem.querySelectorAll("[data-axes]")
+	};
+	gamepadsElem.appendChild(elem);
+	gamepadsElem.appendChild(visualizerElem);
+}
+
+function removeGamepad(gamepad) {
+	const info = gamepadsByIndex[gamepad.index];
+	if (info) {
+		delete gamepadsByIndex[gamepad.index];
+		info.elem.parentElement.removeChild(info.elem);
+		info.visualizerElem.parentElement.removeChild(info.visualizerElem);
+	}
+}
+
+function addGamepadIfNew(gamepad) {
+	const info = gamepadsByIndex[gamepad.index];
+	if (!info) {
+		addGamepad(gamepad);
+	} else {
+		info.gamepad = gamepad;
+	}
+}
+
+const t = String.fromCharCode(0x26AA);
+const f = String.fromCharCode(0x26AB);
+function onOff(v) {
+	return v ? t : f;
+}
+
+const keys = ['index', 'id', 'connected', 'mapping'];
+const axisTextPrec = 3;
+const axisTextLenth = axisTextPrec + 3;//One for sign, one for whole number, and one for decimal point
+const axisTextPadChar = "\xA0";//nbsp
+const axisTFPrec = 6;
+const axesStickAngleMappedVector = [];
+let axesCirclePathVal = "";
+function processController(info) {
+	const {elem, gamepad, axes, buttons, otherKeys, visualizerElem, visualizerElemButtons, visualizerElemAxes} = info;
+	const lines = [`gamepad	: ${gamepad.index}`];
+	for (const key of otherKeys) {
+		const val = gamepad[key.dataset.field];
+		//Note: checking the text before setting the text avoids a memory leak
+		if(val !== undefined && String(val) !== key.textContent)
+		{
+			key.textContent = val;
+			break;
+		}
+	}
+	axes.forEach(({axis, value}, ndx) => {
+		const viewbox = axis.closest("svg").viewBox.animVal;
+		const cx = (viewbox.x + viewbox.width)/2;
+		const cy = (viewbox.y + viewbox.height)/2;
+		const off = ndx * 2;
+		axis.setAttribute('cx', gamepad.axes[off] * 50 + cx);
+		axis.setAttribute('cy', gamepad.axes[off + 1] * 50 + cy);
+		const txtToSet = gamepad.axes[off].toFixed(axisTextPrec).padStart(axisTextLenth, axisTextPadChar) + "," + gamepad.axes[off + 1].toFixed(axisTextPrec).padStart(axisTextLenth, axisTextPadChar);
+		//Note: checking the text before setting the text avoids a memory leak
+		if(txtToSet != value.textContent)
+		{
+			value.textContent = txtToSet;
+		}
+	});
+	buttons.forEach(({circle, value}, ndx) => {
+		const button = gamepad.buttons[ndx];
+		const txtToSet = button.value.toFixed(2);
+		//Note: checking the text before setting the text avoids a memory leak
+		if(txtToSet != value.textContent)
+		{
+			circle.setAttribute('r', button.value * 50);
+			circle.setAttribute('fill', button.pressed ? 'red' : 'gray');
+			value.textContent = txtToSet;
+		}
+	});
+	visualizerElemButtons.forEach(b=>{
+		const gamepadbutton = gamepad.buttons[Number(b.dataset.buttons)];
+		if(gamepadbutton){
+			b.classList.toggle("pressed", gamepadbutton.pressed);
+			b.dataset.value = gamepadbutton.value;
+		}
+	});
+	visualizerElemAxes.forEach(axe=>{
+		const scale = 69;
+		const axes = Object.fromEntries(axe.dataset.axes.split(",").map(v=>v.split(":",2)));
+		let valueX = gamepad.axes[Number(axes.X)] ?? 0;
+		let valueY = gamepad.axes[Number(axes.Y)] ?? 0;
+		let angle = Math.floor((Math.atan2(valueY, valueX)*180/Math.PI+360)%360);
+		let magnitude = Math.sqrt(valueX**2 + valueY**2);
+		axesStickAngleMappedVector[angle] ??= {"magnitude": 0, "coords":"0 0"};
+		if(magnitude > axesStickAngleMappedVector[angle].magnitude)
+		{
+			axesStickAngleMappedVector[angle].magnitude = magnitude;
+			const fmod = 60;
+			axesStickAngleMappedVector[angle].coords = (valueX*scale+fmod).toFixed(axisTFPrec) + " " + (valueY*scale+fmod).toFixed(axisTFPrec);
+			axesCirclePathVal = "M0 0L"+axesStickAngleMappedVector.filter(a=>a.coords).map(a=>a.coords).join("L")+"z";
+		}
+		axe.setAttribute("transform", "translate("+valueX*scale+" "+valueY*scale+")");
+		axe.dataset.angle=angle;
+		//axe.dataset.valueX = valueX;
+		//axe.dataset.valueY = valueY;
+	});
+}
+
+function addNewPads() {
+	const gamepads = navigator.getGamepads();
+	for (let i = 0; i < gamepads.length; i++) {
+		const gamepad = gamepads[i]
+		if (gamepad) {
+			addGamepadIfNew(gamepad);
+		}
+	}
+}
+
+window.addEventListener("gamepadconnected", (event)=>addGamepadIfNew(event.gamepad));
+window.addEventListener("gamepaddisconnected", (event)=>removeGamepad(event.gamepad));
+
+function process() {
+	runningElem.textContent = Math.floor((performance.now() / 10) % 100).toString().padStart(2, '0');
+	addNewPads();	// some browsers add by polling, others by event
+
+	for(var i in gamepadsByIndex){
+		processController(gamepadsByIndex[i]);
+	}
+	requestAnimationFrame(process);
+}
+requestAnimationFrame(process);
+
+</script>
+</html>
