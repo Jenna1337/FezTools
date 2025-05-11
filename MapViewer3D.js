@@ -139,8 +139,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			};
 			
 			searchInputInputElem.id = "searchInputInputElem";
+			searchInputInputElem.setAttribute("placeholder", "Type here to search...");
 			searchInputInputLabelElem.setAttribute("for", searchInputInputElem.id);
-			searchInputInputLabelElem.textContent = "Search box:";
+			searchInputInputLabelElem.textContent = "Search box: ";
 			searchInputButtonElem.setAttribute("type", "button");
 			searchInputButtonElem.textContent = "Search";
 			
@@ -154,6 +155,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 
 			searchinputbox.appendChild(searchInputInputLabelElem);
 			searchinputbox.appendChild(searchInputInputElem);
+			searchinputbox.append(" ");
 			searchinputbox.appendChild(searchInputButtonElem);
 		}
 		

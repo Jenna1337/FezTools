@@ -162,6 +162,11 @@
 	padding-inline-start: calc(var(--closebutton-size) + 1ex);
 	position: absolute;
 }
+#searchinputbox {
+	line-height: var(--searchbox-inputheight);
+	padding-inline: 3ex;
+	background-color: #111C;
+}
 #searchbox {
 	z-index: 99999;
 	height: var(--searchbox-inputheight);
