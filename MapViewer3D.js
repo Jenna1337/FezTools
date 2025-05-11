@@ -63,19 +63,110 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	var maplegend;
 	var mapsettings;
 	
-	var mapdebuginfo = document.createElement("div");
+	const mapdebuginfo = document.createElement("div");
 	mapdebuginfo.id = "mapdebuginfo";
 	mapcontainer.appendChild(mapdebuginfo);
 	
-	var nodeinfobox = document.createElement("div");
+	const nodeinfobox = document.createElement("div");
 	nodeinfobox.id="nodeinfobox";
 	mapcontainer.appendChild(nodeinfobox);
 	
-	var zoomMin = 0.01;
-	var zoomMax = 100;
 	
-	var pitchMin = -90;
-	var pitchMax = 0;
+	//Make search box
+	{
+		const searchbox = document.createElement("div");
+		searchbox.id="searchbox";
+		mapcontainer.appendChild(searchbox);
+		
+		const searchresultsbox = document.createElement("div");
+		searchresultsbox.classList.add("hidden");
+		const searchresultstarget = document.createElement("div");
+		{
+			searchresultsbox.id="searchresultsbox";
+			searchresultsbox.ariaLabel = "Search Results";
+			
+			const hidesearchresultsboxbutton = document.createElement("a");
+			hidesearchresultsboxbutton.href = "#";
+			hidesearchresultsboxbutton.id = "hidesearchresultsboxbutton";
+			hidesearchresultsboxbutton.textContent = "X";
+			hidesearchresultsboxbutton.classList.add("closebutton");
+			hidesearchresultsboxbutton.onclick = function(){
+				searchresultsbox.classList.add("hidden");
+			};
+			hidesearchresultsboxbutton.ariaLabel = "Close Search Results";
+			
+			const searchresultslabel = document.createElement("span");
+			searchresultslabel.classList.add("resultsboxlabel");
+			searchresultslabel.textContent = "Search Results";
+			
+			searchresultsbox.appendChild(searchresultslabel);
+			searchresultsbox.appendChild(hidesearchresultsboxbutton);
+			searchresultsbox.appendChild(searchresultstarget);
+		}
+		const searchinputbox = document.createElement("div");
+		{
+			searchinputbox.id="searchinputbox";
+			const searchInputInputLabelElem = document.createElement("label");
+			const searchInputInputElem = document.createElement("input");
+			const searchInputButtonElem = document.createElement("button");
+			
+			const doSearch = (event)=>{
+				searchresultsbox.classList.remove("hidden");
+				let filter = searchInputInputElem.value;
+				filter = filter.replaceAll("=",":");
+				function valueMapFunc(oldVal){
+					let oldObj = JSON.parse(oldVal);
+					delete oldObj.Connections;
+					delete oldObj.Entrances;
+					delete oldObj.BaseElement;
+					return JSON.stringify(oldObj);
+				}
+				const matchingElems = [...mapnodes.querySelectorAll(".nodebox")]
+							.filter(a=>{
+								const val = valueMapFunc(a.dataset.allLevelInfoData);
+								try{
+									return val.replaceAll('"', "").match(new RegExp(filter, "i"));
+								}catch(e){
+									return val.includes(filter);
+								}
+							});
+				//TODO display useful results and highlight the matching nodes
+				console.log(event);
+				console.log(matchingElems);
+				searchresultstarget.style.whiteSpace = "pre-wrap";
+				searchresultstarget.textContent = matchingElems.map(a=>valueMapFunc(a.dataset.allLevelInfoData)).join("\n\n");
+				return false;
+			};
+			
+			searchInputInputElem.id = "searchInputInputElem";
+			searchInputInputLabelElem.setAttribute("for", searchInputInputElem.id);
+			searchInputInputLabelElem.textContent = "Search box:";
+			searchInputButtonElem.setAttribute("type", "button");
+			searchInputButtonElem.textContent = "Search";
+			
+			searchInputButtonElem.addEventListener("click", doSearch);
+			searchInputInputElem.addEventListener("input", doSearch);
+			searchInputInputElem.addEventListener("keydown", (event) => {
+				if (event.key === 'Enter') {
+					doSearch(event);
+				}
+			});
+
+			searchinputbox.appendChild(searchInputInputLabelElem);
+			searchinputbox.appendChild(searchInputInputElem);
+			searchinputbox.appendChild(searchInputButtonElem);
+		}
+		
+		searchbox.appendChild(searchinputbox);
+		searchbox.appendChild(searchresultsbox);
+		mapcontainer.appendChild(searchbox);
+	}
+	
+	const zoomMin = 0.01;
+	const zoomMax = 100;
+	
+	const pitchMin = -90;
+	const pitchMax = 0;
 	
 	var zoom = 0.5;
 	var yaw = 45;
@@ -119,19 +210,17 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	var settings;
 	
 	var hidenodeinfoboxbutton = document.createElement("a");
-	var hidenodeinfoboxbuttonspacer = document.createElement("span");
 	{
-		hidenodeinfoboxbuttonspacer.textContent = hidenodeinfoboxbutton.textContent = "X";//Note: not using Unicode Cross Mark character "\u274C\uFE0E" since some fonts might not support it.
+		hidenodeinfoboxbutton.textContent = "X";//Note: not using Unicode Cross Mark character "\u274C\uFE0E" since some fonts might not support it.
 		hidenodeinfoboxbutton.href = "#";
-		hidenodeinfoboxbuttonspacer.className = hidenodeinfoboxbutton.className = "hidenodeinfoboxbuttoncontainer";
+		hidenodeinfoboxbutton.className = "closebutton";
+		hidenodeinfoboxbutton.href = "#";
 		hidenodeinfoboxbutton.id = "hidenodeinfoboxbutton";
 		hidenodeinfoboxbutton.onclick = function(){
 			nodeinfobox.classList.add("hidden");
 		};
 		hidenodeinfoboxbutton.ariaLabel = "Close Node Info";
 		nodeinfobox.ariaLabel = "Node Info";
-		hidenodeinfoboxbuttonspacer.role = "none";
-		hidenodeinfoboxbuttonspacer.style.visibility = "hidden";
 	}
 	
 	function focusOnNode(node){
@@ -231,7 +320,6 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				}));
 		nodeinfobox.innerHTML = "";
 		nodeinfobox.appendChild(hidenodeinfoboxbutton);
-		nodeinfobox.appendChild(hidenodeinfoboxbuttonspacer);
 		nodeinfobox.appendChild(MakeCollapsible(nodedata));
 		//nodeinfobox.textContent = JSON.stringify(nodedata,null," ");
 		mapdebuginfo.textContent = JSON.stringify(getDebugInfo(),null," ");

@@ -1,4 +1,9 @@
-
+:root {
+	--searchbox-inputheight: 2lh;
+	--closebutton-padding: 1ex;
+	--closebutton-font-scale: 1.2;
+	--closebutton-size: calc(calc(1lh + 2 * var(--closebutton-padding)) * var(--closebutton-font-scale));
+}
 #mapcontainer {
 	transform-style: flat;
 	overflow: hidden;
@@ -126,31 +131,40 @@
 	/*top: 1lh;*/
 	left: 0;
 }
-#nodeinfobox .hidenodeinfoboxbuttoncontainer {
-	font-size: larger;
+.closebutton {
+	font-size: calc(var(--closebutton-font-scale) * 1em);
 	font-weight: bold;
-	padding: 1ex;
+	padding: var(--closebutton-padding);
 	display: inline-block;
 	color: white;
 	text-decoration: none;
 	/* border: 1px solid red;*/
 	width: 1lh;
 	text-align: center;
-}
-#nodeinfobox #hidenodeinfoboxbutton {
 	background-color: #A00;
 	background-color: #F00A;
 	opacity: 0.9;
 	position: fixed;
 	z-index: inherit;
 }
-#nodeinfobox #hidenodeinfoboxbutton:hover {
+.closebutton:hover {
 	background-color: red;
 	background-color: #F00D;
 }
-#nodeinfobox #hidenodeinfoboxbutton:active {
+.closebutton:active {
 	background-color: #F33;
 	background-color: #F33D;
+}
+.closebutton+* {
+	padding-block-start: var(--closebutton-size);
+}
+.resultsboxlabel {
+	padding-inline-start: calc(var(--closebutton-size) + 1ex);
+	position: absolute;
+}
+#searchbox {
+	z-index: 99999;
+	height: var(--searchbox-inputheight);
 }
 .hidden {
 	display: none !important;
@@ -178,9 +192,10 @@
 	right: 40ch;
 	right: calc(36ch + 2ex + 10px);
 	right: calc(36ch + 2ex + 6px + 2ch);
+	top: var(--searchbox-inputheight);
 }
 @media (min-width: 1000px) {
-	#mapdebuginfo, #maplegend {
+	#mapdebuginfo, #maplegend, #searchbox {
 		left: 20em;
 	}
 }
@@ -193,7 +208,7 @@
 #mapdebuginfo:has(~#nodeinfobox.hidden){
 	left: 0;
 }
-#nodeinfobox.hidden~#maplegend{
+#nodeinfobox.hidden~#maplegend, #nodeinfobox.hidden~#searchbox{
 	left: 0;
 }
 #maplinks {

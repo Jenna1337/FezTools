@@ -43,7 +43,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
 		if(fpsconttopleftelemname!=null){
 			let fpsconttopleftelem = document.getElementById(fpsconttopleftelemname);
 			if(fpsconttopleftelem){
-				fpscont.style.top = window.getComputedStyle(fpsconttopleftelem).height;
+				const compStyle = window.getComputedStyle(fpsconttopleftelem)
+				fpscont.style.top = Number(compStyle.height.toString().replace("px","")) + Number(compStyle.top.toString().replace("px","")) + "px";
 				fpscont.style.left = window.getComputedStyle(fpsconttopleftelem).left;
 			}
 		}
