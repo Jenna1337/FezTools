@@ -25,12 +25,6 @@ noscript {
 	left: 20em;
 	background-color: #111C;
 }
-#fpscounter2 {
-	display: none !important;
-	canvas {
-		width: 300px;
-	}
-}
 
 :root {
 	--searchbox-inputheight: 2lh;

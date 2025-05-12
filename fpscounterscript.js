@@ -2,8 +2,6 @@ var fpscountersetactive = null;
 var fpscountergetactive = null;
 var fpsconttopleftelemname;
 document.addEventListener("DOMContentLoaded", ()=>{
-	console.warn("fpscounterscript.js is deprecated; please use fpscounter2.js instead.");
-	
 	let lastfpstime = 0;
 	let lasttimedifflog = [];
 	const fpscounter = document.getElementById("fpscounter");
