@@ -133,15 +133,23 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 									return val.includes(filter);
 								}
 							});
+				searchresultstarget.innerHTML = "";
 				matchingElems.forEach(a => {
 					a.classList.add("highlighted");
 					const val = valueMapFunc(a.dataset.allLevelInfoData);
+					const resultElem = document.createElement("a");
+					resultElem.setAttribute("href", "#");
+					resultElem.addEventListener("click", () => focusOnNode(a));
 					
+					//TODO display useful results
+					resultElem.textContent = valueMapFunc(a.dataset.allLevelInfoData);
+					
+					searchresultstarget.appendChild(resultElem);
+					searchresultstarget.appendChild(document.createElement("br"));
+					searchresultstarget.appendChild(document.createElement("br"));
 				});
-				//TODO display useful results and highlight the matching nodes
 				console.log(event);
 				console.log(matchingElems);
-				searchresultstarget.textContent = matchingElems.map(a=>valueMapFunc(a.dataset.allLevelInfoData,2)).join("\n\n");
 				return false;
 			};
 			
@@ -1042,24 +1050,18 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	}
 	mapcontainer.appendChild(mapsettings);
 	
-	mapsettings.addEventListener("pointermove",(event)=>{
+	const stopProp = (event)=>{
 		event.stopPropagation();
-	});
-	nodeinfobox.addEventListener("pointermove",(event)=>{
-		event.stopPropagation();
-	});
-	mapsettings.addEventListener("wheel",(event)=>{
-		event.stopPropagation();
-	});
-	nodeinfobox.addEventListener("wheel",(event)=>{
-		event.stopPropagation();
-	});
-	mapsettings.addEventListener("contextmenu",(event)=>{
-		event.stopPropagation();
-	});
-	nodeinfobox.addEventListener("contextmenu",(event)=>{
-		event.stopPropagation();
-	});
+	};
+	mapsettings.addEventListener("pointermove",stopProp);
+	nodeinfobox.addEventListener("pointermove",stopProp);
+	searchbox.addEventListener("pointermove",stopProp);
+	mapsettings.addEventListener("wheel",stopProp);
+	nodeinfobox.addEventListener("wheel",stopProp);
+	searchbox.addEventListener("wheel",stopProp);
+	mapsettings.addEventListener("contextmenu",stopProp);
+	nodeinfobox.addEventListener("contextmenu",stopProp);
+	searchbox.addEventListener("contextmenu",stopProp);
 	
 	//hide/collapse stuff if on mobile or if the screen is small
 	if(navigator.userAgent.match(/Mobile/i) || !window.matchMedia("(min-width: 1000px)").matches){

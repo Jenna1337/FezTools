@@ -27,7 +27,7 @@ noscript {
 	z-index: 10000;
 	position: absolute;
 	top: 1lh;
-	left: 20em;
+	left: var(--infobox-width);
 	background-color: var(--debuginfobgcolor);
 	.fpscounter {
 		fill: white;
@@ -56,6 +56,8 @@ noscript {
 	--outlinesize-hover-scale: 2.5;
 	--debuginfobgcolor: #111C;
 	--boxbgcolor: #000E;
+	--infobox-width: 20em;
+	--viewsourcebox-width: 40ch;
 }
 
 #mapcontainer {
@@ -170,7 +172,7 @@ noscript {
 	color: white;
 	height: 100%;
 	overflow: scroll;
-	width: 20em;
+	width: var(--infobox-width);
 	font-size: 1em;
 	/*top: 1lh;*/
 	left: 0;
@@ -214,10 +216,16 @@ noscript {
 	height: var(--searchbox-inputheight);
 	.searchresults {
 		white-space: pre-wrap;
-		max-width: 100dvw;
+		max-width: calc(100dvw - var(--infobox-width) - var(--viewsourcebox-width));
 		width: max-content;
+		width: 30em;
 		overflow: auto;
 		max-height: calc(100dvh - var(--searchbox-inputheight));
+		background-color: var(--boxbgcolor);
+		a {
+			text-decoration: none;
+			color: white;
+		}
 	}
 }
 .hidden {
@@ -248,7 +256,7 @@ noscript {
 }
 @media (min-width: 1000px) {
 	#mapdebuginfo, #maplegend, #searchbox {
-		left: 20em;
+		left: var(--infobox-width);
 	}
 }
 
@@ -420,6 +428,7 @@ noscript {
 }
 
 #viewsourcebox {
+	max-width: var(--viewsourcebox-width);
 	position: absolute;
 	bottom: 0;
 	right: 0;
