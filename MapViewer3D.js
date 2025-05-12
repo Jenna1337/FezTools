@@ -116,12 +116,12 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				searchresultsbox.classList.remove("hidden");
 				let filter = searchInputInputElem.value;
 				filter = filter.replaceAll("=",":");
-				function valueMapFunc(oldVal){
+				function valueMapFunc(oldVal, indent=null){
 					let oldObj = JSON.parse(oldVal);
 					delete oldObj.Connections;
 					delete oldObj.Entrances;
 					delete oldObj.BaseElement;
-					return JSON.stringify(oldObj);
+					return JSON.stringify(oldObj,null,indent);
 				}
 				[...mapnodes.querySelectorAll(".nodebox.highlighted")].forEach(a=>a.classList.remove("highlighted"));
 				const matchingElems = [...mapnodes.querySelectorAll(".nodebox")]
@@ -141,7 +141,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				//TODO display useful results and highlight the matching nodes
 				console.log(event);
 				console.log(matchingElems);
-				searchresultstarget.textContent = matchingElems.map(a=>valueMapFunc(a.dataset.allLevelInfoData)).join("\n\n");
+				searchresultstarget.textContent = matchingElems.map(a=>valueMapFunc(a.dataset.allLevelInfoData,2)).join("\n\n");
 				return false;
 			};
 			

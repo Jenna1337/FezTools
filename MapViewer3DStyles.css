@@ -28,7 +28,7 @@ noscript {
 	position: absolute;
 	top: 1lh;
 	left: 20em;
-	background-color: #111C;
+	background-color: var(--debuginfobgcolor);
 	.fpscounter {
 		fill: white;
 		white-space: pre;
@@ -54,6 +54,8 @@ noscript {
 	--closebutton-font-scale: 1.2;
 	--closebutton-size: calc(calc(1lh + 2 * var(--closebutton-padding)) * var(--closebutton-font-scale));
 	--outlinesize-hover-scale: 2.5;
+	--debuginfobgcolor: #111C;
+	--boxbgcolor: #000E;
 }
 
 #mapcontainer {
@@ -63,11 +65,7 @@ noscript {
 	background-color: black;
 	color: white;
 	height: 100vh;
-	height: -webkit-fill-available;
-	height: stretch;
 	width: 100vw;
-	width: -webkit-fill-available;
-	width: stretch;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -124,7 +122,6 @@ noscript {
 	top: 0;
 	left: 0;
 	transform-origin: center center;
-	outline: 2px solid white;
 	outline: var(--outlinesize) solid white;
 	pointer-events: auto;
 	pointer-events: all;
@@ -141,10 +138,8 @@ noscript {
 	}
 }
 .nodebox.selected .mapnode{
-	outline: 3.5px solid white;
 	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
 	outline-width: calc(calc(var(--outlinesize-hover) * 0.6 + var(--outlinesize) * 0.4) * 1.5);
-	outline-style: double;
 	outline-style: solid;
 }
 .animations {
@@ -154,13 +149,9 @@ noscript {
 	}
 }
 .mapnode:hover {
-	outline: 5px solid gold;
 	outline: var(--outlinesize-hover) solid gold;
 }
 .nodebox.highlighted {
-	outline: 5px solid gold;
-	outline: var(--outlinesize-hover) solid #0078D7;
-	outline: var(--outlinesize-hover) solid highlight;
 	outline: calc(var(--outlinesize-hover) + var(--outlinesize)) solid highlight;
 }
 .nodebox {
@@ -175,8 +166,7 @@ noscript {
 #nodeinfobox {
 	white-space: pre;
 	z-index: 1000;
-	background-color: black;
-	background-color: #000E;
+	background-color: var(--boxbgcolor);
 	color: white;
 	height: 100%;
 	overflow: scroll;
@@ -186,6 +176,7 @@ noscript {
 	left: 0;
 }
 .closebutton {
+	--closebutton-basecolor: red;
 	font-size: calc(var(--closebutton-font-scale) * 1em);
 	font-weight: bold;
 	padding: var(--closebutton-padding);
@@ -195,19 +186,16 @@ noscript {
 	/* border: 1px solid red;*/
 	width: 1lh;
 	text-align: center;
-	background-color: #A00;
-	background-color: #F00A;
+	background-color: color-mix(in srgb, var(--closebutton-basecolor), transparent 33.5%);
 	opacity: 0.9;
 	position: fixed;
 	z-index: inherit;
 }
 .closebutton:hover {
-	background-color: red;
-	background-color: #F00D;
+	background-color: color-mix(in srgb, var(--closebutton-basecolor), transparent 13.5%);
 }
 .closebutton:active {
-	background-color: #F33;
-	background-color: #F33D;
+	background-color: color-mix(in srgb, color-mix(in srgb, var(--closebutton-basecolor), white 20%), transparent 13.5%);
 }
 .closebutton+* {
 	padding-block-start: var(--closebutton-size);
@@ -224,8 +212,12 @@ noscript {
 #searchbox {
 	z-index: 99999;
 	height: var(--searchbox-inputheight);
-	.searchresultsbox {
+	.searchresults {
 		white-space: pre-wrap;
+		max-width: 100dvw;
+		width: max-content;
+		overflow: auto;
+		max-height: calc(100dvh - var(--searchbox-inputheight));
 	}
 }
 .hidden {
@@ -234,8 +226,7 @@ noscript {
 }
 #maplegend {
 	z-index: 100;
-	background-color: black;
-	background-color: #000E;
+	background-color: var(--boxbgcolor);
 	color: white;
 	bottom: 0;
 	left: 0;
@@ -247,8 +238,7 @@ noscript {
 }
 #mapdebuginfo {
 	z-index: 10000;
-	background-color: black;
-	background-color: #111C;
+	background-color: var(--debuginfobgcolor);
 	color: white;
 	left: 0;
 	right: 40ch;
@@ -281,8 +271,7 @@ noscript {
 	top: 0;
 	right: 0;
 	text-align: center;
-	background-color: black;
-	background-color: #000E;
+	background-color: var(--boxbgcolor);
 	padding: 1ex;
 	border: 1px solid white;
 	max-height: calc(100% - 3lh - 2ex - 2px);
@@ -317,9 +306,6 @@ noscript {
 	cursor: crosshair;
 }
 .maplink *{
-	background-color: white;
-	background-color: gray;
-	background-color: grey;
 	background-color: #7777;
 	/*Note: links are semitransparent so you can see other links crossing and layered
 			beneath the above links, and the opacity property doesn't do this*/
@@ -334,7 +320,6 @@ noscript {
 	left: 50px;
 	transform-origin: top left;
 	image-rendering: pixelated;
-	image-rendering: -webkit-optimize-contrast;
 	image-rendering: crisp-edges;
 	display: flex;
 	flex-direction: column;
@@ -351,14 +336,9 @@ noscript {
 	background-color: white;
 }
 .maplink.mapshortcutlink * {
-	background-color: red;
-	background-color: darkred;
-	background-color: #9007;
-	/*background-color: #d007;*/
 	background-color: hsla(var(--shortcutlinkhue), 100%, 30%, 45%);
 }
 .maplink.mapshortcutlink.selected * {
-	background-color: red;
 	background-color: hsla(var(--shortcutlinkhue), 100%, 50%, 100%);
 }
 
@@ -367,8 +347,7 @@ noscript {
 	bottom: 0;
 	right: 0;
 	color: white;
-	background-color: black;
-	background-color: #000E;
+	background-color: (--boxbgcolor);
 	border: 1px solid white;
 	border-radius: 4px;
 	line-height: 1;
@@ -445,8 +424,7 @@ noscript {
 	bottom: 0;
 	right: 0;
 	color: white;
-	background-color: black;
-	background-color: #000E;
+	background-color: var(--boxbgcolor);
 	padding: 2px;
 	border: 1px solid white;
 	border-radius: 4px;
