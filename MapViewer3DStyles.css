@@ -15,15 +15,37 @@ noscript {
 	font-size: min(100vh, calc(100vw / 30));
 	line-height: 100vh;
 	text-align: center;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	inset: 0;
 }
 
-#fpscountercontainer, #fpscounter2
+#fpscountercontainer
 {
 	z-index: 10000;
 	position: absolute;
 	top: 1lh;
 	left: 20em;
 	background-color: #111C;
+	.fpscounter {
+		fill: white;
+		white-space: pre;
+		dominant-baseline: hanging;
+	}
+	.fpschart {
+		stroke: blue;
+		stroke-width: 1;
+		opacity: 0.9;
+		fill: none;
+	}
+	.fpschartavg {
+		stroke: red;
+		stroke-width: 1;
+		opacity: 0.3;
+		fill: none;
+	}
 }
 
 :root {
@@ -202,6 +224,9 @@ noscript {
 #searchbox {
 	z-index: 99999;
 	height: var(--searchbox-inputheight);
+	.searchresultsbox {
+		white-space: pre-wrap;
+	}
 }
 .hidden {
 	display: none !important;
@@ -371,58 +396,43 @@ noscript {
 		transition-timing-function: linear;
 		color: #DDD;
 	}
-	#panrotationtogglebutton {
-		color: cyan;
-		line-height: 1;
+	.panrotationtogglebutton {
 		margin: 1px;
+		padding: 0;
 		border: 1px solid currentColor;
 		border-radius: 2px;
 	}
-	/* #panrotationtogglebutton>* {
+	/* .panrotationtogglebutton>* {
 		background-color: color-mix(in srgb, currentColor 35%, transparent);
 	}*/
-	#panrotationtogglebutton svg * {
+	.panrotationtogglebutton svg * {
 		color: inherit;
 		mix-blend-mode: difference;
 		font-size: 12px;
 	}
-	/* unvisited */   /* visited */
-	#panrotationtogglebutton:link, #panrotationtogglebutton:visited {
-		/* Just use the styles defined above */
-	}
-	/* pointer over */
-	#panrotationtogglebutton:hover {
-		color: yellow;
-		font-weight: bold;
-	}
-	#panrotationtogglebutton:hover:not([data-option]) #panrotationtogglebutton-pan,
-	#panrotationtogglebutton:hover[data-option="pan-rotate"] #panrotationtogglebutton-pan,
-	#panrotationtogglebutton:hover[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	.panrotationtogglebutton:hover:not([data-option]) .panrotationtogglebutton-pan,
+	.panrotationtogglebutton:hover[data-option="pan-rotate"] .panrotationtogglebutton-pan,
+	.panrotationtogglebutton:hover[data-option="rotate-pan"] .panrotationtogglebutton-rotate {
 		transform: scale(0.85) translate(-1.2px, -1.2px);
 		color: white;
 	}
-	/* pointer down */
-	#panrotationtogglebutton:active {
-		color: red;
-		font-weight: normal !important;
-	}
-	#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-pan,
-	#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-pan,
-	#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
+	.panrotationtogglebutton:not([data-option]) .panrotationtogglebutton-pan,
+	.panrotationtogglebutton[data-option="pan-rotate"] .panrotationtogglebutton-pan,
+	.panrotationtogglebutton[data-option="rotate-pan"] .panrotationtogglebutton-rotate {
 		transform: scale(0.8);
 		transform-origin: top left;
 		z-index: 20;
 		opacity: 1;
 	}
-	#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-rotate,
-	#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-rotate,
-	#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-pan {
+	.panrotationtogglebutton:not([data-option]) .panrotationtogglebutton-rotate,
+	.panrotationtogglebutton[data-option="pan-rotate"] .panrotationtogglebutton-rotate,
+	.panrotationtogglebutton[data-option="rotate-pan"] .panrotationtogglebutton-pan {
 		transform: scale(0.5);
 		transform-origin: bottom right;
 		z-index: 1;
 		opacity: 0.6;
 	}
-	#panrotationtogglebutton-tinyswapicon {
+	.panrotationtogglebutton-tinyswapicon {
 		color: white !important;
 		z-index: 99999;
 		transform-origin: top right;
@@ -444,23 +454,23 @@ noscript {
 	line-height: 1;
 	z-index: 1000000000;
 	text-align: right;
-	#viewsource {
+	a {
 		color: cyan;
 		padding: 2px;
 		margin: 2px;
 		line-height: 1;
 	}
 	/* unvisited */   /* visited */
-	#viewsource:link, #viewsource:visited {
+	a:link, a:visited {
 		/* Just use the styles defined above */
 	}
 	/* pointer over */
-	#viewsource:hover {
+	a:hover {
 		color: yellow;
 		font-weight: bold;
 	}
 	/* pointer down */
-	#viewsource:active {
+	a:active {
 		color: red;
 		font-weight: normal !important;
 	}

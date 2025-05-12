@@ -2,15 +2,27 @@ var fpscountersetactive = null;
 var fpscountergetactive = null;
 var fpsconttopleftelemname;
 document.addEventListener("DOMContentLoaded", ()=>{
-	let lastfpstime = 0;
+	const SVGNS = "http://www.w3.org/2000/svg";
+	const fpscont = document.getElementById("fpscountercontainer");
 	let lasttimedifflog = [];
-	const fpscounter = document.getElementById("fpscounter");
+	let lastfpstime = 0;
 	let maxfps = 60;
 	let lastTop = 0;
 	let lastLeft = 0;
-	const fpscont = document.getElementById("fpscountercontainer");
-	const fpschartelem = document.getElementById("fpschart");
-	const fpschartavg = document.getElementById("fpschartavg");
+	
+	const fpscounter = document.createElementNS(SVGNS, "text");
+	fpscounter.setAttribute("alignment-baseline", "hanging");
+	fpscounter.classList.add("fpscounter");
+	fpscont.appendChild(fpscounter);
+	
+	const fpschartelem = document.createElementNS(SVGNS, "path");
+	fpschartelem.classList.add("fpschart");
+	fpscont.appendChild(fpschartelem);
+	
+	const fpschartavg = document.createElementNS(SVGNS, "path");
+	fpschartavg.classList.add("fpschartavg");
+	fpscont.appendChild(fpschartavg);
+	
 	const fpschartwidth = Number(fpscont.getAttribute("width"));
 	const fpschartheight = Number(fpscont.getAttribute("height"));
 	
@@ -24,7 +36,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 		lastfpstime = time;
 		maxfps = 1000/Math.min(...lasttimedifflog);
 		lasttimedifflog.push(timediff);
-		const maxframes = Number(fpschartelem.dataset["maxlasttimediffloglen"]);
+		const maxframes = Number(fpscont.dataset.maxlasttimediffloglen);
 		if (lasttimedifflog.length > maxframes) {
 			lasttimedifflog = lasttimedifflog.slice(-maxframes);
 		}

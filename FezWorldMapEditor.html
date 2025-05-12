@@ -30,7 +30,6 @@
 </style>
 <link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
 <link rel='stylesheet' href='MapViewer3DStyles.css' id="MapViewer3DStyles" />
-<link rel='stylesheet' href='panrotationtoggletyles.css' id="panrotationtoggletyles" />
 <script src="FezUtils.js" id="FezUtils"></script>
 <script src="WorldMap.js" id="WorldMap"></script>
 <script src="jsonToElements.js" id="jsonToElements"></script>
@@ -937,44 +936,11 @@ var menubarbars = {
 <div id="mapgennoticebox"></div>
 <div id="mapviewerbox">
 <div id="mapcontainer" style="height: calc(100vh - 2.2rlh); translate: 0 2.2rlh; height: calc(-2.2rlh + 100vh)"></div>
-<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none; translate: 0 2.2rlh;">
-	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
-	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />
-	<path id="fpschartavg" d="M 0,0 100,100 z" stroke="red" stroke-width="1" opacity="0.3" fill="none" /></g>
+<svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none; translate: 0 2.2rlh;" data-maxlasttimediffloglen="300" >
 </svg>
 <div id="viewsourcebox" style="max-width: 40ch">
-<div id="panrotationtogglebox">
-<a id="panrotationtogglebutton" title="Swap Pan/Rotate" href="#">
-<svg id="panrotationtogglebutton-pan" height="48" width="48" viewbox="0 0 48 48" role="presentation">
-	<path d="M24 0 l10 10h-5v9h9v-5l10,10 -10,10v-5h-9v9h5l-10,10 -10,-10h5v-9h-9v5l-10,-10 10,-10v5h9v-9h-5z" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	<text text-anchor="middle" dominant-baseline="central" y="24" x="24" fill="currentColor">Pan</text>
-</svg>
-<svg id="panrotationtogglebutton-rotate" height="48" width="48" viewBox="0 0 48 48" role="presentation">
-	<!--
-	<path d="M19 10h-5l10 -10 10 10h-5v28h5l-10 10 -10 -10h5v-28M10 29v5l-10 -10 10 -10v5h28v-5l10 10 -10 10v-5h-28" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	<path d="M17 8h-5l10 -8 10 8h-5q-10 16 0 32h5l-10 8 -10 -8h5q-11 -16 0 -32M8 32v5l-8 -10 8 -10v5q16 2 32 0v-5l8 10 -8 10v-5q-16 2 -32 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	-->
-	<path d="M20 7l-5 -1 13 -6 7 10 -5 -1q-10 15 0 30l5 -1 -7 10 -13 -6 5 -1q-11 -17 0 -34M7.5 30l-0.5 5 -7 -11 9 -9 -0.5 5q15.5 2 31 0l-0.5 -5 9 9 -7 11 -0.5 -5q-16.5 2 -33 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	<text text-anchor="middle" dominant-baseline="central" y="24.5" x="24" fill="currentColor">Rotate</text>
-</svg>
-<svg id="panrotationtogglebutton-tinyswapicon" height="48" width="48" viewbox="0 0 48 48" role="presentation">
-	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor" />
-	<!-- TODO make the swap icon nicer -->
-</svg>
-</a>
-<script style="display: none;">
-document.addEventListener("DOMContentLoaded",function(){
-	document.getElementById("panrotationtogglebutton").addEventListener("click", function(){
-		mapViewer.swapPanRotate = !mapViewer.swapPanRotate;
-		var s = document.getElementById("map_setting_swapPanRotate");
-		s.checked = mapViewer.swapPanRotate;
-		s.dispatchEvent(new Event("change"))
-	});
-});
-</script>
-</div>
-This web app created by <span id="createdbyspan">Jenna Sloan</span>
-Last Modified: <span id="lastmodifiedspan"></span>
+This web app created by <span id="createdbyspan">Jenna Sloan</span><br />
+<span id="lastmodifiedspan"></span>
 <a id="viewsource" target="_blank" href="https://github.com/Jenna1337/FezTools/blob/main/FezWorldMapEditor.html">
 View Source
 <span> on GitHub</span><span><svg role="presentation" style="display: inline-block; width: 1em; height: 1em; vertical-align: top; fill: currentcolor;" viewbox="0
@@ -999,7 +965,7 @@ This page requires JavaScript
 document.addEventListener("DOMContentLoaded",function(){
 	try{
 		var lm = document.getElementById("lastmodifiedspan");
-		lm.textContent = (new Date(document.lastModified)).toISOString();
+		lm.textContent = "Last Modified: "+(new Date(document.lastModified)).toISOString();
 		lm.after(document.createElement("br"));
 	}
 	catch(error){
@@ -1011,7 +977,6 @@ document.addEventListener("DOMContentLoaded",function(){
 				.filter(function(a){var n=a.getAttribute("name"); return n && n.toLowerCase()==="author";})
 				.map(a=>a.getAttribute("content"))
 				.join(", ");
-		cb.after(document.createElement("br"));
 	}
 	catch(error){
 		console.error(error);
