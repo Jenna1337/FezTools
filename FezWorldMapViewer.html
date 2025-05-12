@@ -5,169 +5,9 @@
 <meta name="author" content="Jenna Sloan">
 <title>Fez World Map Viewer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-body {
-	font-family: monospace;
-	padding: 0;
-	margin: 0;
-	overflow: hidden;
-	overflow: clip;
-}
-noscript {
-	position: absolute;
-	z-index: 9999999;
-	color: white;
-	background-color: black;
-	height: 100vh;
-	width: 100vw;
-	font-size: min(100vh, calc(100vw / 30));
-	line-height: 100vh;
-	text-align: center;
-}
-</style>
 <link rel='stylesheet' href='TableStyles.css' id="TableStyles" />
 <link rel='stylesheet' href='MapViewer3DStyles.css' id="MapViewer3DStyles" />
-<style id="fpscounterstyles">
-#fpscountercontainer
-{
-	z-index: 10000;
-	position: absolute;
-	top: 1lh;
-	left: 20em;
-	background-color: #111C;
-}
-</style>
-<style id="panrotationtoggletyles">
-#panrotationtogglebox {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	color: white;
-	background-color: black;
-	background-color: #000E;
-	border: 1px solid white;
-	border-radius: 4px;
-	line-height: 1;
-	z-index: 100;
-	text-align: right;
-	height: 48px;
-	width: 48px;
-	top: -60px;
-	margin: 0;
-	padding: 2px;
-	overflow: hidden;
-	overflow: clip;
-}
-#panrotationtogglebox * {
-	padding: 0;
-	margin: 0;
-	height: inherit;
-	width: inherit;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	transition-property: transform, transform-origin, z-index, opacity, font-weight;
-	transition-duration: 0.1s;
-	transition-timing-function: linear;
-	color: #DDD;
-}
-#panrotationtogglebutton {
-	color: cyan;
-	line-height: 1;
-	margin: 1px;
-	border: 1px solid currentColor;
-	border-radius: 2px;
-}
-/* #panrotationtogglebutton>* {
-	background-color: color-mix(in srgb, currentColor 35%, transparent);
-}*/
-#panrotationtogglebutton svg * {
-	color: inherit;
-	mix-blend-mode: difference;
-	font-size: 12px;
-}
-/* unvisited */   /* visited */
-#panrotationtogglebutton:link, #panrotationtogglebutton:visited {
-	/* Just use the styles defined above */
-}
-/* pointer over */
-#panrotationtogglebutton:hover {
-	color: yellow;
-	font-weight: bold;
-}
-#panrotationtogglebutton:hover:not([data-option]) #panrotationtogglebutton-pan,
-#panrotationtogglebutton:hover[data-option="pan-rotate"] #panrotationtogglebutton-pan,
-#panrotationtogglebutton:hover[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
-	transform: scale(0.85) translate(-1.2px, -1.2px);
-	color: white;
-}
-/* pointer down */
-#panrotationtogglebutton:active {
-	color: red;
-	font-weight: normal !important;
-}
-#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-pan,
-#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-pan,
-#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-rotate {
-	transform: scale(0.8);
-	transform-origin: top left;
-	z-index: 20;
-	opacity: 1;
-}
-#panrotationtogglebutton:not([data-option]) #panrotationtogglebutton-rotate,
-#panrotationtogglebutton[data-option="pan-rotate"] #panrotationtogglebutton-rotate,
-#panrotationtogglebutton[data-option="rotate-pan"] #panrotationtogglebutton-pan {
-	transform: scale(0.5);
-	transform-origin: bottom right;
-	z-index: 1;
-	opacity: 0.6;
-}
-#panrotationtogglebutton-tinyswapicon {
-	color: white !important;
-	z-index: 99999;
-	transform-origin: top right;
-	transform: scale(0.35) translate(-5px,5px);
-}
-</style>
-<style id="viewsourcelinkstyles">
-#viewsourcebox {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	color: white;
-	background-color: black;
-	background-color: #000E;
-	padding: 2px;
-	border: 1px solid white;
-	border-radius: 4px;
-	margin: 2px;
-	line-height: 1;
-	z-index: 1000000000;
-	text-align: right;
-}
-#viewsource {
-	color: cyan;
-	padding: 2px;
-	margin: 2px;
-	line-height: 1;
-}
-/* unvisited */   /* visited */
-#viewsource:link, #viewsource:visited {
-	/* Just use the styles defined above */
-}
-/* pointer over */
-#viewsource:hover {
-	color: yellow;
-	font-weight: bold;
-}
-/* pointer down */
-#viewsource:active {
-	color: red;
-	font-weight: normal !important;
-}
-</style>
+<link rel='stylesheet' href='panrotationtoggletyles.css' id="panrotationtoggletyles" />
 <script src="FezUtils.js" id="FezUtils"></script>
 <script src="WorldMap.js" id="WorldMap"></script>
 <script src="jsonToElements.js" id="jsonToElements"></script>
@@ -339,9 +179,12 @@ document.addEventListener("DOMContentLoaded",()=>{
 fpsconttopleftelemname = "mapdebuginfo";
 </script>
 <script src="fpscounterscript.js" id="fpscounterscript"></script>
+<script src="fpscounter2.js" id="fpscounter2script"></script>
 </head>
 <body class="tabledataasblocks">
 <div id="mapcontainer"></div>
+<div id="fpscounter2" role="status" height="150" width="300" style="display: none;" data-maxlasttimediffloglen="300">
+</div>
 <svg id="fpscountercontainer" role="status" height="150" width="300" style="display: none;">
 	<text id="fpscounter" class="fpscounter" alignment-baseline="hanging" style="fill: white; white-space: pre; dominant-baseline: hanging;">0</text>
 	<g><path id="fpschart" d="M 0,0 100,100 z" stroke="blue" stroke-width="1" opacity="0.9" fill="none" data-maxlasttimediffloglen="300" />

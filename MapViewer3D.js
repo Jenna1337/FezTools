@@ -121,6 +121,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					delete oldObj.BaseElement;
 					return JSON.stringify(oldObj);
 				}
+				[...mapnodes.querySelectorAll(".nodebox.highlighted")].forEach(a=>a.classList.remove("highlighted"));
 				const matchingElems = [...mapnodes.querySelectorAll(".nodebox")]
 							.filter(a=>{
 								const val = valueMapFunc(a.dataset.allLevelInfoData);
@@ -130,6 +131,11 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 									return val.includes(filter);
 								}
 							});
+				matchingElems.forEach(a => {
+					a.classList.add("highlighted");
+					const val = valueMapFunc(a.dataset.allLevelInfoData);
+					
+				});
 				//TODO display useful results and highlight the matching nodes
 				console.log(event);
 				console.log(matchingElems);
@@ -471,10 +477,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			let ypos = -levelinfo.Position.Y*nodeDistanceMultiplier+nodeSizeUnits;
 			let zpos = levelinfo.Position.Z*nodeDistanceMultiplier +nodeSizeUnits;
 			nodebox.style.translate = xpos + " " + ypos + " " + zpos;
-			//nodebox.style.fontSize = nodeDistanceMultiplier*0.3+nodeSizeUnits;//nodeDistanceMultiplier*0.04+nodeSizeUnits;
-			//mapnode.style.outlineWidth = 1/levelinfo.Size*nodeDistanceMultiplier*0.3+nodeSizeUnits
 			nodebox.style.setProperty("--outlinesize", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.05+nodeSizeUnits);
-			nodebox.style.setProperty("--outlinesize-hover", nodeOutlineSizeMultiplier/levelinfo.Size*nodeDistanceMultiplier*0.25+nodeSizeUnits);
 			nodebox.tabIndex = 0;
 			nodebox.role = "button";
 			nodebox.addEventListener("focusin", function(event){
@@ -821,8 +824,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		set ShowDebugInfo(value){
 			mapdebuginfo.style.display = value ? "" : "none";
 			let fpstracker = document.getElementById("fpscountercontainer");
-			if(fpstracker){
-				fpstracker.style.display = value ? "" : "none";
+			let fpstracker2 = document.getElementById("fpscounter2");
+			if(fpstracker || fpstracker2){
+				if(fpstracker){ fpstracker.style.display = value ? "" : "none"; }
+				if(fpstracker2){ fpstracker2.style.display = value ? "" : "none"; }
 				function waitForFpsToShow(){
 					if(fpscountersetactive){
 						fpscountersetactive(value);
