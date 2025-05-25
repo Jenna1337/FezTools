@@ -58,6 +58,17 @@ noscript {
 	--boxbgcolor: #000E;
 	--infobox-width: 20em;
 	--viewsourcebox-width: 40ch;
+	--viewsourcebox-height: 3lh;
+	--viewsourcebox-border-width: 1px;
+	--viewsourcebox-padding: 0.1em;
+	--viewsourcebox-margin: 2px;
+	--viewsourcebox-lineheight: 1;
+	--viewsourcebox-full-height: calc(var(--viewsourcebox-height) + 2 * var(--viewsourcebox-border-width) + 2 * var(--viewsourcebox-padding) + 2 * var(--viewsourcebox-margin));
+	--panrotationtogglebox-size: 48px;
+	--panrotationtogglebox-border-width: 1px;
+	--panrotationtogglebox-padding: 2px;
+	--panrotationtogglebox-fake-margin: 2px;
+	--panrotationtogglebox-full-size: calc(var(--panrotationtogglebox-size) + 2 * var(--panrotationtogglebox-padding) + 2 * var(--panrotationtogglebox-border-width) + 2 * var(--panrotationtogglebox-fake-margin));
 }
 
 #mapcontainer {
@@ -80,6 +91,10 @@ noscript {
 	}
 	
 	--shortcutlinkhue: 0deg;
+	
+	& hr {
+		border: 1px solid white;
+	}
 }
 #mapcontainer>*{
 	position: absolute;
@@ -91,79 +106,128 @@ noscript {
 	cursor: grab;
 	pointer-events: none;
 	background: none;
-}
-#mapnodepanbox *{
-	/* TODO fix transitions? */
-	/*transition-property: translate, scale;
-	transition-duration: 0.2s;
-	transition-timing-function: linear;*/
-	-webkit-user-select: none;
-	user-select: none;
-	backface-visibility: visible;
+	& *{
+		/* TODO fix transitions? */
+		/*transition-property: translate, scale;
+		transition-duration: 0.2s;
+		transition-timing-function: linear;*/
+		-webkit-user-select: none;
+		user-select: none;
+		backface-visibility: visible;
+	}
+	#maplinks {
+		z-index: 1 !important;
+	}
+	#mapnodes, #maplinks {
+		translate: 50vw 50vh;
+		height: 100vh;
+		width: 100vw;
+		transform-style: preserve-3d;
+		transform-origin: top left;
+		pointer-events: none;
+		background: none;
+		z-index: 10;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.mapnode {
+		transform-style: flat;
+		background-color: black;
+		color: white;
+		word-wrap: anywhere;
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-origin: center center;
+		outline: var(--outlinesize) solid white;
+		pointer-events: auto;
+		pointer-events: all;
+		cursor: pointer;
+	}
+	@keyframes waves{
+		from {
+			outline-style: solid;
+			outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2);
+		}
+		to {
+			outline-style: double;
+			outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) * 1.5);
+		}
+	}
+	.nodebox.selected .mapnode{
+		outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
+		outline-width: calc(calc(var(--outlinesize-hover) * 0.6 + var(--outlinesize) * 0.4) * 1.5);
+		outline-style: solid;
+	}
+	.mapnode:hover {
+		outline: var(--outlinesize-hover) solid gold;
+	}
+	.nodebox.highlighted {
+		outline: calc(var(--outlinesize-hover) + var(--outlinesize)) solid highlight;
+	}
+	.nodebox {
+		transform-style: flat;
+		position: absolute;
+		height: 50px;
+		width: 50px;
+		overflow: visible;
+		font-size: 15px;
+		--outlinesize-hover: calc(var(--outlinesize) * var(--outlinesize-hover-scale));
+	}
+	.maplink {
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-style: preserve-3d;
+	}
+	.nomousebuttons .maplink{
+		pointer-events: all;
+		cursor: crosshair;
+	}
+	.maplink *{
+		background-color: #7777;
+		/*Note: links are semitransparent so you can see other links crossing and layered
+				beneath the above links, and the opacity property doesn't do this*/
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-style: preserve-3d;
+	}
+	.mapnodeiconcontainer {
+		position: absolute;
+		top: 0;
+		left: 50px;
+		transform-origin: top left;
+		image-rendering: pixelated;
+		image-rendering: crisp-edges;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		line-height: 1;
+		/* TODO ensure icons meet WCAG standards for color contrast; */
+	}
+	.nodeicon {
+		display: block;
+		height: 1lh;
+		width: 1lh;
+	}
+	.maplink.selected * {
+		background-color: white;
+	}
+	.maplink.mapshortcutlink * {
+		background-color: hsla(var(--shortcutlinkhue), 100%, 30%, 45%);
+	}
+	.maplink.mapshortcutlink.selected * {
+		background-color: hsla(var(--shortcutlinkhue), 100%, 50%, 100%);
+	}
 }
 
-#mapnodes, #maplinks {
-	translate: 50vw 50vh;
-	height: 100vh;
-	width: 100vw;
-	transform-style: preserve-3d;
-	transform-origin: top left;
-	pointer-events: none;
-	background: none;
-	z-index: 10;
-	position: absolute;
-	top: 0;
-	left: 0;
-}
-.mapnode {
-	transform-style: flat;
-	background-color: black;
-	color: white;
-	word-wrap: anywhere;
-	position: absolute;
-	top: 0;
-	left: 0;
-	transform-origin: center center;
-	outline: var(--outlinesize) solid white;
-	pointer-events: auto;
-	pointer-events: all;
-	cursor: pointer;
-}
-@keyframes waves{
-	from {
-		outline-style: solid;
-		outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2);
-	}
-	to {
-		outline-style: double;
-		outline-width: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) * 1.5);
-	}
-}
-.nodebox.selected .mapnode{
-	outline: calc(calc(var(--outlinesize-hover) + var(--outlinesize)) / 2) solid white;
-	outline-width: calc(calc(var(--outlinesize-hover) * 0.6 + var(--outlinesize) * 0.4) * 1.5);
-	outline-style: solid;
-}
 .animations {
 	& .nodebox.selected .mapnode, .mapnode:focus{
 		/*animation: 1s ease-in-out 0s alternate infinite waves;*/
 		animation: 1s ease-in 0s infinite waves;
 	}
-}
-.mapnode:hover {
-	outline: var(--outlinesize-hover) solid gold;
-}
-.nodebox.highlighted {
-	outline: calc(var(--outlinesize-hover) + var(--outlinesize)) solid highlight;
-}
-.nodebox {
-	transform-style: flat;
-	position: absolute;
-	height: 50px;
-	width: 50px;
-	overflow: visible;
-	font-size: 15px;
-	--outlinesize-hover: calc(var(--outlinesize) * var(--outlinesize-hover-scale));
 }
 #nodeinfobox {
 	white-space: pre;
@@ -241,9 +305,6 @@ noscript {
 	border: 1px solid white;
 	padding: 2px;
 }
-#mapcontainer hr {
-	border: 1px solid white;
-}
 #mapdebuginfo {
 	z-index: 10000;
 	background-color: var(--debuginfobgcolor);
@@ -271,9 +332,6 @@ noscript {
 #nodeinfobox.hidden~#maplegend, #nodeinfobox.hidden~#searchbox{
 	left: 0;
 }
-#maplinks {
-	z-index: 1 !important;
-}
 #mapsettings {
 	z-index: 100000;
 	top: 0;
@@ -282,18 +340,20 @@ noscript {
 	background-color: var(--boxbgcolor);
 	padding: 1ex;
 	border: 1px solid white;
-	max-height: calc(100% - 3lh - 2ex - 2px);
+	line-height: var(--viewsourcebox-lineheight);
+	max-height: calc(100% - var(--viewsourcebox-full-height));
 	overflow: scroll;
 	overflow: auto;
-}
-#mapsettings input {
-	max-width: 19ch;
-	padding-block: 1px;
-	padding-inline: 2px;
-	font-family: inherit;
-	/*border-width: 2px;
-	border-radius: 2px;*/
-	margin: 0;
+	box-sizing: border-box;
+	& input {
+		max-width: 19ch;
+		padding-block: 1px;
+		padding-inline: 2px;
+		font-family: inherit;
+		/*border-width: 2px;
+		border-radius: 2px;*/
+		margin: 0;
+	}
 }
 #mapsettings.collapsed {
 	height: 3ex;
@@ -302,52 +362,7 @@ noscript {
 	width: 1lh;
 	overflow: hidden;
 	overflow: clip;
-}
-.maplink {
-	position: absolute;
-	top: 0;
-	left: 0;
-	transform-style: preserve-3d;
-}
-.nomousebuttons .maplink{
-	pointer-events: all;
-	cursor: crosshair;
-}
-.maplink *{
-	background-color: #7777;
-	/*Note: links are semitransparent so you can see other links crossing and layered
-			beneath the above links, and the opacity property doesn't do this*/
-	position: absolute;
-	top: 0;
-	left: 0;
-	transform-style: preserve-3d;
-}
-.mapnodeiconcontainer {
-	position: absolute;
-	top: 0;
-	left: 50px;
-	transform-origin: top left;
-	image-rendering: pixelated;
-	image-rendering: crisp-edges;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
-	line-height: 1;
-	/* TODO ensure icons meet WCAG standards for color contrast; */
-}
-.nodeicon {
-	display: block;
-	height: 1lh;
-	width: 1lh;
-}
-.maplink.selected * {
-	background-color: white;
-}
-.maplink.mapshortcutlink * {
-	background-color: hsla(var(--shortcutlinkhue), 100%, 30%, 45%);
-}
-.maplink.mapshortcutlink.selected * {
-	background-color: hsla(var(--shortcutlinkhue), 100%, 50%, 100%);
+	box-sizing: content-box !important;
 }
 
 #panrotationtogglebox {
@@ -355,17 +370,17 @@ noscript {
 	bottom: 0;
 	right: 0;
 	color: white;
-	background-color: (--boxbgcolor);
-	border: 1px solid white;
+	background-color: var(--boxbgcolor);
+	border: var(--panrotationtogglebox-border-width) solid white;
 	border-radius: 4px;
 	line-height: 1;
 	z-index: 100;
 	text-align: right;
-	height: 48px;
-	width: 48px;
-	top: -60px;
+	height: var(--panrotationtogglebox-size);
+	width: var(--panrotationtogglebox-size);
+	top: calc(0px - var(--panrotationtogglebox-full-size) - var(--viewsourcebox-margin));
 	margin: 0;
-	padding: 2px;
+	padding: var(--panrotationtogglebox-padding);
 	overflow: hidden;
 	overflow: clip;
 	* {
@@ -429,16 +444,17 @@ noscript {
 
 #viewsourcebox {
 	max-width: var(--viewsourcebox-width);
+	height: var(--viewsourcebox-height);
 	position: absolute;
 	bottom: 0;
 	right: 0;
 	color: white;
 	background-color: var(--boxbgcolor);
-	padding: 2px;
-	border: 1px solid white;
+	padding: var(--viewsourcebox-padding);
+	border: var(--viewsourcebox-border-width) solid white;
 	border-radius: 4px;
-	margin: 2px;
-	line-height: 1;
+	margin: var(--viewsourcebox-margin);
+	line-height: var(--viewsourcebox-lineheight);
 	z-index: 1000000000;
 	text-align: right;
 	a {
