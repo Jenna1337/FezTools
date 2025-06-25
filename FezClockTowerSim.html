@@ -420,14 +420,31 @@ document.addEventListener("DOMContentLoaded",function(){
 </div>
 <div id="interactive-area">
 <script>
+Object.defineProperty(HTMLSelectElement.prototype, 'defaultValue', {
+	get: function() {
+		return [...this.options].find(opt=>opt.defaultSelected)?.value;
+	},
+});
+
 var timeformat = window.localStorage?.timeformat ?? "Locale_time_string";
 
-window.setTimeout(()=>{
-	//set selected item on timeformatselector to whatever matched window.localStorage.timeformat
-	const timeformatselector = document.getElementById("timeformatselector");
-	timeformatselector.value = window.localStorage?.timeformat ?? "Locale_time_string";
-	timeformatselector.onchange();
-}, 1000);
+{
+	const init = ()=>{
+		//set selected item on timeformatselector to whatever matched window.localStorage.timeformat
+		const timeformatselector = document.getElementById("timeformatselector");
+		timeformatselector.value = window.localStorage?.timeformat ?? "Locale_time_string";
+		timeformatselector.onchange();
+		window.requestAnimationFrame(()=>{
+			window.requestAnimationFrame(()=>{
+				window.requestAnimationFrame(()=>{
+					forceRefreshAllTimestamps();
+				});
+			});
+		});
+	};
+	document.addEventListener('load',init);
+	window.addEventListener('load',init);
+}
 
 function formatTimeLabel(timelabel, dt){
 	var ofst = dt.getTimezoneOffset();
@@ -440,12 +457,24 @@ function formatTimeLabel(timelabel, dt){
 	
 	timelabel.textContent = timelabel.dataset[timeformat];
 }
+function forceRefreshAllTimestamps(callOnChange = true)
+{
+	//force refresh all timestamps
+	document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
+	document.querySelectorAll("[data-nextstampend]").forEach(a=>a.removeAttribute("data-nextstampend"));
+	if(callOnChange) {
+		document.querySelectorAll("input[type=\"number\"]").forEach(a=>a.onchange(a));
+	}
+}
 var doneloading = false;
 var hashbrowns = ({});
 function updateHashbrowns(inputelem){
 	if(doneloading){
-		hashbrowns[inputelem.id] = inputelem.value;
-		setHashbrownsObject(hashbrowns);
+		if(inputelem.defaultValue!=inputelem.value || hashbrowns[inputelem.id])
+		{
+			hashbrowns[inputelem.id] = inputelem.value;
+			setHashbrownsObject(hashbrowns);
+		}
 	}
 }
 function loadHashbrowns(){
@@ -468,10 +497,7 @@ function timeformatselectorchanged(formatselector){
 	timeformat = formatselector.value;
 	window.localStorage.timeformat = timeformat;
 	
-	//force refresh all timestamps
-	document.querySelectorAll("[data-nextstamp]").forEach(a=>a.removeAttribute("data-nextstamp"));
-	document.querySelectorAll("[data-nextstampend]").forEach(a=>a.removeAttribute("data-nextstampend"));
-	document.querySelectorAll("input[type=\"number\"]").forEach(a=>a.onchange(a));
+	forceRefreshAllTimestamps();
 	
 	updateHashbrowns(formatselector);
 }
@@ -533,7 +559,7 @@ to affect the outcome of the content set by formatTimeLabel
 <label for="starttimeinput" class="timestamp timelabel"></label>
 </p>
 <p>
-<label for="offetfromsysteminput">Adjust current time: <input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" /> milliseconds ahead</label>
+<label for="offetfromsysteminput">Adjust current time: <input id="offetfromsysteminput" type="number" step="1000" onchange="offetfromsysteminput_change(this)" value="0" /> milliseconds ahead</label>
 </p>
 
 <button onclick="resetStartTime()" type="button">Reset clocks to current time</button>
