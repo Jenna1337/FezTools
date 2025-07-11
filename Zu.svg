@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="optimizeSpeed" height="120" width="120" viewBox="0 0 120 120">
+<defs>
+	<path id="glyph-base-A" d="M0,0H1V2H2V3H1V5H0ZM2,0H5V5H2V4H3V1H2Z"/>
+	<path id="glyph-base-B" d="M0,0H5V5H4V1H1V4H3V5H0ZM2,2H3V3H2Z"/>
+	<path id="glyph-base-C" d="M0,0H1V2H4V0H5V5H0ZM2,0H3V1H2Z"/>
+	<path id="glyph-base-D" d="M0,0H5V3H3V5H0ZM4,4H5V5H4Z"/>
+	<path id="glyph-base-E" d="M0,0H3V3H1V5H0ZM4,0H5V5H2V4H4Z"/>
+	<path id="glyph-base-F" d="M0,0H5V5H3V4H4V3H3V2H4V1H1V2H2V3H1V4H2V5H0Z"/>
+	<path id="glyph-base-num" d="M0,0H5V5H0ZM1,1H4V4H1Z" fill-rule="evenodd"/>
+</defs>
+<g id="glyphs" transform="translate(1 1) scale(2)">
+	<g class="row" transform="translate(0 0)">
+		<g transform="translate(0 0)">
+			<title>A</title>
+			<use id="glyph-A" href="#glyph-base-A" />
+		</g>
+		<g transform="translate(6 0)">
+			<title>B</title>
+			<use id="glyph-B" href="#glyph-base-B"/>
+		</g>
+		<g transform="translate(12 0)">
+			<title>C</title>
+			<use id="glyph-C" href="#glyph-base-C" />
+		</g>
+		<g transform="translate(18 0)">
+			<title>D</title>
+			<use id="glyph-D" href="#glyph-base-D" />
+		</g>
+		<g transform="translate(24 0)">
+			<title>E</title>
+			<use id="glyph-E" href="#glyph-base-E" />
+		</g>
+		<g transform="translate(30 0)">
+			<title>F</title>
+			<use id="glyph-F" href="#glyph-base-F" />
+		</g>
+		<g transform="translate(36 0)">
+			<title>G</title>
+			<use id="glyph-G" href="#glyph-base-A" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(42 0)">
+			<title>H</title>
+			<use id="glyph-H" href="#glyph-base-B" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(48 0)">
+			<title>I</title>
+			<use id="glyph-I" href="#glyph-base-C" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(54 0)">
+			<title>J</title>
+			<use id="glyph-J" href="#glyph-base-D" transform="rotate(-90 2.5 2.5)" />
+		</g>
+	</g>
+	<g class="row" transform="translate(0 6)">
+		<g transform="translate(0 0)">
+			<title>K</title>
+			<use id="glyph-K" href="#glyph-base-E" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(6 0)">
+			<title>L</title>
+			<use id="glyph-L" href="#glyph-base-F" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(12 0)">
+			<title>M</title>
+			<use id="glyph-M" href="#glyph-base-A" transform="rotate(180 2.5 2.5)" />
+		</g>
+		<g transform="translate(18 0)">
+			<title>N</title>
+			<use id="glyph-N" href="#glyph-base-B" transform="rotate(180 2.5 2.5)" />
+		</g>
+		<g transform="translate(24 0)">
+			<title>O</title>
+			<use id="glyph-O" href="#glyph-base-C" transform="rotate(180 2.5 2.5)" />
+		</g>
+		<g transform="translate(30 0)">
+			<title>P</title>
+			<use id="glyph-P" href="#glyph-base-D" transform="rotate(180 2.5 2.5)" />
+		</g>
+		<g transform="translate(36 0)">
+			<title>Q</title>
+			<use id="glyph-Q" href="#glyph-base-E" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(42 0)">
+			<title>R</title>
+			<use id="glyph-R" href="#glyph-base-F" transform="rotate(180 2.5 2.5)" />
+		</g>
+		<g transform="translate(48 0)">
+			<title>S</title>
+			<use id="glyph-S" href="#glyph-base-A" transform="rotate(-90 2.5 2.5)" />
+		</g>
+		<g transform="translate(54 0)">
+			<title>T</title>
+			<use id="glyph-T" href="#glyph-base-B" transform="rotate(90 2.5 2.5)" />
+		</g>
+	</g>
+	<g class="row" transform="translate(0 12)">
+		<g transform="translate(0 0)">
+			<title>U</title>
+			<use id="glyph-U" href="#glyph-base-C" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(6 0)">
+			<title>V</title>
+			<use id="glyph-V" href="#glyph-base-C" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(12 0)">
+			<title>W</title>
+			<use id="glyph-W" href="#glyph-base-D" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(18 0)">
+			<title>X</title>
+			<use id="glyph-X" href="#glyph-base-E" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(24 0)">
+			<title>Y</title>
+			<use id="glyph-Y" href="#glyph-base-F" transform="rotate(90 2.5 2.5)" />
+		</g>
+		<g transform="translate(30 0)">
+			<title>Z</title>
+			<use id="glyph-Z" href="#glyph-base-E" transform="rotate(180 2.5 2.5)" />
+		</g>
+	</g>
+	<g class="row" transform="translate(0 18)">
+		<g transform="translate(0 0)">
+			<title>0</title>
+			<use id="glyph-0" href="#glyph-base-num" />
+		</g>
+		<g transform="translate(6 0)">
+			<title>1</title>
+			<g id="glyph-1">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(12 0)">
+			<title>2</title>
+			<g id="glyph-2">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(18 0)">
+			<title>3</title>
+			<g id="glyph-3">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(24 0)">
+			<title>4</title>
+			<g id="glyph-4">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(30 0)">
+			<title>5</title>
+			<g id="glyph-5">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(36 0)">
+			<title>6</title>
+			<g id="glyph-6">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(42 0)">
+			<title>7</title>
+			<g id="glyph-7">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(48 0)">
+			<title>8</title>
+			<g id="glyph-8">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(54 0)">
+			<title>9</title>
+			<g id="glyph-9">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+	</g>
+	<g class="row" transform="translate(0 24)">
+		<g transform="translate(0 0)">
+			<title>10</title>
+			<g id="glyph-10">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(6 0)">
+			<title></title>
+		</g>
+		<g transform="translate(12 0)">
+			<title></title>
+		</g>
+		<g transform="translate(18 0)">
+			<title>3 (alt)</title>
+			<g id="glyph-3">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(24 0)">
+			<title>4 (alt)</title>
+			<g id="glyph-4">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(30 0)">
+			<title>5 (alt)</title>
+			<g id="glyph-5">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(36 0)">
+			<title>6 (alt)</title>
+			<g id="glyph-6">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(42 0)">
+			<title>7 (alt)</title>
+			<g id="glyph-7-alt">
+				<use href="#glyph-base-num" />
+			</g>
+		</g>
+		<g transform="translate(48 0)">
+			<title></title>
+		</g>
+		<g transform="translate(54 0)">
+			<title></title>
+		</g>
+	</g>
+</g>
+</svg>
