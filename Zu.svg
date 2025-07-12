@@ -134,136 +134,104 @@ Note: the letters and code symbols must be rotated 90deg clockwise when written 
 		</g></g>
 		<g transform="translate(6 0)"><g id="glyph-1" data-prevent-rotate="true">
 			<title>1</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
 		</g></g>
 		<g transform="translate(12 0)"><g id="glyph-2" data-prevent-rotate="true">
 			<title>2</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-2" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-2" />
 		</g></g>
 		<g transform="translate(18 0)"><g id="glyph-3" data-prevent-rotate="true">
 			<title>3</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-3" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-3" />
 		</g></g>
 		<g transform="translate(24 0)"><g id="glyph-4" data-prevent-rotate="true">
 			<title>4</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(30 0)"><g id="glyph-5" data-prevent-rotate="true">
 			<title>5</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(36 0)"><g id="glyph-6" data-prevent-rotate="true">
 			<title>6</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(42 0)"><g id="glyph-7" data-prevent-rotate="true">
 			<title>7</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-3" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-3" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(48 0)"><g id="glyph-8" data-prevent-rotate="true">
 			<title>8</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-3" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-3" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(54 0)"><g id="glyph-9" data-prevent-rotate="true">
 			<title>9</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-3" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-3" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 	</g>
 	<g class="row" transform="translate(0 24)">
 		<g transform="translate(0 0)"><g id="glyph-10" data-prevent-rotate="true">
 			<title>10</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-3" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-3" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(6 0)"><g id="glyph-=" data-prevent-rotate="true">
 			<title>=</title>
-			<g>
-				<path d="M0,1H5V2H0ZM0,3H5V4H0Z" />
-			</g>
+			<path d="M0,1H5V2H0ZM0,3H5V4H0Z" />
 		</g></g>
 		<g transform="translate(12 0)"><g id="">
 			<title></title>
 		</g></g>
 		<g transform="translate(18 0)"><g id="glyph-3-alt" data-prevent-rotate="true">
 			<title>3 (alt)</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-2" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-2" />
 		</g></g>
 		<g transform="translate(24 0)"><g id="glyph-4-alt" data-prevent-rotate="true">
 			<title>4 (alt)</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-3" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-3" />
 		</g></g>
 		<g transform="translate(30 0)"><g id="glyph-5-alt" data-prevent-rotate="true">
 			<title>5 (alt)</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-3" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-3" />
 		</g></g>
 		<g transform="translate(36 0)"><g id="glyph-6-alt" data-prevent-rotate="true">
 			<title>6 (alt)</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-3" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-3" />
 		</g></g>
 		<g transform="translate(42 0)"><g id="glyph-7-alt" data-prevent-rotate="true">
 			<title>7 (alt)</title>
-			<g>
-				<use href="#glyph-base-num" />
-				<use href="#glyph-part-num-1" />
-				<use href="#glyph-part-num-2" />
-				<use href="#glyph-part-num-4" />
-			</g>
+			<use href="#glyph-base-num" />
+			<use href="#glyph-part-num-1" />
+			<use href="#glyph-part-num-2" />
+			<use href="#glyph-part-num-4" />
 		</g></g>
 		<g transform="translate(48 0)"><g id="">
 			<title></title>
