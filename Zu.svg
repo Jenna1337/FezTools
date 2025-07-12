@@ -6,11 +6,27 @@
 	<path id="glyph-base-D" d="M0,0H5V3H3V5H0ZM4,4H5V5H4Z"/>
 	<path id="glyph-base-E" d="M0,0H3V3H1V5H0ZM4,0H5V5H2V4H4Z"/>
 	<path id="glyph-base-F" d="M0,0H5V5H3V4H4V3H3V2H4V1H1V2H2V3H1V4H2V5H0Z"/>
-	<path id="glyph-base-num" d="M0,0H5V5H0ZM1,1H4V4H1Z" fill-rule="evenodd"/>
-	<path id="glyph-part-num-1" d="M2,1H3V3H2Z" />
-	<path id="glyph-part-num-2" d="M2,2H4V3H2Z" />
-	<path id="glyph-part-num-3" d="M2,2H3V4H2Z" />
-	<path id="glyph-part-num-4" d="M1,2H3V3H1Z" />
+	<path id="glyph-base-num-0" d="M0,0H5V5H0ZM1,1H4V4H1Z" fill-rule="evenodd"/>
+	<g id="glyph-base-num-1">
+		<use href="#glyph-base-num-0" />
+		<path d="M2,0.5H3V3H2Z" />
+	</g>
+	<g id="glyph-base-num-L">
+		<use href="#glyph-base-num-0" />
+		<path d="M2,0.5H3V2H4.5V3H2Z" />
+	</g>
+	<g id="glyph-base-num-I">
+		<use href="#glyph-base-num-0" />
+		<path d="M2,0.5H3V4.5H2Z" />
+	</g>
+	<g id="glyph-base-num-T">
+		<use href="#glyph-base-num-0" />
+		<path d="M0.5,3V2H4.5V3H3V4.5H2V3Z" />
+	</g>
+	<g id="glyph-base-num-X">
+		<use href="#glyph-base-num-I" />
+		<use href="#glyph-base-num-I" transform="rotate(90 2.5 2.5)" />
+	</g>
 </defs>
 <!--
 Note: the letters and code symbols must be rotated 90deg clockwise when written to appear properly!
@@ -130,69 +146,49 @@ Note: the letters and code symbols must be rotated 90deg clockwise when written 
 	<g class="row" transform="translate(0 18)">
 		<g transform="translate(0 0)"><g id="glyph-0" data-prevent-rotate="true">
 			<title>0</title>
-			<use href="#glyph-base-num" />
+			<use href="#glyph-base-num-0" />
 		</g></g>
 		<g transform="translate(6 0)"><g id="glyph-1" data-prevent-rotate="true">
 			<title>1</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
+			<use href="#glyph-base-num-1" />
 		</g></g>
 		<g transform="translate(12 0)"><g id="glyph-2" data-prevent-rotate="true">
 			<title>2</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-2" />
+			<use href="#glyph-base-num-1" transform="rotate(90 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(18 0)"><g id="glyph-3" data-prevent-rotate="true">
 			<title>3</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-3" />
+			<use href="#glyph-base-num-1" transform="rotate(180 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(24 0)"><g id="glyph-4" data-prevent-rotate="true">
 			<title>4</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-1" transform="rotate(270 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(30 0)"><g id="glyph-5" data-prevent-rotate="true">
 			<title>5</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-L" transform="rotate(270 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(36 0)"><g id="glyph-6" data-prevent-rotate="true">
 			<title>6</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-I" transform="rotate(90 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(42 0)"><g id="glyph-7" data-prevent-rotate="true">
 			<title>7</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-3" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-L" transform="rotate(180 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(48 0)"><g id="glyph-8" data-prevent-rotate="true">
 			<title>8</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-3" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-T" transform="rotate(90 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(54 0)"><g id="glyph-9" data-prevent-rotate="true">
 			<title>9</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-3" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-T" />
 		</g></g>
 	</g>
 	<g class="row" transform="translate(0 24)">
 		<g transform="translate(0 0)"><g id="glyph-10" data-prevent-rotate="true">
 			<title>10</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-3" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-X" />
 		</g></g>
 		<g transform="translate(6 0)"><g id="glyph-=" data-prevent-rotate="true">
 			<title>=</title>
@@ -203,35 +199,23 @@ Note: the letters and code symbols must be rotated 90deg clockwise when written 
 		</g></g>
 		<g transform="translate(18 0)"><g id="glyph-3-alt" data-prevent-rotate="true">
 			<title>3 (alt)</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-2" />
+			<use href="#glyph-base-num-L" />
 		</g></g>
 		<g transform="translate(24 0)"><g id="glyph-4-alt" data-prevent-rotate="true">
 			<title>4 (alt)</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-3" />
+			<use href="#glyph-base-num-I" />
 		</g></g>
 		<g transform="translate(30 0)"><g id="glyph-5-alt" data-prevent-rotate="true">
 			<title>5 (alt)</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-3" />
+			<use href="#glyph-base-num-L" transform="rotate(90 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(36 0)"><g id="glyph-6-alt" data-prevent-rotate="true">
 			<title>6 (alt)</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-3" />
+			<use href="#glyph-base-num-T" transform="rotate(270 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(42 0)"><g id="glyph-7-alt" data-prevent-rotate="true">
 			<title>7 (alt)</title>
-			<use href="#glyph-base-num" />
-			<use href="#glyph-part-num-1" />
-			<use href="#glyph-part-num-2" />
-			<use href="#glyph-part-num-4" />
+			<use href="#glyph-base-num-T" transform="rotate(180 2.5 2.5)" />
 		</g></g>
 		<g transform="translate(48 0)"><g id="">
 			<title></title>
