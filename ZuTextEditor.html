@@ -28,10 +28,10 @@ svg * {
 }
 </style>
 <script>
-function makeZu(textElem, resultBoxId, resultBoxRotatedId)
+function makeZu(textElem)
 {
-	const resultBox = document.getElementById(resultBoxId);
-	const resultBoxRotated = document.getElementById(resultBoxRotatedId);
+	const resultBox = document.getElementById('resultBox');
+	const resultBoxRotated = document.getElementById('resultBoxRotated');
 	resultBox.innerHTML = "";
 	resultBoxRotated.innerHTML = "";
 	textElem.value.split("").forEach(ch=>{
@@ -64,9 +64,10 @@ function makeZu(textElem, resultBoxId, resultBoxRotatedId)
 }
 document.addEventListener("DOMContentLoaded", ()=>{
 	const el = document.getElementById("makeZuInput");
-	const eh = e=>{makeZu(e.target, 'resultBox', 'resultBoxRotated');};
+	const eh = e=>{makeZu(e.target);};
 	el.addEventListener("change", eh);
 	el.addEventListener("input", eh);
+	el.addEventListener("keydown", eh);
 });
 </script>
 </head>
@@ -92,12 +93,14 @@ fetch("Zu.svg")
 				document.body.append(el);
 				el.style.display = "none";
 				})
-			.then(_=>makeZu(document.getElementById("makeZuInput"), 'resultBox', 'resultBoxRotated'));
+			.then(_=>makeZu(document.getElementById("makeZuInput")));
 
 document.addEventListener(
 	"GamepadButtonDown",
 	(e) => {
 		console.log(e.detail);
+		//TODO put the gamepad input symbols into the output by putting private use characters into the "makeZuInput" element and trigger the "makeZu" function
+		//note the glyph names in Zu.svg are "glyph-gamepad-button-" + the button ID
 	},
 );
 
