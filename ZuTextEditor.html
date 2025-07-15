@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Jenna Sloan">
+<title>FEZ Zu language text editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<style>
+:root {
+	
+}
+body {
+	
+}
+
+svg * {
+	fill: currentColor;
+}
+#resultBox svg, #resultBoxRotated svg {
+	width: 1em;
+	height: 1em;
+	display: inline-block;
+	margin: 0.05em;
+}
+#resultBoxRotated {
+	writing-mode: sideways-rl;
+}
+</style>
+<script>
+function makeZu(textElem, resultBoxId, resultBoxRotatedId)
+{
+	const resultBox = document.getElementById(resultBoxId);
+	const resultBoxRotated = document.getElementById(resultBoxRotatedId);
+	resultBox.innerHTML = "";
+	resultBoxRotated.innerHTML = "";
+	textElem.value.split("").forEach(ch=>{
+		if(ch == "\n"){
+			resultBox.appendChild(document.createElement("br"));
+			resultBoxRotated.appendChild(document.createElement("br"));
+			return;
+		}
+		const glyph = document.getElementById("glyph-"+ch.toUpperCase());
+		const newSVG = document.getElementById("newSVGTemplate").content.children[0].cloneNode(true);
+		newSVG.setAttribute("viewBox", "0 0 5 5");
+		newSVG.setAttribute("height", "5");
+		newSVG.setAttribute("width", "5");
+		if(glyph){
+			const glyphCopy = glyph.cloneNode(true);
+			glyphCopy.id = "";
+			glyphCopy.removeAttribute("id");
+			delete glyphCopy.id;
+			newSVG.appendChild(glyphCopy);
+			const newSVGRotated = newSVG.cloneNode(true);
+			if(glyphCopy.dataset.preventRotate!="true") {
+				newSVGRotated.style.transform = "rotate(90deg)";
+			}
+			resultBoxRotated.appendChild(newSVGRotated);
+		}else{
+			resultBoxRotated.appendChild(newSVG.cloneNode(true));
+		}
+		resultBox.appendChild(newSVG);
+	});
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+	const el = document.getElementById("makeZuInput");
+	const eh = e=>{makeZu(e.target, 'resultBox', 'resultBoxRotated');};
+	el.addEventListener("change", eh);
+	el.addEventListener("input", eh);
+});
+</script>
+</head>
+<body>
+<template id="newSVGTemplate">
+<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="optimizeSpeed" height="5" width="5" viewBox="0 0 5 5"></svg>
+</template>
+<main role="application" aria-labelledby="title">
+<h1 id="title">Zu text editor</h1>
+<textarea id="makeZuInput">The quick brown fox jumps over the lazy dog
+0123456789=</textarea><br /><hr />
+<div id="resultBox"></div><br /><hr />
+<div id="resultBoxRotated"></div>
+</main>
+</body>
+<script>
+
+fetch("Zu.svg")
+			.then(response => response.text())
+			.then(str => new DOMParser().parseFromString(str, "text/xml"))
+			.then(data => {
+				document.body.append(data.rootElement);
+				data.rootElement.style.display = "none";
+				})
+			.then(_=>makeZu(document.getElementById("makeZuInput"), 'resultBox', 'resultBoxRotated'));
+
+document.addEventListener(
+	"GamepadButtonDown",
+	(e) => {
+		console.log(e.detail);
+	},
+);
+
+const gamepadsByIndex = [];
+function addGamepad(gamepad) {
+	console.log('add:', gamepad.index);
+	
+	gamepadsByIndex[gamepad.index] = gamepad;
+}
+
+function removeGamepad(gamepad) {
+	const info = gamepadsByIndex[gamepad.index];
+	if (info) {
+		delete gamepadsByIndex[gamepad.index];
+		info.elem.parentElement.removeChild(info.elem);
+		info.visualizerElem.parentElement.removeChild(info.visualizerElem);
+	}
+}
+
+function addGamepadIfNew(gamepad) {
+	const info = gamepadsByIndex[gamepad.index];
+	if (!info) {
+		addGamepad(gamepad);
+	} else {
+		info.gamepad = gamepad;
+	}
+}
+
+const gamepadButtonValues = [];
+function processController(info) {
+	const gamepad = info;
+	gamepad.buttons.forEach((value, ndx) => {
+		gamepadButtonValues[ndx] ??= false;
+		const buttonDown = gamepad.buttons[ndx].pressed;
+		if(buttonDown != gamepadButtonValues[ndx])
+		{
+			gamepadButtonValues[ndx] = buttonDown;
+			const event = new CustomEvent("GamepadButtonPressedStateChange",
+					{
+						detail: {
+							button: gamepad.buttons[ndx],
+							pressed: buttonDown,
+							buttonId: ndx
+						}
+					}
+			);
+			document.dispatchEvent(event);
+			const event2 = new CustomEvent(buttonDown ? "GamepadButtonDown" : "GamepadButtonUp",
+					{
+						detail: {
+							button: gamepad.buttons[ndx],
+							pressed: buttonDown,
+							buttonId: ndx
+						}
+					}
+			);
+			document.dispatchEvent(event2);
+		}
+	});
+}
+
+function addNewPads() {
+	const gamepads = navigator.getGamepads();
+	for (let i = 0; i < gamepads.length; i++) {
+		const gamepad = gamepads[i]
+		if (gamepad) {
+			addGamepadIfNew(gamepad);
+		}
+	}
+}
+
+window.addEventListener("gamepadconnected", (event)=>addGamepadIfNew(event.gamepad));
+window.addEventListener("gamepaddisconnected", (event)=>removeGamepad(event.gamepad));
+
+function process() {
+	addNewPads();	// some browsers add by polling, others by event
+
+	for(var i in gamepadsByIndex){
+		processController(gamepadsByIndex[i]);
+	}
+	requestAnimationFrame(process);
+}
+requestAnimationFrame(process);
+
+</script>
+</html>
