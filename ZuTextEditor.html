@@ -88,8 +88,9 @@ fetch("Zu.svg")
 			.then(response => response.text())
 			.then(str => new DOMParser().parseFromString(str, "text/xml"))
 			.then(data => {
-				document.body.append(data.rootElement);
-				data.rootElement.style.display = "none";
+				const el = data.rootElement;
+				document.body.append(el);
+				el.style.display = "none";
 				})
 			.then(_=>makeZu(document.getElementById("makeZuInput"), 'resultBox', 'resultBoxRotated'));
 
