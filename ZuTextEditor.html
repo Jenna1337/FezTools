@@ -22,12 +22,14 @@ svg * {
 	height: 1em;
 	display: inline-block;
 	margin: 0.05em;
+	vertical-align: middle;
 }
 #resultBoxRotated {
 	writing-mode: sideways-rl;
 }
 </style>
 <script>
+const PrivateUseAreaOffset = 0xE200;
 function makeZu(textElem)
 {
 	const resultBox = document.getElementById('resultBox');
@@ -40,11 +42,29 @@ function makeZu(textElem)
 			resultBoxRotated.appendChild(document.createElement("br"));
 			return;
 		}
-		const glyph = document.getElementById("glyph-"+ch.toUpperCase());
+		const cp = ch.codePointAt(0);
 		const newSVG = document.getElementById("newSVGTemplate").content.children[0].cloneNode(true);
-		newSVG.setAttribute("viewBox", "0 0 5 5");
-		newSVG.setAttribute("height", "5");
-		newSVG.setAttribute("width", "5");
+		let glyph;
+		const isSpecialCP = cp >= PrivateUseAreaOffset && cp < PrivateUseAreaOffset + 100;
+		if(isSpecialCP) {
+			//put the gamepad input symbols into the output 
+			//note the glyph names in Zu.svg are "glyph-gamepad-button-" + the button ID
+			const buttonNum = (cp-PrivateUseAreaOffset);
+			glyph = document.getElementById("glyph-gamepad-button-"+buttonNum);
+			const newHeight = "3";
+			const newWidth = glyph?.querySelector("[data-width]")?.dataset?.width ?? "3";
+			newSVG.setAttribute("height", newHeight);
+			newSVG.setAttribute("width", newWidth);
+			newSVG.setAttribute("viewBox", "0 0 "+newWidth+" "+newHeight);
+			newSVG.style.width = "calc("+newWidth+"em / "+3+")";
+			newSVG.style.height = "1em";
+			newSVG.style.margin = "0";
+		}else{
+			glyph = document.getElementById("glyph-"+ch.toUpperCase());
+			newSVG.setAttribute("viewBox", "0 0 5 5");
+			newSVG.setAttribute("height", "5");
+			newSVG.setAttribute("width", "5");
+		}
 		if(glyph){
 			const glyphCopy = glyph.cloneNode(true);
 			glyphCopy.id = "";
@@ -54,6 +74,11 @@ function makeZu(textElem)
 			const newSVGRotated = newSVG.cloneNode(true);
 			if(glyphCopy.dataset.preventRotate!="true") {
 				newSVGRotated.style.transform = "rotate(90deg)";
+				if(isSpecialCP){
+					newSVGRotated.style.marginInline = "calc(0px - ("+newSVG.style.height+" - "+newSVG.style.width+") / 2)";
+				}
+			}else{
+				
 			}
 			resultBoxRotated.appendChild(newSVGRotated);
 		}else{
@@ -78,7 +103,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
 <main role="application" aria-labelledby="title">
 <h1 id="title">Zu text editor</h1>
 <textarea id="makeZuInput">The quick brown fox jumps over the lazy dog
-0123456789=</textarea><br /><hr />
+0123456789=
+&#xE20C;&#xE20C;&#xE20D;&#xE20D;&#xE20E;&#xE20F;&#xE20E;&#xE20F;&#xE200;</textarea><br /><hr />
 <div id="resultBox"></div><br /><hr />
 <div id="resultBoxRotated"></div>
 </main>
@@ -99,8 +125,14 @@ document.addEventListener(
 	"GamepadButtonDown",
 	(e) => {
 		console.log(e.detail);
-		//TODO put the gamepad input symbols into the output by putting private use characters into the "makeZuInput" element and trigger the "makeZu" function
-		//note the glyph names in Zu.svg are "glyph-gamepad-button-" + the button ID
+		//put the gamepad input symbols into the output by putting private use characters into the "makeZuInput" element and trigger the "makeZu" function
+		//note the glyph names in Zu.svg are "glyph-gamepad-button-" + the button ID\
+		const charToInsert = String.fromCodePoint(e.detail.buttonId + PrivateUseAreaOffset);
+		const inel = document.getElementById("makeZuInput");
+		const oldSelectStart = inel.selectionStart;
+		inel.value = inel.value.slice(0, inel.selectionStart) + charToInsert + inel.value.slice(inel.selectionEnd)
+		inel.selectionEnd = inel.selectionStart = oldSelectStart+1;
+		makeZu(inel);
 	},
 );
 
