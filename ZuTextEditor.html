@@ -25,6 +25,19 @@ svg * {
 	margin: 0.05em;
 	vertical-align: middle;
 }
+#controllerButtons {
+	display: grid;
+	width: fit-content;
+	grid-template-areas:
+			". u . lt rt ."
+			"l d r lb rb a"
+	;
+	grid-gap: 0.1em;
+	margin: 0.1em;
+	* {
+		font-size: smaller;
+	}
+}
 #makeZuInput {
 	resize: both;
 	min-width: 25vw;
@@ -36,6 +49,14 @@ svg * {
 #resultBoxRotated {
 	writing-mode: sideways-rl;
 }
+@media (width <= 50ch) {
+	#controllerButtons {
+	grid-template-areas:
+			"lt u rt"
+			"l d r"
+			"lb a rb"
+	;
+}
 </style>
 <script>
 const PrivateUseAreaOffset = 0xE200;
@@ -45,6 +66,8 @@ function makeZu(textElem)
 	const resultBoxRotated = document.getElementById('resultBoxRotated');
 	resultBox.innerHTML = "";
 	resultBoxRotated.innerHTML = "";
+	
+	//TODO put all the glyphs in a single SVG element instead of each glyph in their own individual SVG elemen
 	textElem.value.split("").forEach(ch=>{
 		if(ch == "\n"){
 			resultBox.appendChild(document.createElement("br"));
@@ -103,6 +126,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
 	el.addEventListener("input", eh);
 	el.addEventListener("keydown", eh);
 });
+function gamepadButtonClick(buttonElem){
+	const charToInsert = String.fromCodePoint(Number(buttonElem.dataset.button) + PrivateUseAreaOffset);
+	const inel = document.getElementById("makeZuInput");
+	const oldSelectStart = inel.selectionStart;
+	inel.value = inel.value.slice(0, inel.selectionStart) + charToInsert + inel.value.slice(inel.selectionEnd)
+	inel.selectionEnd = inel.selectionStart = oldSelectStart+1;
+}
 </script>
 </head>
 <body>
@@ -111,6 +141,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </template>
 <main role="application" aria-labelledby="title">
 <h1 id="title">Zu text editor</h1>
+<div id="controllerButtons">
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: u;" data-button="12">dpad Up</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: d;" data-button="13">dpad Down</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: l;" data-button="14">dpad Left</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: r;" data-button="15">dpad Right</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: lb" data-button="4">bumper left</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: lt" data-button="6">trigger left</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: rb" data-button="5">bumper left</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: rt" data-button="7">trigger left</button>
+<button onclick="gamepadButtonClick(this)" type="button" style="grid-area: a" data-button="0">button Jump</button>
+</div>
 <textarea id="makeZuInput">The quick brown fox jumps over the lazy dog
 0123456789=
 &#xE20C;&#xE20C;&#xE20D;&#xE20D;&#xE20E;&#xE20F;&#xE20E;&#xE20F;&#xE200;</textarea><br /><hr />
