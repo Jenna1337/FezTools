@@ -11,7 +11,8 @@
 	
 }
 body {
-	
+	writing-mode: horizontal-tb;
+	direction: ltr;
 }
 
 svg * {
@@ -23,6 +24,14 @@ svg * {
 	display: inline-block;
 	margin: 0.05em;
 	vertical-align: middle;
+}
+#makeZuInput {
+	resize: both;
+	min-width: 25vw;
+	max-width: 100%;
+	min-height: 5lh;
+	max-height: 100vh;
+	box-sizing: border-box;
 }
 #resultBoxRotated {
 	writing-mode: sideways-rl;
