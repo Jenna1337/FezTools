@@ -238,7 +238,7 @@ noscript {
 	overflow: scroll;
 	width: var(--infobox-width);
 	font-size: 1em;
-	/*top: 1lh;*/
+	top: var(--searchbox-inputheight);
 	left: 0;
 }
 .closebutton {
@@ -318,6 +318,9 @@ noscript {
 @media (min-width: 1000px) {
 	#mapdebuginfo, #maplegend, #searchbox {
 		left: var(--infobox-width);
+	}
+	#nodeinfobox {
+		top: 0;
 	}
 }
 
