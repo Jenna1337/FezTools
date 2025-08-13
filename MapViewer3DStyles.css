@@ -278,18 +278,42 @@ noscript {
 #searchbox {
 	z-index: 99999;
 	height: var(--searchbox-inputheight);
+	.resultsboxcounttextlabel {
+		margin-inline: 1ex;
+	}
 	.searchresults {
 		white-space: pre-wrap;
-		max-width: calc(100dvw - var(--infobox-width) - var(--viewsourcebox-width));
+		max-width: var(--infobox-width);
 		width: max-content;
 		width: 30em;
 		overflow: auto;
-		max-height: calc(100dvh - var(--searchbox-inputheight));
+		max-height: calc(100dvh - var(--searchbox-inputheight) - var(--closebutton-size));
+		min-width: var(--infobox-width);
 		background-color: var(--boxbgcolor);
-		a {
+		& a {
 			text-decoration: none;
 			color: white;
+			display: block;
+			font-size: larger;
+			line-height: 2lh;
+			padding: 0.75ex;
+			border: 1px solid #222;
+			margin: 0.25ex;
+			& img {
+				height: 1lh;
+				vertical-align: top;
+			}
+			& span {
+			}
 		}
+		& a:hover {
+			background-color: #6666;
+			border: 1px solid #888;
+		}
+		
+		/*display: grid;
+		grid-auto-rows: 1fr;
+		grid-template-columns: 1fr;*/
 	}
 }
 .hidden {

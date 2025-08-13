@@ -98,7 +98,19 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			const searchresultslabel = document.createElement("span");
 			searchresultslabel.classList.add("resultsboxlabel");
 			searchresultslabel.textContent = "Search Results";
-			
+			{
+				const resultsboxcounttextlabel = document.createElement("span");
+				resultsboxcounttextlabel.classList.add("resultsboxcounttextlabel");
+				resultsboxcounttextlabel.append("(");
+				
+				const resultsboxcounttextvalue = document.createElement("span");
+				resultsboxcounttextvalue.classList.add("resultsboxcounttextvalue");
+				resultsboxcounttextvalue.textContent = "0";
+				resultsboxcounttextlabel.append(resultsboxcounttextvalue);
+				resultsboxcounttextlabel.append(" results)");
+				
+				searchresultslabel.append(resultsboxcounttextlabel);
+			}
 			searchresultstarget.classList.add("searchresults");
 			
 			searchresultsbox.appendChild(searchresultslabel);
@@ -134,6 +146,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 								}
 							});
 				searchresultstarget.innerHTML = "";
+				searchresultsbox.querySelector(".resultsboxcounttextvalue").textContent = matchingElems.length;
 				matchingElems.forEach(a => {
 					a.classList.add("highlighted");
 					const val = valueMapFunc(a.dataset.allLevelInfoData);
@@ -141,12 +154,20 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 					resultElem.setAttribute("href", "#");
 					resultElem.addEventListener("click", () => focusOnNode(a));
 					
+					const levelpreview = document.createElement("img");
+					levelpreview.src = a.dataset.Texture;
+					resultElem.append(levelpreview);
+					
+					const leveltext = document.createElement("span");
+					leveltext.textContent = a.dataset.Name;//valueMapFunc(a.dataset.allLevelInfoData);
+					resultElem.append(leveltext);
+					
 					//TODO display useful results
-					resultElem.textContent = valueMapFunc(a.dataset.allLevelInfoData);
+					resultElem.dataset.allLevelInfoData = a.dataset.allLevelInfoData;//valueMapFunc(a.dataset.allLevelInfoData);
 					
 					searchresultstarget.appendChild(resultElem);
-					searchresultstarget.appendChild(document.createElement("br"));
-					searchresultstarget.appendChild(document.createElement("br"));
+					//searchresultstarget.appendChild(document.createElement("br"));
+					//searchresultstarget.appendChild(document.createElement("br"));
 				});
 				console.log(event);
 				console.log(matchingElems);
