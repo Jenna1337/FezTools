@@ -546,6 +546,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 				if(addhiddenicons || a.ShowFlag){
 				//if(!(addhiddenicons && a.ShowFlag)){
 					let nodeicon = document.createElement("span");
+					nodeicon.role = "img";
+					nodeicon.setAttribute("aria-label", a.Description);
+					nodeicon.setAttribute("aria-description", a.Description+". Corresponding field "+(a.Field.includes(',')?'s are':'is')+": "+a.Field);
 					nodeicon.className = "nodeicon";
 					nodeicon.style.display = a.ShowFlag ? "" : "none";
 					nodeicon.dataset.IconField = a.Field;
@@ -765,10 +768,10 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 		const panRotateToggleBox = document.createElement("div");
 		panRotateToggleBox.id = "panrotationtogglebox";
 		panRotateToggleBox.innerHTML = `
-<a class="panrotationtogglebutton" title="Swap Pan/Rotate" href="#">
+<a class="panrotationtogglebutton" title="Swap Pan/Rotate" href="#" role="button" aria-labelledby="map_setting_swapPanRotate">
 <svg class="panrotationtogglebutton-pan" height="48" width="48" viewbox="0 0 48 48" role="presentation">
 	<path d="M24 0 l10 10h-5v9h9v-5l10,10 -10,10v-5h-9v9h5l-10,10 -10,-10h5v-9h-9v5l-10,-10 10,-10v5h9v-9h-5z" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	<text text-anchor="middle" dominant-baseline="central" y="24" x="24" fill="currentColor">Pan</text>
+	<text text-anchor="middle" dominant-baseline="central" y="24" x="24">Pan</text>
 </svg>
 <svg class="panrotationtogglebutton-rotate" height="48" width="48" viewBox="0 0 48 48" role="presentation">
 	<!--
@@ -776,7 +779,7 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 	<path d="M17 8h-5l10 -8 10 8h-5q-10 16 0 32h5l-10 8 -10 -8h5q-11 -16 0 -32M8 32v5l-8 -10 8 -10v5q16 2 32 0v-5l8 10 -8 10v-5q-16 2 -32 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
 	-->
 	<path d="M20 7l-5 -1 13 -6 7 10 -5 -1q-10 15 0 30l5 -1 -7 10 -13 -6 5 -1q-11 -17 0 -34M7.5 30l-0.5 5 -7 -11 9 -9 -0.5 5q15.5 2 31 0l-0.5 -5 9 9 -7 11 -0.5 -5q-16.5 2 -33 0" stroke="none" fill="currentColor" transform-origin="24 24" transform="scale(0.9)" />
-	<text text-anchor="middle" dominant-baseline="central" y="24.5" x="24" fill="currentColor">Rotate</text>
+	<text text-anchor="middle" dominant-baseline="central" y="24.5" x="24">Rotate</text>
 </svg>
 <svg class="panrotationtogglebutton-tinyswapicon" height="48" width="48" viewbox="0 0 48 48" role="presentation">
 	<path d="M0 21v-15l5 5q56-31 38 32l5 5h-15v-15l5 5q12-46-28-22l5 5z" stroke="none" fill="currentColor" />
@@ -809,6 +812,9 @@ const MapViewer3D = function(maptree, worlddata, worldmap, mapcontainer){
 			if(s){
 				s.dataset.option = value ? "rotate-pan" : "pan-rotate";
 				s.title = "Swap "+(value ? "Rotate/Pan" : "Pan/Rotate")
+				s.setAttribute("aria-label", "Swap "+(value ? "Rotate/Pan" : "Pan/Rotate")+" button")
+				s.setAttribute("aria-description", "Button to swap "+(value ? "camera rotate inputs with camera pan inputs" : "camera pan inputs with camera rotate inputs"))
+				s.setAttribute("aria-pressed", value)
 			}
 		},
 		get showIcons(){

@@ -197,7 +197,7 @@ noscript {
 	.mapnodeiconcontainer {
 		position: absolute;
 		top: 0;
-		left: 50px;
+		left: 55px;
 		transform-origin: top left;
 		image-rendering: pixelated;
 		image-rendering: crisp-edges;
@@ -211,6 +211,7 @@ noscript {
 		display: block;
 		height: 1lh;
 		width: 1lh;
+		color: white;
 	}
 	.maplink.selected * {
 		background-color: white;
@@ -434,10 +435,14 @@ noscript {
 	/* .panrotationtogglebutton>* {
 		background-color: color-mix(in srgb, currentColor 35%, transparent);
 	}*/
-	.panrotationtogglebutton svg * {
-		color: inherit;
-		mix-blend-mode: difference;
-		font-size: 12px;
+	.panrotationtogglebutton svg {
+		& * {
+			color: inherit;
+			font-size: 12px;
+		}
+		& text {
+			fill: black;
+		}
 	}
 	.panrotationtogglebutton:hover:not([data-option]) .panrotationtogglebutton-pan,
 	.panrotationtogglebutton:hover[data-option="pan-rotate"] .panrotationtogglebutton-pan,
