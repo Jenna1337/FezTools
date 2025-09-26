@@ -10,10 +10,10 @@ noscript {
 	z-index: 9999999;
 	color: white;
 	background-color: black;
-	height: 100vh;
-	width: 100vw;
-	font-size: min(100vh, calc(100vw / 30));
-	line-height: 100vh;
+	height: 100dvh;
+	width: 100dvw;
+	font-size: min(100dvh, calc(100dvw / 30));
+	line-height: 100dvh;
 	text-align: center;
 	top: 0;
 	left: 0;
@@ -77,8 +77,8 @@ noscript {
 	overflow: clip;
 	background-color: black;
 	color: white;
-	height: 100vh;
-	width: 100vw;
+	height: 100dvh;
+	width: 100dvw;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -119,9 +119,9 @@ noscript {
 		z-index: 1 !important;
 	}
 	#mapnodes, #maplinks {
-		translate: 50vw 50vh;
-		height: 100vh;
-		width: 100vw;
+		translate: 50dvw 50dvh;
+		height: 100dvh;
+		width: 100dvw;
 		transform-style: preserve-3d;
 		transform-origin: top left;
 		pointer-events: none;
