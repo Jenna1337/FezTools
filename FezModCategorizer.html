@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="author" content="Jenna Sloan" />
+<meta name="generator" content="FezModCategorizer.py" />
+<title>Fez Mod Categorizer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<style>
+
+*{
+	border-color: currentColor;
+	border-color: CanvasText;
+}
+
+.category {
+	font-size: larger;
+}
+ul .category {
+	font-size: larg;
+}
+.author {
+	
+}
+.name {
+	font-weight: bold;
+}
+date {
+	font-size: small;
+	display: inline-block;
+}
+.lastupdated:before {
+	content: "Last Updated: ";
+}
+.description {
+	padding-inline-start: 4ex;
+	padding-block: 0.5ex;
+	display: block;
+}
+ul{
+	border-inline-start: 1px dashed gray;
+	margin-top: 0;
+}
+li{
+	border-block-end-width: 1px;
+	border-block-end-style: solid;
+	padding: 1px;
+}
+a {
+	text-underline-position: under;
+	padding-inline-end: 3ex;
+	font-size: large;
+	display: inline-block;
+}
+span:has(+ul){
+	border-block-end: 1px dashed gray;
+	display: block;
+}
+
+li:has(.category[aria-expanded="true"]) {
+	list-style-type: disclosure-open;
+}
+li:has(.category[aria-expanded="false"]) {
+	list-style-type: disclosure-closed;
+}
+.category[aria-expanded="true"]~[role="group"] {
+	height: calc-size(auto, size);
+}
+.category[aria-expanded="false"]~[role="group"] {
+	height: 0;
+	display: none;
+}
+.category~[role="group"]{
+	transition-property: all;
+	transition-duration: 0.25s;
+	transition-behavior: allow-discrete;
+	overflow: hidden;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+	document.querySelectorAll("[aria-expanded]").forEach(categoryElem=>{
+		categoryElem.addEventListener("click",a=>categoryElem.setAttribute("aria-expanded", categoryElem.getAttribute("aria-expanded")=="true"?"false":"true"));
+	});
+});
+</script>
+</head>
+<body dir="auto">
+<noscript>
+This page requires JavaScript
+</noscript>
+<div style="">
+<!-- 
+From https://github.com/stars/Jenna1337/lists/fez-game-tools-mods
+-->
+<div><span id="treetitle" class="category" role="presentation">Fez Mod Categorizer</span><ul role="tree" aria-labelledby="treetitle"><li role="treeitem"><span class="category" aria-owns="SkinsGroup" aria-expanded="true">Skins</span><ul role="group" id="SkinsGroup"><li role="treeitem"><a href="https://github.com/FEZModding/FezSonezSkin/"><span class="author">FEZModding</span><span> / </span><span class="name">FezSonezSkin</span></a><date class="lastupdated" datetime="2023-01-19T21:00:04Z">2023-01-19T21:00:04Z</date><span class="description">FEZ HAT mod replacing Gomez with Sonic</span></li></ul></li><li role="treeitem"><span class="category" aria-owns="ToolsGroup" aria-expanded="true">Tools</span><ul role="group" id="ToolsGroup"><li role="treeitem"><a href="https://github.com/edintomato2/Beret/"><span class="author">edintomato2</span><span> / </span><span class="name">Beret</span></a><date class="lastupdated" datetime="2025-10-24T03:58:08Z">2025-10-24T03:58:08Z</date><span class="description">A level editor and viewer for FEZ, made in Godot.</span></li><li role="treeitem"><a href="https://github.com/kaprosdev/FEZ-Skywatcher/"><span class="author">kaprosdev</span><span> / </span><span class="name">FEZ-Skywatcher</span></a><date class="lastupdated" datetime="2024-05-01T20:02:53Z">2024-05-01T20:02:53Z</date><span class="description">Sky viewer and editor for FEZ (2012)</span></li><li role="treeitem"><a href="https://github.com/FEZModding/FEZRepacker/"><span class="author">FEZModding</span><span> / </span><span class="name">FEZRepacker</span></a><date class="lastupdated" datetime="2025-10-11T05:26:30Z">2025-10-11T05:26:30Z</date><span class="description">Tool and library for unpacking and repacking FEZ assets</span></li><li role="treeitem"><a href="https://github.com/Krzyhau/Felt/"><span class="author">Krzyhau</span><span> / </span><span class="name">Felt</span></a><date class="lastupdated" datetime="2025-01-14T21:57:26Z">2025-01-14T21:57:26Z</date><span class="description">Trixel-art editor for FEZ modding (WIP)</span></li><li role="treeitem"><a href="https://github.com/Jenna1337/FezTools/"><span class="author">Jenna1337</span><span> / </span><span class="name">FezTools</span></a><date class="lastupdated" datetime="2025-10-12T20:33:07Z">2025-10-12T20:33:07Z</date><span class="description">Fez Tools, including World Map Viewer &amp; Save File Editor https://jenna1337.github.io/FezTools/</span></li><li role="treeitem"><a href="https://github.com/icsharpcode/ILSpy/"><span class="author">icsharpcode</span><span> / </span><span class="name">ILSpy</span></a><date class="lastupdated" datetime="2025-10-23T15:39:03Z">2025-10-23T15:39:03Z</date><span class="description">.NET Decompiler with support for PDB generation, ReadyToRun, Metadata (&amp;more) - cross-platform!</span></li><li role="treeitem"><a href="https://github.com/MonoMod/MonoMod/"><span class="author">MonoMod</span><span> / </span><span class="name">MonoMod</span></a><date class="lastupdated" datetime="2025-10-17T13:26:03Z">2025-10-17T13:26:03Z</date><span class="description">C# modding swiss army knife, powered by cecil.</span></li><li role="treeitem"><a href="https://github.com/FEZModding/wiki/"><span class="author">FEZModding</span><span> / </span><span class="name">wiki</span></a><date class="lastupdated" datetime="2025-09-13T15:12:28Z">2025-09-13T15:12:28Z</date><span class="description">Collection of resources for FEZ modding.</span></li><li role="treeitem"><a href="https://github.com/fesh0r/xnb_parse/"><span class="author">fesh0r</span><span> / </span><span class="name">xnb_parse</span></a><date class="lastupdated" datetime="2017-03-27T11:03:08Z">2017-03-27T11:03:08Z</date><span class="description">XNA xnb/xact file parser, and FEZ extractor/viewer</span></li></ul></li><li role="treeitem"><span class="category" aria-owns="ModsGroup" aria-expanded="true">Mods</span><ul role="group" id="ModsGroup"><li role="treeitem"><a href="https://github.com/0x0ade/FEZMod/"><span class="author">0x0ade</span><span> / </span><span class="name">FEZMod</span></a><date class="lastupdated" datetime="2020-08-10T21:30:00Z">2020-08-10T21:30:00Z</date><span class="description">oops i did it again</span></li><li role="treeitem"><a href="https://github.com/Krzyhau/FEZQuantumController/"><span class="author">Krzyhau</span><span> / </span><span class="name">FEZQuantumController</span></a><date class="lastupdated" datetime="2024-02-13T15:51:45Z">2024-02-13T15:51:45Z</date><span class="description">Quick FEZ mod for controlling quantum level, made for Bad Apple video</span></li><li role="treeitem"><a href="https://github.com/FEZModding/FEZUG/"><span class="author">FEZModding</span><span> / </span><span class="name">FEZUG</span></a><date class="lastupdated" datetime="2025-10-18T02:55:55Z">2025-10-18T02:55:55Z</date><span class="description">HAT mod for FEZ adding some cool debug tools</span></li><li role="treeitem"><a href="https://github.com/Jenna1337/FezChaosMod/"><span class="author">Jenna1337</span><span> / </span><span class="name">FezChaosMod</span></a><date class="lastupdated" datetime="2023-04-21T20:28:16Z">2023-04-21T20:28:16Z</date><span class="description">Game modification for FEZ adding random effects</span></li><li role="treeitem"><a href="https://github.com/FEZModding/FezMultiplayerMod/"><span class="author">FEZModding</span><span> / </span><span class="name">FezMultiplayerMod</span></a><date class="lastupdated" datetime="2025-10-25T02:30:30Z">2025-10-25T02:30:30Z</date><span class="description">Game modification for FEZ adding online multiplayer</span></li><li role="treeitem"><a href="https://github.com/FEZModding/HAT/"><span class="author">FEZModding</span><span> / </span><span class="name">HAT</span></a><date class="lastupdated" datetime="2025-09-13T10:19:03Z">2025-09-13T10:19:03Z</date><span class="description">Simple mod loader for FEZ</span></li><li role="treeitem"><a href="https://github.com/Krzyhau/HEADSET/"><span class="author">Krzyhau</span><span> / </span><span class="name">HEADSET</span></a><date class="lastupdated" datetime="2025-02-28T18:21:02Z">2025-02-28T18:21:02Z</date><span class="description">Work-in-progress VR mod for FEZ</span></li><li role="treeitem"><a href="https://github.com/thearst3rd/fez-camera-unlocker/"><span class="author">thearst3rd</span><span> / </span><span class="name">fez-camera-unlocker</span></a><date class="lastupdated" datetime="2023-03-15T05:44:05Z">2023-03-15T05:44:05Z</date><span class="description">A simple HAT mod for FEZ which allows you to unlock the camera and truly view the world from any perspective. Mirror of https://codeberg.org/thearst3rd/fez-camera-unlocker</span></li><li role="treeitem"><a href="https://github.com/admoore0/fez-randomizer/"><span class="author">admoore0</span><span> / </span><span class="name">fez-randomizer</span></a><date class="lastupdated" datetime="2023-02-10T23:35:08Z">2023-02-10T23:35:08Z</date><span class="description">A randomizer for FEZ, using the HAT modloader.</span></li></ul></li><li role="treeitem"><span class="category" aria-owns="undefinedGroup" aria-expanded="true">undefined</span><ul role="group" id="undefinedGroup"><li role="treeitem"><a href="https://github.com/zrckr/FEZEdit/"><span class="author">zrckr</span><span> / </span><span class="name">FEZEdit</span></a><date class="lastupdated" datetime="2025-10-25T14:51:16Z">2025-10-25T14:51:16Z</date><span class="description" /></li><li role="treeitem"><a href="https://github.com/edintomato2/Hexahedron/"><span class="author">edintomato2</span><span> / </span><span class="name">Hexahedron</span></a><date class="lastupdated" datetime="2024-06-28T13:51:08Z">2024-06-28T13:51:08Z</date><span class="description">An installer for FEZ's HAT modloader.</span></li><li role="treeitem"><a href="https://github.com/nhyldmar/fez-ap/"><span class="author">nhyldmar</span><span> / </span><span class="name">fez-ap</span></a><date class="lastupdated" datetime="2025-10-20T22:57:49Z">2025-10-20T22:57:49Z</date><span class="description" /></li></ul></li></ul></div>
+</div>
+</body>
+</html>
