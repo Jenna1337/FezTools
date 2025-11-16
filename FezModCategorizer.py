@@ -339,18 +339,3 @@ except urllib.error.URLError as e:
 except urllib.error.HTTPError as e:
     print(f"HTTP Error: {e.code} - {e.reason}")
 
-exit
-"""
-cacheRemotePage("", "fezmodlist.html.txt", function($html){
-
-	// Step 6: Insert the new HTML structure into the document
-	$treeTitle = $doc->createElement("span", "Fez Mod Categorizer");
-	$treeTitle->setAttribute("id", "treetitle");
-	$treeTitle->setAttribute("class", "category");
-	$treeTitle->setAttribute("role", "presentation");
-
-	$container = $doc->createElement("div");
-	$container->appendChild($treeTitle);
-	$container->appendChild($listlistelem);
-?>
-"""
