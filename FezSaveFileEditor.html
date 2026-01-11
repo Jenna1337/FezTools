@@ -338,6 +338,26 @@ body[data-color-scheme=dark]/*, @media (prefers-color-scheme: dark)*/ {
 	}
 }
 </style>
+<style>
+.noedit{
+	h1, #menubar, #menubar+br, #settingsbox{
+		display: none !important;
+	}
+	.listremoveentrybutton {
+		visibility: hidden !important;
+		width: 0px !important;
+	}
+	.listbuttoncontainer {
+		display: none;
+	}
+	.object:has(>.listbuttoncontainer):not(:has(>.listbuttoncontainer+*))::after{
+		content: "No entries";
+		white-space: nowrap;
+		padding-inline: 1ex;
+		color: color-mix(in srgb, currentColor, transparent 50%);
+	}
+}
+</style>
 <!-- from https://sloan4.com/games/libs/StyleSheetUtils.js -->
 <script id="CSSSelectorScript">
 'use strict';
@@ -770,6 +790,9 @@ var MakeInputs = (function(){
 		else{
 			//primitive type
 			elem = document.createElement("input");
+			if(document.body.classList.contains('noedit')){
+				elem.disabled = true;
+			}
 			elem.type = el.inputtype;
 			if(el.inputattr?.length>0){
 				el.inputattr.split(" ").map(a=>a.split("=",2)).forEach(a=>{
@@ -1641,6 +1664,23 @@ function LoadPrefabSave(savename){
 }
 
 document.title = document.title.replace("version whatever", "v"+new Date(document.lastModified).toISOString().replaceAll(/[-:]|\..*/g,'').replace('t','-'));
+
+window.addEventListener('message', function(event) {
+	const dat=event.data.split(':', 2);
+	switch(dat[0]){
+		case 'mode':
+			switch(dat[1]){
+				case 'noedit':
+					document.body.classList.add('noedit');
+				default:
+					debugger;
+					break;
+			}
+			break;
+		case 'loadsave':
+			saveloadfuncs.loadFromDataView(new DataView(Uint8Array.fromBase64(dat[1]).buffer));
+	}
+}, false);
 </script>
 </head>
 <body lang="en-US" data-color-scheme="light">
@@ -1997,4 +2037,10 @@ SaveData:<br />
 </datalist>
 </div>
 </body>
+<script>
+if(location.hash.includes('noedit'))
+{
+	document.body.classList.add('noedit');
+}
+</script>
 </html>
