@@ -1671,6 +1671,7 @@ window.addEventListener('message', function(event) {
 		case 'mode':
 			switch(dat[1]){
 				case 'noedit':
+					document.querySelectorAll('input').forEach(a=>a.disabled=true)
 					document.body.classList.add('noedit');
 				default:
 					debugger;
